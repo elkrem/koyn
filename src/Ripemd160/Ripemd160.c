@@ -33,7 +33,7 @@
 
 #if defined(MBEDTLS_RIPEMD160_C)
 
-#include "ripemd160.h"
+#include "Ripemd160.h"
 
 #include <string.h>
 
