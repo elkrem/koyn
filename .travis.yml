@@ -24,7 +24,7 @@ before_script:
   - arduino --pref build.path=$PWD/build --board esp8266:esp8266:generic --save-prefs
 
 script:
- - for example in $PWD/examples/*/*/*.ino; do arduino --verify $example; done;
+ - for example in $PWD/examples/*/*.ino; do arduino --verify $example; done;
 #  - find $PWD/examples -type f -name "*.ino" -exec arduino --verify {} \;
 
 notifications:
