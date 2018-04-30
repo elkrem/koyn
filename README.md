@@ -70,7 +70,7 @@ So it is advised to preload the microSD card with the latest headers before hand
 
 If you are trusting Electrum.org, you can download the headers directly from their website.
 
-- Bitcoin [Testnet Headers](https://download.electrum.org/blockchain_headers) (till August, 2017)
+- Bitcoin [Testnet Headers](https://download.electrum.org/testnet_headers) (till August, 2017)
 - Bitcoin [Mainnet Headers](https://download.electrum.org/blockchain_headers) (till August, 2017)
 
 If you don't trust their headers, install Electrum client on your machine if you don't have it, run it, let it sync and copy the synced headers file to `/koyn` directory on the microSD and rename it to `blkhdrs`.
@@ -274,10 +274,10 @@ Be the first to know about our future blockchain connected hardware products by 
 ## License and Copyright
 
 ```
-This code is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License
-version 3 only, as published by the Free Software Foundation.
+This code is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public
+License version 3 only, as published by the Free Software Foundation.
 
-This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License version 3 for more details
-(a copy is included in the LICENSE.md file that accompanied this code).
+This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License version 3
+for more details (a copy is included in the LICENSE.md file that accompanied this code).
 ```
