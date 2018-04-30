@@ -1,0 +1,4 @@
+- Open an issue with your proposed feature or bug fix. (For discussion with other developers)
+- Fork the repo.
+- Commit and push code to a new branch in your forked repo.
+- Submit a pull request against our *develop* branch.

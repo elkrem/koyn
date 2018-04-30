@@ -1,0 +1,29 @@
+{
+  "name": "Koyn",
+  "keywords": "arduino, bitcoin, blockchain, esp8266, electrum",
+  "description": "A trustless and decentralized Bitcoin library for Arduino compatible boards",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/Elkrem/Koyn.git"
+  },
+  "authors":
+  [
+    {
+      "name": "Elkrem, Inc.",
+      "email": "hello@elkrem.io",
+      "url": "https://www.elkrem.io",
+      "maintainer": true
+    },
+    {
+      "name": "Eslam Ali",
+      "email": "eali@elkrem.io",
+      "maintainer": true
+    }
+  ],
+  "license": "LGPL-3.0-only",
+  "homepage":"https://www.elkrem.io",
+  "version": "0.1.0",
+  "frameworks": "arduino",
+  "platforms": "espressif8266"
+}

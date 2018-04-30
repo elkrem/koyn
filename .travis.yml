@@ -1,0 +1,33 @@
+language: cpp
+
+env:
+  global:
+    - ARDUINO_VERSION="1.8.5"
+
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  - wget http://downloads.arduino.cc/arduino-$(eval echo $ARDUINO_VERSION)-linux64.tar.xz
+  - tar xf arduino-$(eval echo $ARDUINO_VERSION)-linux64.tar.xz
+  - sudo mv arduino-$(eval echo $ARDUINO_VERSION) /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+  - mkdir build
+
+install:
+  - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
+  - arduino --install-boards esp8266:esp8266 > /dev/null
+  - arduino --board esp8266:esp8266:generic --save-prefs
+  - ln -s $PWD /usr/local/share/arduino/libraries/Koyn
+
+before_script:
+  - arduino --pref build.path=$PWD/build --board esp8266:esp8266:generic --save-prefs
+
+script:
+ - for example in $PWD/examples/*/*/*.ino; do arduino --verify $example; done;
+#  - find $PWD/examples -type f -name "*.ino" -exec arduino --verify {} \;
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
