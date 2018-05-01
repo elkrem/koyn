@@ -1494,7 +1494,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 				{
 					/* If last time was sync and this is a hop, request the prev header and set sync by false
 						preventing next same headers to request prev again */
-					for(int i=0;i<diff;i++){request.getBlockHeader(totalBlockNumb+i);}
+					for(int i=0;i<=diff;i++){request.getBlockHeader(totalBlockNumb+i);}
 					fallingBackBlockHeight = currentHeaderHeight;
 					requestsSent =true;
 				}
