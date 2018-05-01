@@ -53,7 +53,7 @@ void KoynClass::checkDirAvailability()
 		Serial.println(F("Removing Response folder"));
 		SD.rmdir("koyn/response");
 	}
-	delay(200);
+	::delay(200);
 	SD.mkdir("koyn/response");
 
 	if(SD.exists("koyn/blkhdrs"))
