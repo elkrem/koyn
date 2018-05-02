@@ -21,10 +21,10 @@ install:
   - ln -s $PWD /usr/local/share/arduino/libraries/Koyn
 
 before_script:
-  - arduino --pref build.path=$PWD/build --board esp8266:esp8266:generic --save-prefs
+  - arduino --pref build.path=$PWD/build --board esp8266:esp8266:generic:CpuFrequency=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=512K0 --save-prefs
 
 script:
- - for example in $PWD/examples/*/*/*.ino; do arduino --verify $example; done;
+ - for example in $PWD/examples/*/*.ino; do arduino --verify $example; done;
 #  - find $PWD/examples -type f -name "*.ino" -exec arduino --verify {} \;
 
 notifications:
