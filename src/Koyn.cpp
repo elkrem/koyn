@@ -540,14 +540,11 @@ void KoynClass::connectToServers()
 		Serial.print(String("Client ")+String(i)+String(" connected to "));
 		Serial.println(servName);
 		String dirName = String("koyn/response/")+"client"+i;
-		SD.mkdir(&dirName[0]);
-		Serial.println(String("Created directory ")+dirName);
-	// if(!clientsArray[i].connect(mainnetServerNames[i],DEFAULT_PORT))   /* Check how to retrieve the string (server names) from PROGMEM */
-	// {
-	// 	Serial.println(String("Client ")+String(i)+String(" failed to connect!"));
-	// }else{
-	// 	Serial.println(String("Client ")+String(i)+String(" connected"));
-	// }
+		if(!SD.exists(&dirName[0]))
+		{
+			SD.mkdir(&dirName[0]);
+			Serial.println(String("Created directory ")+dirName);
+		}
 	}
 }
 
@@ -694,7 +691,7 @@ void KoynClass::run()
 				- In case client is disconnected, we should recover by reconnecting to another client.
 				- Also we should pick randomly from recServ file.
 			*/
-			Serial.println(String("Client ")+String(i)+String("Disconnected"));
+			connectToServers();
 		}
 		while(clientsArray[i].available())
 		{
