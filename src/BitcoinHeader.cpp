@@ -181,10 +181,11 @@ bool BitcoinHeader::operator!=(BitcoinHeader& other)
     	return false;
     }
 }
-
+#if defined(ENABLE_DEBUG_MESSAGE)
 void BitcoinHeader::printHeader()
 {
 	char hdr2[160]={};
 	bin2hex(hdr2,completeHeader,80);
 	Serial.write(hdr2,160);
 }
+#endif

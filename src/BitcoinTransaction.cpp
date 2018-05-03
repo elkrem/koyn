@@ -16,13 +16,25 @@ BitcoinTransaction::BitcoinTransaction(const BitcoinTransaction *transaction)
 bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 {
 	if(len%2!=0){return false;}
+	#if defined(ENABLE_DEBUG_MESSAGE)
 	Serial.println("Finding memory for raw transaction");
+	#endif
 	rawTx = (uint8_t*)malloc(sizeof(uint8_t)*(len/2));
-	if(rawTx == NULL){Serial.println("Cannot locate memory");return false;}
+	if(rawTx == NULL){
+	#if defined(ENABLE_DEBUG_MESSAGE)
+	Serial.println("Cannot locate memory");
+	#endif 
+	return false;
+	}
 	hex2bin(rawTx,rawData,len);
-	// Serial.write(rawTx,len/2);
 	/* Start parsing from rawData */
-	if(rawTx[4]==0x00){free(rawTx);rawTx= NULL;Serial.println("SegWit not supported");return false;} /* Currently segwit transaction are not supported */
+	if(rawTx[4]==0x00){
+	free(rawTx);rawTx= NULL;
+	#if defined(ENABLE_DEBUG_MESSAGE)
+	Serial.println("SegWit not supported");
+	#endif
+	return false;
+	} /* Currently segwit transaction are not supported */
 	transcationLength = len/2;
 	/* Getting no of inputs, currently we are supporting 1 byte (255 addresses) as input but anyway we still have a
 	   a rawTx size limitation by default and the user can change it */
@@ -148,15 +160,12 @@ bool BitcoinTransaction::getInput(uint8_t index,char * container)
 		uint8_t versionByteHash[21];
 		uint8_t final[25];
 		sha256(hash,lastInptAdd+1,lastInptAdd[0]);
-		// Serial.write(hash,32);
 		mbedtls_ripemd160(hash,32,ripedHash);
-		// Serial.write(ripedHash,20);
 		memcpy(versionByteHash+1, ripedHash,20);
 		versionByteHash[0]=TEST_NET_VERSION;
 		doubleSha256(hash,versionByteHash,21);
 		memcpy(final,versionByteHash,21);
 		memcpy(final+21,hash,4);
-		// Serial.write(final,sizeof(final));
 		base58Encode(final,sizeof(final),container,36);
 		return true;
 	}else
@@ -191,7 +200,6 @@ bool BitcoinTransaction::getOutput(uint8_t index,char * container,uint8_t * amou
 		doubleSha256(hash,versionByteHash,21);
 		memcpy(final,versionByteHash,21);
 		memcpy(final+21,hash,4);
-		// Serial.write(final,sizeof(final));
 		base58Encode(final,sizeof(final),container,36);
 		return true;
 	}else

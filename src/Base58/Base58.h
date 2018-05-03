@@ -5,6 +5,7 @@
 #define BASE58_ENCODE_BASE 0
 #define BASE58_DECODE_OUT_OF_RANGE 1
 
+#if defined(ENABLE_DEBUG_MESSAGE)
 static void print_array(unsigned char* arr, int len){
 	int i = 0;
 	for (i=0; i<len; ++i){
@@ -12,6 +13,7 @@ static void print_array(unsigned char* arr, int len){
 	}
 	Serial.printf("\n");
 }
+#endif
 
 static unsigned char alphabet[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 

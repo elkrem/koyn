@@ -26,7 +26,6 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	}else if(keyType == KEY_PRIVATE && keyLen  == 64)
 	{
 		/* Original private key */
-		Serial.println(key);
 		hex2bin(privateKey,key,keyLen);
 		calculateAddress(KEY_PRIVATE);
 	}else if(keyType == KEY_WIF && keyLen == 52)
@@ -58,8 +57,10 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 		calculateAddress(KEY_PUBLIC);
 	}else
 	{
+		#if defined(ENABLE_DEBUG_MESSAGE)
 		/* Something wrong with key*/
 		Serial.println("Something wrong with key");
+		#endif
 	}
 }
 
@@ -143,7 +144,6 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	uint8_t final[25];
 	if(keyType == KEY_PRIVATE || keyType == KEY_WIF)
 	{
-		// Serial.write(privateKey,32);
 		uECC_compute_public_key(privateKey,publicKey,curve);
 		uECC_compress(publicKey,compPubKey,curve);
 	}else if(keyType == KEY_PUBLIC)
@@ -151,9 +151,7 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 		uECC_compress(publicKey,compPubKey,curve);
 	}else if(keyType == KEY_COMPRESSED_PUBLIC)
 	{
-	    // Serial.write(compPubKey,33);
 		sha256(hash,compPubKey,33);
-		// Serial.write(hash,32);
 		mbedtls_ripemd160(hash,32,final+1);
 	}else if(keyType == KEY_SCRIPT_HASH)
 	{
@@ -161,7 +159,6 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 		memcpy(final+1,compPubKey,20);
 		memset(compPubKey,0,33);
 	}
-	// Serial.write(ripedHash,20);
 	// #if defined(USE_TEST_NET)
 	final[0]=TEST_NET_VERSION;
 	// #elif defined(USE_MAIN_NET)
@@ -169,13 +166,11 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	// #endif
 	doubleSha256(hash,final,21);
 	memcpy(final+21,hash,4);
-	// Serial.write(final,sizeof(final));
 	base58Encode(final,sizeof(final),address,36);
 	for(int i=0;i<36;i++){address[i]=address[i+2];} /* Shifting array to the left */
 	/* Quick and Dirty solution for Base58 encoding, as there should be a generic solution for supporting all addresses lenght*/
 	address[34]='\0';
 	address[35]='\0';
-	Serial.write(address,36);
 }
 
 bool BitcoinAddress::isTracked()

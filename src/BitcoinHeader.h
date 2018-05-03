@@ -24,7 +24,9 @@ public:
 	bool operator==(BitcoinHeader& );
 	bool operator!=(BitcoinHeader&);
 	void setHeader(uint8_t *,uint32_t );
+	#if defined(ENABLE_DEBUG_MESSAGE)
 	void printHeader();
+	#endif
 private:
 	uint8_t completeHeader[80];
 	uint8_t hash[32];
