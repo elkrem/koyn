@@ -39,7 +39,7 @@ void KoynClass::checkSDCardMounted()
 	/* Stick here until SD card mounted. */
 	do{
 		Serial.println(F("Mount SD card"));
-	}while(!SD.begin(SD_CHIP_SEL,SD_SCK_MHZ(4)));
+	}while(!SD.begin(SD_CARD_CHIP_SELECT,SD_SCK_MHZ(4)));
 }
 
 void KoynClass::checkDirAvailability()
@@ -238,7 +238,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 					/* check all forking files and make a chain */
 					/* Make sure not to request old headers multiple times */
 					bool fork;
-					for(int i=0;i<MAX_CLIENT_NO;i++){if(forks[i].exists()){fork=true;break;}}
+					for(int i=0;i<MAX_CONNECTED_SERVERS;i++){if(forks[i].exists()){fork=true;break;}}
 					if(fork && (prevHeader.getHeight()<0 || prevHeader!=*currhdr))
 					{
 						BitcoinHeader oldHeader;
@@ -283,7 +283,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 		SD.mkdir("koyn/fork");
 	}else
 	{
-		for(int i=0;i<MAX_CLIENT_NO;i++)
+		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			if(forks[i].exists())
 			{
@@ -407,7 +407,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 void KoynClass::reorganizeMainChain()
 {
 	BitcoinHeader tempHeader=lastHeader;
-	for(int i=0;i<MAX_CLIENT_NO;i++)
+	for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(forks[i].exists()&&forks[i].gotParentHeader())
 		{
@@ -425,7 +425,7 @@ void KoynClass::reorganizeMainChain()
 	if(tempHeader!=lastHeader)
 	{
 		Serial.println(F("Chain with bigger difficulty"));
-		for(int i=0;i<MAX_CLIENT_NO;i++)
+		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			if(forks[i].exists()&&forks[i].gotParentHeader())
 			{
@@ -450,7 +450,7 @@ void KoynClass::reorganizeMainChain()
 						blkHeaderFile.close();
 						updateTotalBlockNumb();
 						lastHeader = *forks[i].getLastHeader();
-						for(int j=0;j<MAX_CLIENT_NO;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 						return;
 					}
 				}
@@ -460,7 +460,7 @@ void KoynClass::reorganizeMainChain()
 	{
 		/* wait for tallest chain height and then swap the chain with main chain and set all forks with Null */
 		tempHeader.setNull();
-		for(int i=0;i<MAX_CLIENT_NO;i++)
+		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			if(forks[i].exists()&&forks[i].gotParentHeader())
 			{
@@ -472,7 +472,7 @@ void KoynClass::reorganizeMainChain()
 				uint32_t diff=0;
 				diff = forks[i].getLastHeader()->getHeight()-forks[i].getParentHeader()->getHeight();
 				Serial.println(F("Getting longest chain"));
-				if(diff>=LONGEST_CHAIN)
+				if(diff>=LONGEST_CHAIN_AT_FORK)
 				{
 					Serial.println(F("Chain is long"));
 					/* reorg chain to have this fork and remove all other forks and set forks with Null then update totalBlockNumb and break */
@@ -494,7 +494,7 @@ void KoynClass::reorganizeMainChain()
 						blkHeaderFile.close();
 						updateTotalBlockNumb();
 						lastHeader = *forks[i].getLastHeader();
-						for(int j=0;j<MAX_CLIENT_NO;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 						return;
 					}
 
@@ -505,9 +505,9 @@ void KoynClass::reorganizeMainChain()
 			}
 		}
 		/* Solving case if all forks stopped growing and the main chain is growing only */
-		if(tempHeader.getHeight()>0&&lastHeader.getHeight()-tempHeader.getHeight()>LONGEST_CHAIN)
+		if(tempHeader.getHeight()>0&&lastHeader.getHeight()-tempHeader.getHeight()>LONGEST_CHAIN_AT_FORK)
 		{
-			for(int j=0;j<MAX_CLIENT_NO;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+			for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 			return;
 		}
 	}
@@ -522,7 +522,7 @@ void KoynClass::connectToServers()
 	*/
 	uint8_t mainNetArrSize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
 	uint16_t serverNamesCount =0;
-	for(uint16_t i =0;i<MAX_CLIENT_NO;i++)
+	for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		char  servName[strlen_P(testnetServerNames[serverNamesCount])+1];
 		while(!clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
@@ -652,7 +652,7 @@ void KoynClass::run()
 			{
 				Serial.println(F("Merkle Verified ..! "));
 				lastMerkleVerified = true;
-				for(int i=0;i<MAX_TX_NO;i++)
+				for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 				{
 					if(incomingTx[i].isUsed()&&!incomingTx[i].inBlock())
 					{
@@ -680,7 +680,7 @@ void KoynClass::run()
 			SD.remove("koyn/address/merkle");
 		}
 	}
-	for(int i=0 ;i<MAX_CLIENT_NO;i++)
+	for(int i=0 ;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		bool opened = false;
 		File responseFile;
@@ -735,7 +735,7 @@ void KoynClass::run()
 		responseFile.close();
 	}
 	/* Parsing completed files*/
-	for(int i =0 ;i<MAX_CLIENT_NO;i++)
+	for(int i =0 ;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		char buff[13];
 		currentClientNo = i;
@@ -889,13 +889,13 @@ void KoynClass::parseReceivedTx()
 		uint32_t count=0;
 		while(file.read()!='"'){count++;}
 		Serial.println(count);
-		if(count/2>MAX_RAW_TX_SZ){Serial.println(F("Raw transaction is too big"));return;}
+		if(count/2>MAX_TRANSACTION_SIZE){Serial.println(F("Raw transaction is too big"));return;}
 		Serial.println(F("Locating space in Ram"));
 		char stringRawTx[count];
 		file.seek(pos);
 		for(int i=0;i<count;i++){stringRawTx[i]=file.read();}
 		// Serial.write(stringRawTx,count);
-		for(int i=0;i<MAX_TX_NO;i++)
+		for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 		{
 			if(!incomingTx[i].isUsed())
 			{
@@ -908,7 +908,7 @@ void KoynClass::parseReceivedTx()
 						(*userCallback)(incomingTx[i]);
 					}
 					/* reset tx object if user added 0 confirmations*/
-					if(USER_BLOCK_DEPTH==0)
+					if(REMOVE_CONFIRMED_TRANSACTION_AFTER==0)
 					{
 						incomingTx[i].resetTx();
 					}
@@ -938,7 +938,7 @@ void KoynClass::processInput(String key,String value)
 					if(noOfChunksNeeded)
 					{
 						chunkNo++;
-						if(++currentClientNo==MAX_CLIENT_NO){currentClientNo=MAIN_CLIENT;}
+						if(++currentClientNo==MAX_CONNECTED_SERVERS){currentClientNo=MAIN_CLIENT;}
 						request.getBlockChunks(currentClientNo);
 						synchronized =false;
 					}else
@@ -949,7 +949,7 @@ void KoynClass::processInput(String key,String value)
 					updateTotalBlockNumb();
 				}else
 				{
-					if(++currentClientNo==MAX_CLIENT_NO){currentClientNo=MAIN_CLIENT;}
+					if(++currentClientNo==MAX_CONNECTED_SERVERS){currentClientNo=MAIN_CLIENT;}
 				/* Re-request chunks but from another server */
 					request.getBlockChunks(currentClientNo+1);
 					synchronized = false;
@@ -1091,12 +1091,12 @@ void KoynClass::processInput(String key,String value)
 			{
 				case HEADER_VALID:
 					updateTotalBlockNumb();
-					for(int i=0;i<MAX_TX_NO;i++)
+					for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 					{
 						if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 						{
 							int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
-							if(isCallBackAssigned && diff>0 && diff<USER_BLOCK_DEPTH)
+							if(isCallBackAssigned && diff>0 && diff<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 							{
 								Serial.print(F("Block Difference "));
 								Serial.println(diff);
@@ -1112,12 +1112,12 @@ void KoynClass::processInput(String key,String value)
 				case FORKED:break;
 				case FORK_VALID:
 				/* Check if there are any transactions to be sent as confirmations to user */
-				for(int i=0;i<MAX_TX_NO;i++)
+				for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 				{
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 					{
 						int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
-						if(isCallBackAssigned && diff>0 && diff<USER_BLOCK_DEPTH)
+						if(isCallBackAssigned && diff>0 && diff<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
 							Serial.print(F("Block Difference "));
 							Serial.println(diff);
@@ -1249,7 +1249,7 @@ void KoynClass::processInput(String key,String value)
 		addHistory.getStringTxHash(txHash_str);
 		Serial.println(txHash_str);
 		/* Preventing re-requesting raw transactions */
-		for(int i=0;i<MAX_TX_NO;i++)
+		for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 		{
 			if(incomingTx[i].isUsed())
 			{
@@ -1391,7 +1391,7 @@ WiFiClient * KoynClass::getMainClient()
 
 void KoynClass::setMainClient()
 {
-	for(int i=0;i<MAX_CLIENT_NO;i++)
+	for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(clientsArray[i].connected())
 		{
@@ -1451,7 +1451,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 	{
 		/* We also make sure that if there's any forks to check up with the current heights */
 		int32_t tempForkHeight=0;
-		for(int i=0;i<MAX_CLIENT_NO;i++)
+		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			uint32_t currentForkHeight = forks[i].getLastHeader()->getHeight();
 			if(forks[i].exists() && currentForkHeight>tempForkHeight){tempForkHeight=currentForkHeight;}

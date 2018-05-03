@@ -1,7 +1,6 @@
 #ifndef Servers_h
 #define Servers_h
 
-#define DEFAULT_PORT	50001
 
 
 

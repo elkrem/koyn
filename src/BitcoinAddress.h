@@ -1,18 +1,6 @@
 #ifndef BitcoinAddress_h
 #define BitcoinAddress_h
 
-#define MAIN_NET_VERSION 0x00
-#define TEST_NET_VERSION 0x6F
-
-#define KEY_ENCODED				0x01
-#define KEY_WIF  				0x02
-#define KEY_PRIVATE	 			0x03
-#define KEY_COMPRESSED_PUBLIC	0x04
-#define KEY_PUBLIC 				0x05
-#define KEY_SCRIPT_HASH			0x06
-
-#define SIZE_OF_RIPE_HASH 0x14
-
 extern "C" {
 
   static int RNG(uint8_t *dest, unsigned size) {

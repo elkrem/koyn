@@ -1,13 +1,6 @@
 #ifndef BitcoinHeader_h
 #define BitcoinHeader_h
 
-#define ERROR			0
-#define HEADER_VALID	1
-#define SAME_HEADER		2
-#define FORKED			3
-#define FORK_VALID		4
-#define INVALID			5
-
 class BitcoinHeader
 {
 public:

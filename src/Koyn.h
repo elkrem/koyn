@@ -1,32 +1,13 @@
 #ifndef Koyn_h
 #define Koyn_h
 
-#define MAX_CLIENT_NO	3
-#define MAX_REQUEST_NO	20
-#define SD_CHIP_SEL		15
-#define MAIN_CLIENT	0
-
-#define ADDRESS_NOT_TRACKED 0x00
-#define ADDRESS_NO_FUNDS	0x01
-#define ADDRESS_INSUFFECIENT_BALANCE 0x02
-#define ADDRESS_NO_PRIVATE_KEY	0x03
-#define ADDRESS_INVALID	0x04
-#define INVALID_AMOUNT	0x05
-
-#define P2PKH_ADDRESS	0x00
-#define P2SH_ADDRESS	0x01
-
-#define ASN1_BMPSTRING	0x30
-#define ASN1_INTEGER	0x02
-
-#define GENESIS_BLOCK_HASH_TESTNET	"000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943"
-
 #include <SPI.h>
 #include "SdFat/SdFat.h"
 #include "uECC/uECC.h"
 #include "Base58/Base58.h"
 #include "Ripemd160/Ripemd160.h"
 #include <ESP8266WiFi.h>
+#include "Config.h"
 #include "JsonMessage.h"
 #include "ElectrumRequests.h"
 #include "Hash.h"
@@ -65,12 +46,12 @@ private:
 	SdFat SD;
 	JsonListener listener;
 	File file;
-	WiFiClient clientsArray[MAX_CLIENT_NO];
+	WiFiClient clientsArray[MAX_CONNECTED_SERVERS];
 	WiFiClient * mainClient;
 	ElectrumRequests request;
 	ElectrumRequestData * reqData;
-	BitcoinTransaction incomingTx[MAX_TX_NO];
-	BitcoinFork forks[MAX_CLIENT_NO];
+	BitcoinTransaction incomingTx[MAX_TRANSACTION_COUNT];
+	BitcoinFork forks[MAX_CONNECTED_SERVERS];
 	void updateTotalBlockNumb();
 	void setMainClient();
 	int8_t verifyBlockHeaders(BitcoinHeader*);

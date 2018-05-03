@@ -58,7 +58,7 @@ ElectrumRequests::ElectrumRequests()
 
 void ElectrumRequests::sendVersion()
 {
-	for(int i = 0;i<MAX_CLIENT_NO;i++)
+	for(int i = 0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(Koyn.getClient(i)->connected())
 		{
@@ -77,7 +77,7 @@ void ElectrumRequests::sendVersion()
 
 void ElectrumRequests::subscribeToPeers()
 {
-	for(int i = 0;i<MAX_CLIENT_NO;i++)
+	for(int i = 0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(Koyn.getClient(i)->connected())
 		{
@@ -115,7 +115,7 @@ void ElectrumRequests::subscribeToBlocksNumber()
 
 void ElectrumRequests::subscribeToBlockHeaders()
 {
-	for(int i = 0;i<MAX_CLIENT_NO;i++)
+	for(int i = 0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(Koyn.getClient(i)->connected())
 		{
@@ -222,7 +222,7 @@ void ElectrumRequests::getMerkleProof(const char  * address,int height)
 
 void ElectrumRequests::getBlockHeader(int blockHeight)
 {
-	for(int i = 0;i<MAX_CLIENT_NO;i++)
+	for(int i = 0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		if(Koyn.getClient(i)->connected())
 		{
@@ -334,7 +334,7 @@ void ElectrumRequests::getTransaction(const char * txHash)
 ElectrumRequestData * ElectrumRequests::getElectrumRequestData()
 {
 	uint16_t i=0;
-	while(i<MAX_REQUEST_NO)
+	while(i<MAX_PARALLEL_REQUESTS)
 	{
 		if(!electrumRequestDataArray[i].isReqUsed())
 		{
@@ -348,7 +348,7 @@ ElectrumRequestData * ElectrumRequests::getElectrumRequestData()
 ElectrumRequestData * ElectrumRequests::getElectrumRequestData(int reqNo)
 {
 	uint16_t i=0;
-	while(i<MAX_REQUEST_NO)
+	while(i<MAX_PARALLEL_REQUESTS)
 	{
 		if(electrumRequestDataArray[i].getReqId()== reqNo)
 		{

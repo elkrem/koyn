@@ -2,32 +2,6 @@
 #define ElectrumRequests_h
 
 
-
-
-
-#define VERSION_STRING    "2.7.11"
-
-
-#define VERSION_BIT						0
-#define ADRRESS_HISTORY_BIT				1
-#define ADDRESS_BALANCE_BIT				2
-#define ADDRESS_MEMPOOL_BIT				3
-#define ADDRESS_UTXO_BIT				4
-#define BLOCK_CHUNKS_BIT				5
-#define TRANSACTION_BIT					6
-#define BLOCK_HEADER_BIT				7
-#define HEADERS_SUBS_BIT				8
-#define ADDRESS_SUBS_BIT				9
-#define PEERS_SUBS_BIT					10
-#define BLOCKS_NO_SUBS_BIT				11
-#define RELAY_FEE_BIT					12
-#define BROADCAST_TRANSACTION_BIT		13
-#define MERKLE_PROOF					14
-
-#define BLOCK_NUM_SUB					0
-#define BLOCK_HEAD_SUB					1
-#define ADDRESS_SUB						2
-
 class ElectrumRequestData
 {
 private:
@@ -74,7 +48,7 @@ public:
 	ElectrumRequestData * getElectrumRequestData();
 	ElectrumRequestData * getElectrumRequestData(int);
 private:
-	ElectrumRequestData electrumRequestDataArray[MAX_REQUEST_NO];
+	ElectrumRequestData electrumRequestDataArray[MAX_PARALLEL_REQUESTS];
 	JsonMessage jsonMessage;
 friend class KoynClass;
 friend class JsonListener;

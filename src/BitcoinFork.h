@@ -1,8 +1,6 @@
 #ifndef BitcoinFork_h
 #define BitcoinFork_h
 
-#define LONGEST_CHAIN 3
-
 
 class BitcoinFork{
 public:
