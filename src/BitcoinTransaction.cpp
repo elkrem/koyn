@@ -381,4 +381,12 @@ uint8_t BitcoinTransaction::getOutputsCount()
 }
 
 uint32_t BitcoinTransaction::getConfirmations()
-{}
+{
+	if(this->inBlock())
+	{
+		return Koyn.getBlockNumber()-this->getBlockNumber(); 
+	}else
+	{
+		return 0;
+	}
+}

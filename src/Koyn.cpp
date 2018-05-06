@@ -1246,12 +1246,11 @@ void KoynClass::processInput(String key,String value)
 					{
 						if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 						{
-							int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
-							if(isCallBackAssigned && diff>0 && diff<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+							if(isCallBackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 							{
 								#if defined(ENABLE_DEBUG_MESSAGE)
 								Serial.print(F("Block Difference "));
-								Serial.println(diff);
+								Serial.println(incomingTx[i].getConfirmations());
 								#endif
 								(*userCallback)(incomingTx[i]);
 							}else
@@ -1270,11 +1269,11 @@ void KoynClass::processInput(String key,String value)
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 					{
 						int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
-						if(isCallBackAssigned && diff>0 && diff<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+						if(isCallBackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
 							#if defined(ENABLE_DEBUG_MESSAGE)
 							Serial.print(F("Block Difference "));
-							Serial.println(diff);
+							Serial.println(incomingTx[i].getConfirmations());
 							#endif
 							(*userCallback)(incomingTx[i]);
 						}else
