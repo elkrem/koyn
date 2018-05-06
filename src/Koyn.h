@@ -95,6 +95,7 @@ private:
 	uint32_t noOfChunksNeeded;
 	friend class ElectrumRequests;
 	friend class JsonListener;
+	friend class BitcoinTransaction;
 };
 
 extern KoynClass Koyn;
