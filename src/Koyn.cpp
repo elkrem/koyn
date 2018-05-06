@@ -761,6 +761,7 @@ void KoynClass::run()
 						uint8_t hash[32];
 						incomingTx[i].getHash(txHash);
 						lastTxHash.getTxHash(hash);
+						reverseBin(hash,32);
 						if(!memcmp(txHash,hash,32))
 						{
 							incomingTx[i].setHeight(lastTxHash.getHeight());
