@@ -25,6 +25,7 @@ public:
 	void resetTx();
 	bool setRawTx(char*,uint32_t);
 	void setHeight(int32_t);
+	uint8_t getUnconfirmedIterations();
 private:
 	uint32_t transcationLength;
 	uint8_t * rawTx;
@@ -32,6 +33,7 @@ private:
 	int32_t height;
 	uint8_t inputNo;
 	uint8_t outNo;
+	uint8_t unconfirmedIterations;
 	bool isInBlock;
 };
 

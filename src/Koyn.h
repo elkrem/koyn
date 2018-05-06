@@ -65,6 +65,7 @@ private:
 	void parseReceivedTx();
 	void getHeaderFromMainChain(BitcoinHeader *,uint32_t);
 	void reorganizeMainChain();
+	void removeUnconfirmedTransactions();
 	bool checkBlckNumAndValidate(int32_t);
 	void (*userCallback)(BitcoinTransaction);
 	uint32_t lastTimeTaken;

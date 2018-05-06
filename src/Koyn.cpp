@@ -665,6 +665,7 @@ void KoynClass::run()
 	}
 	if(synchronized)
 	{
+		removeUnconfirmedTransactions();
 		/* Requesting Merkle proofs */
 		if(SD.exists("koyn/address/his_unveri")&&(lastMerkleVerified||isFirstMerkle))
 		{
@@ -1961,6 +1962,23 @@ void KoynClass::delay(unsigned long time)
 	while((millis()<(now+time)))
 	{
 		run();
+	}
+}
+
+void KoynClass::removeUnconfirmedTransactions()
+{
+	for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
+	{
+		if(incomingTx[i].isUsed()&&!incomingTx[i].inBlock())
+		{
+			if(incomingTx[i].getUnconfirmedIterations()==REMOVE_UNCONFIRMED_TRANSACTION_AFTER)
+			{
+				#if defined(ENABLE_DEBUG_MESSAGE)
+				Serial.print(F("Removing unconfirmed transaction"));
+				#endif
+				incomingTx[i].resetTx();
+			}
+		}
 	}
 }
 

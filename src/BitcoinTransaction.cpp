@@ -8,6 +8,7 @@ BitcoinTransaction::BitcoinTransaction()
 	isInBlock=false;
 	inputNo=0;
 	outNo=0;
+	unconfirmedIterations=0;
 }
 
 BitcoinTransaction::BitcoinTransaction(const BitcoinTransaction *transaction)
@@ -86,6 +87,7 @@ bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 void BitcoinTransaction::setHeight(int32_t _height)
 {
 	height = _height;
+	unconfirmedIterations=0;
 }
 
 bool BitcoinTransaction::getInput(uint8_t index,char * container)
@@ -368,6 +370,7 @@ void BitcoinTransaction::resetTx()
 	rawTx = NULL;
 	height = -1;
 	isInBlock=false;
+	unconfirmedIterations=0;
 }
 
 uint8_t BitcoinTransaction::getInputsCount()
@@ -387,6 +390,12 @@ uint32_t BitcoinTransaction::getConfirmations()
 		return Koyn.getBlockNumber()-this->getBlockNumber(); 
 	}else
 	{
+		unconfirmedIterations++;
 		return 0;
 	}
+}
+
+uint8_t BitcoinTransaction::getUnconfirmedIterations()
+{
+	return unconfirmedIterations;
 }
