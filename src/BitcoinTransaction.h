@@ -10,8 +10,6 @@ public:
 	BitcoinTransaction(const BitcoinTransaction *);
 	bool getInput(uint8_t ,BitcoinAddress *);
 	bool getOutput(uint8_t,BitcoinAddress *);
-	bool getInput(uint8_t ,char *);
-	bool getOutput(uint8_t,char *,uint8_t *);
 	uint64_t getOutputAmount(uint8_t);
 	uint8_t getInputsCount();
 	uint8_t getOutputsCount();
