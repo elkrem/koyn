@@ -68,7 +68,8 @@ private:
 	void reorganizeMainChain();
 	void removeUnconfirmedTransactions();
 	bool checkBlckNumAndValidate(int32_t);
-	void (*userCallback)(BitcoinTransaction);
+	void (*transactionCallback)(BitcoinTransaction);
+	void (*newBlockCallback)(uint32_t);
 	uint32_t lastTimeTaken;
 	int32_t totalBlockNumb;
 	int32_t fallingBackBlockHeight;
@@ -83,7 +84,8 @@ private:
 	bool bigFile;
 	bool lastMerkleVerified;
 	bool isFirstMerkle;
-	bool isCallBackAssigned;
+	bool isTransactionCallbackAssigned;
+	bool isNewBlockCallbackAssigned;
 	bool saveNextHistory;
 	bool reparseFile;
 	BitcoinHeader header;

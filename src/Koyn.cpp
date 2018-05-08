@@ -782,9 +782,9 @@ void KoynClass::run()
 								{
 									incomingTx[i].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
 									/* Consider calling user callback here */
-									if(isCallBackAssigned)
+									if(isTransactionCallbackAssigned)
 									{
-										(*userCallback)(incomingTx[i]);
+										(*transactionCallback)(incomingTx[i]);
 									}
 								}
 							}
@@ -1061,9 +1061,9 @@ void KoynClass::parseReceivedTx()
 					Serial.println(F("Success"));
 					#endif
 					incomingTx[i].setHeight(0);
-					if(isCallBackAssigned)
+					if(isTransactionCallbackAssigned)
 					{
-						(*userCallback)(incomingTx[i]);
+						(*transactionCallback)(incomingTx[i]);
 					}
 					/* reset tx object if user added 0 confirmations*/
 					if(REMOVE_CONFIRMED_TRANSACTION_AFTER==0)
@@ -1223,6 +1223,10 @@ void KoynClass::processInput(String key,String value)
 		int32_t _height = my_atoll(&value[0]);
 		header.height =  _height;
 		header.calcPos();
+		if(isTransactionCallbackAssigned&&_height>totalBlockNumb)
+		{
+			(*newBlockCallback)(_height);
+		}
 	}else if(key == "version" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
 	{
 		uint32_t version = my_atoll(&value[0]);
@@ -1270,13 +1274,13 @@ void KoynClass::processInput(String key,String value)
 					{
 						if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 						{
-							if(isCallBackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+							if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 							{
 								#if defined(ENABLE_DEBUG_MESSAGE)
 								Serial.print(F("Block Difference "));
 								Serial.println(incomingTx[i].getConfirmations());
 								#endif
-								(*userCallback)(incomingTx[i]);
+								(*transactionCallback)(incomingTx[i]);
 							}else
 							{
 								incomingTx[i].resetTx();
@@ -1293,13 +1297,13 @@ void KoynClass::processInput(String key,String value)
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 					{
 						int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
-						if(isCallBackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+						if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
 							#if defined(ENABLE_DEBUG_MESSAGE)
 							Serial.print(F("Block Difference "));
 							Serial.println(incomingTx[i].getConfirmations());
 							#endif
-							(*userCallback)(incomingTx[i]);
+							(*transactionCallback)(incomingTx[i]);
 						}else
 						{
 							incomingTx[i].resetTx();
@@ -1694,12 +1698,15 @@ bool KoynClass::isSynced()
 
 void KoynClass::onNewTransaction(void (* usersFunction)(BitcoinTransaction newTx))
 {
-	userCallback=usersFunction;
-	isCallBackAssigned=true;
+	transactionCallback=usersFunction;
+	isTransactionCallbackAssigned=true;
 }
 
 void KoynClass::onNewBlockHeader(void (*usersFunction)(uint32_t height))
-{}
+{
+	newBlockCallback=usersFunction;
+	isNewBlockCallbackAssigned=true;
+}
 
 void KoynClass::onError(void (*usersFunction)(uint8_t errCode))
 {}
