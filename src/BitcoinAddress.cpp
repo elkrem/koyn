@@ -146,9 +146,13 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	{
 		uECC_compute_public_key(privateKey,publicKey,curve);
 		uECC_compress(publicKey,compPubKey,curve);
+		sha256(hash,compPubKey,33);
+		mbedtls_ripemd160(hash,32,final+1);
 	}else if(keyType == KEY_PUBLIC)
 	{
 		uECC_compress(publicKey,compPubKey,curve);
+		sha256(hash,compPubKey,33);
+		mbedtls_ripemd160(hash,32,final+1);
 	}else if(keyType == KEY_COMPRESSED_PUBLIC)
 	{
 		sha256(hash,compPubKey,33);
