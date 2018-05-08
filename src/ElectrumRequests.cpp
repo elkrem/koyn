@@ -143,7 +143,7 @@ void ElectrumRequests::subscribeToAddress(const char  * address)
 			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.subscribe",address))+"\n"); /*Make sure to call the right message from jsonMessage create*/
 			currentReq->setReqType(ADDRESS_SUBS_BIT);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
+			memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
@@ -160,7 +160,7 @@ void ElectrumRequests::getAddressHistory(const char  * address)
 			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.get_history",address))+"\n"); /*Make sure to call the right message from jsonMessage create*/
 			currentReq->setReqType(ADRRESS_HISTORY_BIT);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
+			memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
@@ -177,7 +177,7 @@ void ElectrumRequests::getAddressBalance(const char  * address)
 			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.get_balance",address))+"\n"); /*Make sure to call the right message from jsonMessage create*/
 			currentReq->setReqType(ADDRESS_BALANCE_BIT);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
+			memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
@@ -201,7 +201,7 @@ void ElectrumRequests::getMempool(const char  * address)
 	}
 }
 
-void ElectrumRequests::getMerkleProof(const char  * address,int height)
+void ElectrumRequests::getMerkleProof(const char * address,const char  * txHash,int height)
 {
 	/* We should get Merkle proof from another servers and not from the main client,if one of them failed we should shif to the other and
 	   get the same merkle proof*/
@@ -210,10 +210,10 @@ void ElectrumRequests::getMerkleProof(const char  * address,int height)
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessage(currentReq->getReqId(),"blockchain.transaction.get_merkle",address,&height))+"\n"); /*Make sure to call the right message from jsonMessage create*/
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessage(currentReq->getReqId(),"blockchain.transaction.get_merkle",txHash,&height))+"\n"); /*Make sure to call the right message from jsonMessage create*/
 			currentReq->setReqType(MERKLE_PROOF);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
+			memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
@@ -250,7 +250,7 @@ void ElectrumRequests::listUtxo(const char  * address)
 			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.listunspent",address))+"\n"); /*Make sure to call the right message from jsonMessage create*/
 			currentReq->setReqType(ADDRESS_UTXO_BIT);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
+			memcpy(currentReq->dataString,address,strlen(address));/* memcpy here takes an already declared container with size while current.dataString is just a pointer so this will crash, make sure to pass an array to memcpy*/
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}

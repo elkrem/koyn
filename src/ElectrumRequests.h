@@ -8,7 +8,7 @@ private:
 	static uint32_t reqId;
 	uint32_t localReqId;
 	uint32_t reqType;
-	uint8_t  dataString[32];
+	uint8_t  dataString[65];
 	int dataInt;
 	bool isUsed;
 public:
@@ -39,7 +39,7 @@ public:
 	void getAddressBalance(const char  *);
 	void getMempool(const char  *);
 	void getBlockHeader(int );
-	void getMerkleProof(const char * , int );
+	void getMerkleProof(const char *,const char * , int );
 	void listUtxo(const char *);
 	void getBlockChunks(int);
 	void relayFee();

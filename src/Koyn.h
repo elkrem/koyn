@@ -15,9 +15,9 @@
 #include "Servers.h"
 #include "JsonStreamingParser/JsonStreamingParser.h"
 #include "JsonStreamingParser/JsonListener.h"
+#include "AddressHistory.h"
 #include "BitcoinHeader.h"
 #include "BitcoinAddress.h"
-#include "AddressHistory.h"
 #include "BitcoinTransaction.h"
 #include "BitcoinFork.h"
 
@@ -28,7 +28,7 @@ public:
 	KoynClass();
 	void begin(bool=false);
 	void run();
-	void trackAddress(BitcoinAddress * );
+	uint8_t trackAddress(BitcoinAddress * );
 	void unTrackAddress(BitcoinAddress * );
 	void unTrackAllAddresses();
 	bool isAddressTracked(BitcoinAddress * );
@@ -56,6 +56,7 @@ private:
 	void setMainClient();
 	int8_t verifyBlockHeaders(BitcoinHeader*);
 	int8_t catchingUpFork(BitcoinHeader*);
+	int8_t getAddressPointerIndex(ElectrumRequestData * );
 	void syncWithServers();
 	void connectToServers();
 	void processInput(String ,String );
@@ -88,9 +89,8 @@ private:
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
 	BitcoinHeader prevHeader;
-	BitcoinAddress * userAddressPointer;
+	BitcoinAddress * userAddressPointerArray[MAX_ADDRESSES_COUNT];
 	AddressHistory addHistory;
-	AddressHistory lastTxHash;
 	uint8_t currentClientNo;
 	uint32_t chunkNo;
 	uint32_t noOfChunksNeeded;

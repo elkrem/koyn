@@ -76,6 +76,7 @@ private:
 	bool gotAddressRef;
 	uint32_t confirmedBalance;
 	uint32_t unconfirmedBalance;
+	AddressHistory lastTxHash;
 	const struct uECC_Curve_t * curve;
 	friend class KoynClass;
 	friend class BitcoinTransaction;
