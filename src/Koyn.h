@@ -91,7 +91,7 @@ private:
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
 	BitcoinHeader prevHeader;
-	BitcoinAddress * userAddressPointerArray[MAX_ADDRESSES_COUNT];
+	BitcoinAddress * userAddressPointerArray[MAX_ADDRESSES_TRACKED_COUNT];
 	AddressHistory addHistory;
 	uint8_t currentClientNo;
 	uint32_t chunkNo;

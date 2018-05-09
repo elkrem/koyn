@@ -17,7 +17,7 @@ KoynClass::KoynClass()
 	isFirstMerkle = true;
 	saveNextHistory = false;
 	reparseFile=false;
-	for(int i=0;i<MAX_ADDRESSES_COUNT;i++){userAddressPointerArray[i]=NULL;}
+	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++){userAddressPointerArray[i]=NULL;}
 }
 
 
@@ -667,7 +667,7 @@ void KoynClass::run()
 	if(synchronized)
 	{
 		removeUnconfirmedTransactions();
-		for(int i=0;i<MAX_ADDRESSES_COUNT;i++)
+		for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 		{
 			if(userAddressPointerArray[i]!=NULL)
 			{
@@ -1575,7 +1575,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 	if(!userAddress->isTracked())
 	{
 		int i;
-		for(i=0;i<MAX_ADDRESSES_COUNT;i++)
+		for(i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 		{
 			if(userAddressPointerArray[i]==NULL)
 			{
@@ -1631,7 +1631,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 
 void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 {
-	for(int i=0;i<MAX_ADDRESSES_COUNT;i++)
+	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 	{
 		if(!strcmp(userAddressPointerArray[i]->address,userAddress->address))
 		{
@@ -1643,7 +1643,7 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 
 void KoynClass::unTrackAllAddresses()
 {
-	for(int i=0;i<MAX_ADDRESSES_COUNT;i++)
+	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 	{
 		userAddressPointerArray[i]=NULL;
 	}
@@ -2085,7 +2085,7 @@ void KoynClass::removeUnconfirmedTransactions()
 
 int8_t KoynClass::getAddressPointerIndex(ElectrumRequestData * reqDataPointer)
 {
-	for(int i=0;i<MAX_ADDRESSES_COUNT;i++)
+	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 	{
 		if(!strcmp(userAddressPointerArray[i]->address,(char *)reqDataPointer->dataString))
 		{
