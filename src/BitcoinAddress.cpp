@@ -65,7 +65,31 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 }
 
 BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
-{}
+{
+	tracked = false;
+	gotAddressRef = false;
+	init();
+    if(keyType == KEY_PRIVATE)
+	{
+		/* Original private key */
+		memcpy(privateKey,key,32);
+		calculateAddress(KEY_PRIVATE);
+	}if(keyType == KEY_COMPRESSED_PUBLIC)
+	{
+		memcpy(compPubKey,key,33);
+		calculateAddress(KEY_COMPRESSED_PUBLIC);
+	}else if(keyType == KEY_PUBLIC)
+	{
+		memcpy(publicKey,key,65);
+		calculateAddress(KEY_PUBLIC);
+	}else
+	{
+		#if defined(ENABLE_DEBUG_MESSAGE)
+		/* Something wrong with key*/
+		Serial.println("Something wrong with key");
+		#endif
+	}
+}
 
 BitcoinAddress::BitcoinAddress(bool generateKeysImplicitly)
 {
@@ -99,7 +123,9 @@ void BitcoinAddress::getPrivateKey(uint8_t * container)
 }
 
 void BitcoinAddress::getPrivateKey(const char * container)
-{}
+{
+	bin2hex((char*)container,privateKey,32);
+}
 
 void BitcoinAddress::getPublicKey(uint8_t * container)
 {
@@ -107,7 +133,9 @@ void BitcoinAddress::getPublicKey(uint8_t * container)
 }
 
 void BitcoinAddress::getPublicKey(const char * container)
-{}
+{
+	bin2hex((char*)container,publicKey,65);
+}
 
 void BitcoinAddress::getCompressedPublicKey(uint8_t * container)
 {
@@ -115,7 +143,9 @@ void BitcoinAddress::getCompressedPublicKey(uint8_t * container)
 }
 
 void BitcoinAddress::getCompressedPublicKey(const char * container)
-{}
+{
+	bin2hex((char*)container,compPubKey,33);
+}
 
 void BitcoinAddress::getWif(uint8_t * container)
 {
