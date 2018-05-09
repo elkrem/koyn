@@ -31,7 +31,6 @@ static void bin2hex(char * cont,uint8_t * data, uint32_t len)
     pos+=2;
   }
   memcpy(cont,val,len*2);
-  val[(len*2)] = '\0';
 }
 
 
