@@ -1223,7 +1223,7 @@ void KoynClass::processInput(String key,String value)
 		int32_t _height = my_atoll(&value[0]);
 		header.height =  _height;
 		header.calcPos();
-		if(isTransactionCallbackAssigned&&_height>totalBlockNumb)
+		if(isNewBlockCallbackAssigned&&_height>totalBlockNumb)
 		{
 			(*newBlockCallback)(_height);
 		}
