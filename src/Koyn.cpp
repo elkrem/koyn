@@ -52,15 +52,15 @@ void KoynClass::checkDirAvailability()
 		#endif
 	}
 	/* Make sure to remove the files in the directory first to remove the directory*/
-	if(SD.exists("koyn/response"))
+	if(SD.exists("koyn/responses"))
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
 		Serial.println(F("Removing Response folder"));
 		#endif
-		SD.rmdir("koyn/response");
+		SD.rmdir("koyn/responses");
 	}
 	::delay(200);
-	SD.mkdir("koyn/response");
+	SD.mkdir("koyn/responses");
 
 	if(SD.exists("koyn/blkhdrs"))
 	{
@@ -316,16 +316,16 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 	Serial.println("Catching Fork ");
 	#endif
 	int32_t headerHeight = currhdr->getHeight();
-	if(!SD.exists("koyn/fork"))
+	if(!SD.exists("koyn/forks"))
 	{
-		SD.mkdir("koyn/fork");
+		SD.mkdir("koyn/forks");
 	}else
 	{
 		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			if(forks[i].exists())
 			{
-				String fileName = String("koyn/fork/")+"fork"+i;
+				String fileName = String("koyn/forks/")+"fork"+i;
 				if(headerHeight > forks[i].getLastHeader()->height)
 				{
 					uint8_t hash1[32];
@@ -454,7 +454,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 	}
 	/* No Fork was found so this is a new fork solved remotely by the servers */
 	/* Request the previous header */
-	String fileName = String("koyn/fork/")+"fork"+currentClientNo;
+	String fileName = String("koyn/forks/")+"fork"+currentClientNo;
 	File forkFile = SD.open(fileName,FILE_WRITE);
 	if(forkFile)
 	{
@@ -505,7 +505,7 @@ void KoynClass::reorganizeMainChain()
 		{
 			if(forks[i].exists()&&forks[i].gotParentHeader())
 			{
-				String fileName = String("koyn/fork/")+"fork"+i;
+				String fileName = String("koyn/forks/")+"fork"+i;
 				if(tempHeader==*forks[i].getLastHeader())
 				{
 					/* reorg chain to have this fork and remove all other forks and set forks with Null then update totalBlockNumb and break */
@@ -528,7 +528,7 @@ void KoynClass::reorganizeMainChain()
 						blkHeaderFile.close();
 						updateTotalBlockNumb();
 						lastHeader = *forks[i].getLastHeader();
-						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/forks/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 						return;
 					}
 				}
@@ -542,7 +542,7 @@ void KoynClass::reorganizeMainChain()
 		{
 			if(forks[i].exists()&&forks[i].gotParentHeader())
 			{
-				String fileName = String("koyn/fork/")+"fork"+i;
+				String fileName = String("koyn/forks/")+"fork"+i;
 				if(tempHeader.getHeight()<forks[i].getParentHeader()->getHeight())
 				{
 					tempHeader = *forks[i].getParentHeader();
@@ -578,7 +578,7 @@ void KoynClass::reorganizeMainChain()
 						blkHeaderFile.close();
 						updateTotalBlockNumb();
 						lastHeader = *forks[i].getLastHeader();
-						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+						for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/forks/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 						return;
 					}
 
@@ -593,7 +593,7 @@ void KoynClass::reorganizeMainChain()
 		/* Solving case if all forks stopped growing and the main chain is growing only */
 		if(tempHeader.getHeight()>0&&lastHeader.getHeight()-tempHeader.getHeight()>LONGEST_CHAIN_AT_FORK)
 		{
-			for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/fork/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
+			for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/forks/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
 			return;
 		}
 	}
@@ -629,7 +629,7 @@ void KoynClass::connectToServers()
 		Serial.print(String("Client ")+String(i)+String(" connected to "));
 		Serial.println(servName);
 		#endif
-		String dirName = String("koyn/response/")+"client"+i;
+		String dirName = String("koyn/responses/")+"client"+i;
 		if(!SD.exists(&dirName[0]))
 		{
 			SD.mkdir(&dirName[0]);
@@ -831,7 +831,7 @@ void KoynClass::run()
 			{
 				if(!opened)
 				{
-					String fileName = "koyn/response/client"+String(i)+"/"+"uncomplete";
+					String fileName = "koyn/responses/client"+String(i)+"/"+"uncomplete";
 					responseFile = SD.open(&fileName[0],FILE_WRITE);
 					opened = true;
 					if(responseFile){
@@ -853,7 +853,7 @@ void KoynClass::run()
 				}
 			}else
 			{
-				String dirName = "koyn/response/client"+String(i);
+				String dirName = "koyn/responses/client"+String(i);
 				FatFile directory = SD.open(&dirName[0]);
 				if (!responseFile.rename(&directory, &String(millis())[0])) /* In this line we should rename the file using the timeStamp*/
 				{
@@ -872,7 +872,7 @@ void KoynClass::run()
 	{
 		char buff[13];
 		currentClientNo = i;
-		String dirName = "koyn/response/client"+String(i);
+		String dirName = "koyn/responses/client"+String(i);
 		FatFile directory = SD.open(dirName);
 
 		while (file.openNext(&directory,O_READ)) {
