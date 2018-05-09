@@ -221,7 +221,11 @@ void BitcoinTransaction::getHash(uint8_t * container)
 }
 
 void BitcoinTransaction::getHash(const char * container)
-{}
+{
+	uint8_t hash[32];
+	doubleSha256(hash,rawTx,transcationLength);
+	bin2hex((char *)container,hash,32);
+}
 
 uint32_t BitcoinTransaction::getBlockNumber()
 {
