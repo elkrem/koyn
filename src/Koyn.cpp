@@ -237,6 +237,10 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 							blkHdrFile.close();
 						}
 						lastHeader = *currhdr;
+						if(isNewBlockCallbackAssigned)
+						{
+							(*newBlockCallback)(headerHeight);
+						}
 						return HEADER_VALID;
 					}else
 					{
@@ -347,6 +351,10 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							forkFile.write((uint8_t *)&currHdrHeight,4);
 							forkFile.close();
 							forks[i].setLastHeader(currhdr);
+							if(isNewBlockCallbackAssigned)
+							{
+								(*newBlockCallback)(headerHeight);
+							}
 							return FORK_VALID;
 						}else{
 							#if defined(ENABLE_DEBUG_MESSAGE)
@@ -1223,10 +1231,6 @@ void KoynClass::processInput(String key,String value)
 		int32_t _height = my_atoll(&value[0]);
 		header.height =  _height;
 		header.calcPos();
-		if(isNewBlockCallbackAssigned&&_height>totalBlockNumb)
-		{
-			(*newBlockCallback)(_height);
-		}
 	}else if(key == "version" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
 	{
 		uint32_t version = my_atoll(&value[0]);
