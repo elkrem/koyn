@@ -44,9 +44,7 @@ public:
 	void getPublicKey(const char *);
 	void getCompressedPublicKey(uint8_t *);
 	void getCompressedPublicKey(const char *);
-	void getWif(uint8_t *);
 	void getWif(const char *);
-	void getEncoded(uint8_t *);
 	void getEncoded(char *);
 	bool isTracked();
 	uint64_t getBalance();

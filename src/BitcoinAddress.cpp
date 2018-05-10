@@ -147,11 +147,6 @@ void BitcoinAddress::getCompressedPublicKey(const char * container)
 	bin2hex((char*)container,compPubKey,33);
 }
 
-void BitcoinAddress::getWif(uint8_t * container)
-{
-	/* Calculate WIF from private key if exists */
-}
-
 void BitcoinAddress::getWif(const char * container)
 {}
 
@@ -159,9 +154,6 @@ void BitcoinAddress::getEncoded(char * container)
 {
 	strcpy(container,address);
 }
-
-void BitcoinAddress::getEncoded(uint8_t * container)
-{}
 
 void BitcoinAddress::getStatus(char * container)
 {
