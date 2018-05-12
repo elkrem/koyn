@@ -148,7 +148,17 @@ void BitcoinAddress::getCompressedPublicKey(const char * container)
 }
 
 void BitcoinAddress::getWif(const char * container)
-{}
+{
+	if(!memcmp(privateKey,emptyArray,32)){return;}
+	uint8_t final[38];
+	uint8_t hash[32];
+	memcpy(final+1,privateKey,32);
+	final[0]=0xEF;
+	final[33]=0x01;
+	doubleSha256(hash,final,34);
+	memcpy(final+34,hash,4);
+	base58Encode(final,sizeof(final),(char*)container,52);
+}
 
 void BitcoinAddress::getEncoded(char * container)
 {
