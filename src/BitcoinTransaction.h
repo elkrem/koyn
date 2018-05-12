@@ -17,13 +17,6 @@ public:
 	void getHash(const char *);
 	uint32_t getBlockNumber();
 	uint32_t getConfirmations();
-
-	bool inBlock();
-	bool isUsed();
-	void resetTx();
-	bool setRawTx(char*,uint32_t);
-	void setHeight(int32_t);
-	uint8_t getUnconfirmedIterations();
 private:
 	uint32_t transcationLength;
 	uint8_t * rawTx;
@@ -33,6 +26,13 @@ private:
 	uint8_t outNo;
 	uint8_t unconfirmedIterations;
 	bool isInBlock;
+	bool inBlock();
+	bool isUsed();
+	void resetTx();
+	bool setRawTx(char*,uint32_t);
+	void setHeight(int32_t);
+	uint8_t getUnconfirmedIterations();
+	friend class KoynClass;
 };
 
 
