@@ -11,7 +11,6 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	{
 		/* This is a normal address set by user. make sure to add error if address doesn't comply to the chosen network by the user
 		*/
-		memcpy(address,key,keyLen);
 		if(address[0]!='m'||address[0]!='n'||address[0]!='2'||address[0]!='1'||address[0]!='3')
 		{
 			// #error Wrong address;
@@ -23,6 +22,7 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 				// #error Wrong address;
 			}
 		}
+		memcpy(address,key,keyLen);
 	}else if(keyType == KEY_PRIVATE && keyLen  == 64)
 	{
 		/* Original private key */
