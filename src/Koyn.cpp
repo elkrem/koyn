@@ -1579,6 +1579,7 @@ void KoynClass::processInput(String key,String value)
 
 uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 {
+	if(userAddress->address[0]=='1'||userAddress->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
 	if(!userAddress->isTracked())
 	{
 		int i;
@@ -1826,6 +1827,7 @@ uint32_t KoynClass::getBlockNumber()
 
 uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t amount, uint64_t fees, BitcoinAddress * change)
 {
+	if(from->address[0]=='1'||from->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
 	long long totalTransactionAmount = amount+fees;
 	uint8_t privKey[32];
 	char toAddr[36];
