@@ -24,6 +24,9 @@ KoynClass::KoynClass()
 
 void KoynClass::begin(bool _verify)
 {
+	#ifdef	USE_MAIN_NET
+	#error Main net currently not supported
+	#endif
 	verify = _verify;
 	checkSDCardMounted();
 	checkDirAvailability();
