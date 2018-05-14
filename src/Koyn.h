@@ -88,6 +88,7 @@ private:
 	bool isNewBlockCallbackAssigned;
 	bool saveNextHistory;
 	bool reparseFile;
+	bool confirmedFlag;
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
 	BitcoinHeader prevHeader;

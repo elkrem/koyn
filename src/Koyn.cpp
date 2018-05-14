@@ -17,6 +17,7 @@ KoynClass::KoynClass()
 	isFirstMerkle = true;
 	saveNextHistory = false;
 	reparseFile=false;
+	confirmedFlag=false;
 	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++){userAddressPointerArray[i]=NULL;}
 }
 
@@ -1167,7 +1168,11 @@ void KoynClass::processInput(String key,String value)
 				{
 					request.getAddressHistory(addr);
 					request.listUtxo(addr);
-					if(SD.exists(&fileNameUtxo[0])){SD.remove(&fileNameUtxo[0]);}
+					if(SD.exists(&fileNameUtxo[0]))
+					{
+						SD.remove(&fileNameUtxo[0]);
+						userAddressPointerArray[index]->clearBalance();
+					}
 					File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 					if(statusFile)
 					{
@@ -1186,7 +1191,11 @@ void KoynClass::processInput(String key,String value)
 					/* Status changed request history mempool and check the transaction validity and update to last status*/
 					request.getAddressHistory(addr);
 					request.listUtxo(addr);
-					if(SD.exists(&fileNameUtxo[0])){SD.remove(&fileNameUtxo[0]);}
+					if(SD.exists(&fileNameUtxo[0]))
+					{
+						SD.remove(&fileNameUtxo[0]);
+						userAddressPointerArray[index]->clearBalance();
+					}
 					File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 					if(statusFile)	
 					{
@@ -1359,8 +1368,12 @@ void KoynClass::processInput(String key,String value)
 			{
 				request.getAddressHistory(addr);
 				request.listUtxo(addr);
-				if(SD.exists(&fileNameUtxo[0])){SD.remove(&fileNameUtxo[0]);}
-					File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
+				if(SD.exists(&fileNameUtxo[0]))
+				{
+					SD.remove(&fileNameUtxo[0]);
+					userAddressPointerArray[index]->clearBalance();
+				}
+				File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 				if(statusFile)
 				{
 					statusFile.seek(0);
@@ -1380,8 +1393,12 @@ void KoynClass::processInput(String key,String value)
 			/* Status has changed request history again */
 				request.getAddressHistory(addr);
 				request.listUtxo(addr);
-				if(SD.exists(&fileNameUtxo[0])){SD.remove(&fileNameUtxo[0]);}
-					File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
+				if(SD.exists(&fileNameUtxo[0]))
+				{
+					SD.remove(&fileNameUtxo[0]);
+					userAddressPointerArray[index]->clearBalance();
+				}
+				File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 				if(statusFile)
 				{
 					statusFile.seek(0);
@@ -1551,26 +1568,30 @@ void KoynClass::processInput(String key,String value)
 				char addr[36]; /* We must always check type of address before declaring the array to know the length */
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
+				uint32_t height=0;
 				File addressUtxo = SD.open(&fileNameUtxo[0],FILE_WRITE);
 				if(addressUtxo)
 				{
-					uint32_t height=my_atoll(&value[0]);
+					height=my_atoll(&value[0]);
 					addressUtxo.write((uint8_t*)&height,4);
 				}
 				addressUtxo.close();
+				if(height){confirmedFlag = true;}else{confirmedFlag=false;}
 	}else if(key == "value" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
 				char addr[36]; /* We must always check type of address before declaring the array to know the length */
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
+				uint64_t val=0;
 				File addressUtxo = SD.open(&fileNameUtxo[0],FILE_WRITE);
 				if(addressUtxo)
 				{
-					uint64_t val=my_atoll(&value[0]);
+					val=my_atoll(&value[0]);
 					addressUtxo.write((uint8_t*)&val,8);
 				}
 				addressUtxo.close();
+				if(confirmedFlag){userAddressPointerArray[index]->confirmedBalance+=val;}else{userAddressPointerArray[index]->unconfirmedBalance+=val;}
 	}else
 	{
 		reparseFile = true;
@@ -1599,7 +1620,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 		#endif
 		request.subscribeToAddress(addr);
 		request.listUtxo(addr);
-		request.getAddressBalance(addr);
+		// request.getAddressBalance(addr);
 		userAddress->setTracked();
 		String dirName = "koyn/addresses/" + String(&addr[26]);
 		if(!SD.exists(&dirName[0]))
@@ -1632,6 +1653,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 		if(SD.exists(&fileNameUtxo[0]))
 		{
 			SD.remove(&fileNameUtxo[0]);
+			userAddress->clearBalance();
 		}
 		/* Check also if history file exists get the last history and save it to the lastTxHash object */
 	}

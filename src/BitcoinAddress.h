@@ -65,6 +65,7 @@ private:
 	void setAddressStatus(char *);
 	void resetGotAddress();
 	void calculateAddress(uint8_t );
+	void clearBalance();
 	uint8_t privateKey[32];
 	uint8_t publicKey[65];
 	uint8_t compPubKey[33];
@@ -72,8 +73,8 @@ private:
 	char status[65];
 	bool tracked;
 	bool gotAddressRef;
-	uint32_t confirmedBalance;
-	uint32_t unconfirmedBalance;
+	uint64_t confirmedBalance;
+	uint64_t unconfirmedBalance;
 	AddressHistory lastTxHash;
 	const struct uECC_Curve_t * curve;
 	friend class KoynClass;

@@ -309,3 +309,9 @@ bool BitcoinAddress::operator==(BitcoinAddress& other)
 		return false;
 	}
 }
+
+void BitcoinAddress::clearBalance()
+{
+	this->confirmedBalance=0;
+	this->unconfirmedBalance=0;
+}
