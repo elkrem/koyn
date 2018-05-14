@@ -29,14 +29,21 @@ void KoynClass::begin(bool _verify)
 	#ifdef	USE_MAIN_NET
 	#error Main net currently not supported
 	#endif
-	verify = _verify;
-	checkSDCardMounted();
-	checkDirAvailability();
-/* connection to servers using clients*/
-	connectToServers();
-/* setting a main client to communicate with for extra electrum requests.*/
-	setMainClient();
-	syncWithServers();
+	#if	(defined(USE_MAIN_NET)&&defined(USE_TEST_NET))
+	#error Error, both main net and test net configured
+	#endif
+	if(!isInit)
+	{
+		verify = _verify;
+		checkSDCardMounted();
+		checkDirAvailability();
+		/* connection to servers using clients*/
+		connectToServers();
+		/* setting a main client to communicate with for extra electrum requests.*/
+		setMainClient();
+		syncWithServers();
+		isInit=true;
+	}
 }
 
 void KoynClass::checkSDCardMounted()
@@ -671,243 +678,235 @@ void KoynClass::run()
 	   of the file to make sure that the next hashes are for that certain address. and make more files for more addresses history.
 	   7- Merkle checking also has the same issue like tx history as we will save the data in a file first then we will do the
 	 */
-	if(millis()-lastTimeTaken>55*1000)
+	if(isInit)
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
-		Serial.println(F("Sending Version"));
-		#endif
-		request.sendVersion();
-		lastTimeTaken = millis();
-	}
-	if(synchronized)
-	{
-		removeUnconfirmedTransactions();
-		for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
+		if(millis()-lastTimeTaken>55*1000)
 		{
-			if(userAddressPointerArray[i]!=NULL)
+			#if defined(ENABLE_DEBUG_MESSAGE)
+			Serial.println(F("Sending Version"));
+			#endif
+			request.sendVersion();
+			lastTimeTaken = millis();
+		}
+		if(synchronized)
+		{
+			removeUnconfirmedTransactions();
+			for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 			{
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
-				userAddressPointerArray[i]->getEncoded(addr);
-				String dirName = "koyn/addresses/" + String(&addr[26]);
-				String fileNameUnverifiedHistory = dirName+"/"+"his_unveri";
-				String fileNameHistory = dirName+"/"+"history";
-				String fileNameMerkle = dirName+"/"+"merkle";
-				/* Requesting Merkle proofs */
-				if(SD.exists(&fileNameUnverifiedHistory[0])&&(lastMerkleVerified||isFirstMerkle))
+				if(userAddressPointerArray[i]!=NULL)
 				{
-					File historyFile = SD.open(&fileNameUnverifiedHistory[0],FILE_READ);
-					if(historyFile&&historyFileLastPos==historyFile.size())
+					char addr[36]; /* We must always check type of address before declaring the array to know the length */
+					userAddressPointerArray[i]->getEncoded(addr);
+					String dirName = "koyn/addresses/" + String(&addr[26]);
+					String fileNameUnverifiedHistory = dirName+"/"+"his_unveri";
+					String fileNameHistory = dirName+"/"+"history";
+					String fileNameMerkle = dirName+"/"+"merkle";
+					/* Requesting Merkle proofs */
+					if(SD.exists(&fileNameUnverifiedHistory[0])&&(lastMerkleVerified||isFirstMerkle))
 					{
-						if(SD.exists(&fileNameHistory[0]))
+						File historyFile = SD.open(&fileNameUnverifiedHistory[0],FILE_READ);
+						if(historyFile&&historyFileLastPos==historyFile.size())
 						{
-							File oldFile = SD.open(&fileNameHistory[0],FILE_WRITE);
-							while(historyFile.available())
+							if(SD.exists(&fileNameHistory[0]))
 							{
-								oldFile.write(historyFile.read());
-							}
-							oldFile.close();
-							SD.remove(&fileNameUnverifiedHistory[0]);
-							historyFileLastPos=0;
-						}else
-						{
-							if (!SD.chdir(&dirName[0])) {
-								#if defined(ENABLE_DEBUG_MESSAGE)
-								Serial.println(F("chdir failed"));
-								#endif
-							}
-							/* Rename file */
-							historyFile.rename(SD.vwd(), "history");
-							historyFileLastPos=0;
-							if (!SD.chdir()) {
-								#if defined(ENABLE_DEBUG_MESSAGE)
-								Serial.println(F("chdir failed"));
-								#endif
-							}
-						}
-					}else if(historyFile)
-					{
-						uint8_t container[36];
-						historyFile.seek(historyFileLastPos);
-						if(historyFile.available())
-						{
-							for(int i=0;i<36;i++)
-							{
-								container[i]=historyFile.read();
-							}
-						}
-						userAddressPointerArray[i]->lastTxHash.copyData(container);
-						char txHash_str[65];
-						txHash_str[64]='\0';
-						userAddressPointerArray[i]->lastTxHash.getStringTxHash(txHash_str);
-						#if defined(ENABLE_DEBUG_MESSAGE)
-						Serial.println(F("Getting Merkle Proofs"));
-						#endif
-						request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
-						if(isFirstMerkle){isFirstMerkle=false;}
-						historyFileLastPos = historyFile.curPosition();
-						lastMerkleVerified = false;
-					}
-				}
-				/* Verifying Merkle tree */
-				if(SD.exists(&fileNameMerkle[0]))
-				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
-					Serial.println(F("Merkle"));
-					#endif
-					File merkleFile = SD.open(&fileNameMerkle[0],FILE_READ);
-					/* We should make sure first that we got the right blockheader */
-					uint8_t hash[32]={};
-					uint8_t arrayToHash[64];
-					uint8_t merkleLeaf[32];
-					uint32_t leafPos = userAddressPointerArray[i]->lastTxHash.getLeafPos();
-					uint32_t numberOfLeafs = merkleFile.size()/32;
-					userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
-					reverseBin(hash,32);
-					for(int j = 0 ;j<numberOfLeafs;j++)
-					{
-						for(int i=0;i<32;i++){merkleLeaf[i]=merkleFile.read();}
-						reverseBin(merkleLeaf,32);
-						if((leafPos>>j)&0x01)
-						{
-							memcpy(arrayToHash,merkleLeaf,32);
-							memcpy(arrayToHash+32,hash,32);
-						}else
-						{
-							memcpy(arrayToHash+32,merkleLeaf,32);
-							memcpy(arrayToHash,hash,32);
-						}
-						doubleSha256(hash,arrayToHash,64);
-					}
-					if(!memcmp(merkleRoot,hash,32))
-					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
-						Serial.println(F("Merkle Verified ..! "));
-						#endif
-						lastMerkleVerified = true;
-						for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
-						{
-							if(incomingTx[i].isUsed()&&!incomingTx[i].inBlock())
-							{
-								uint8_t txHash[32];
-								uint8_t hash[32];
-								incomingTx[i].getHash(txHash);
-								userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
-								reverseBin(hash,32);
-								if(!memcmp(txHash,hash,32))
+								File oldFile = SD.open(&fileNameHistory[0],FILE_WRITE);
+								while(historyFile.available())
 								{
-									incomingTx[i].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
-									/* Consider calling user callback here */
-									if(isTransactionCallbackAssigned)
+									oldFile.write(historyFile.read());
+								}
+								oldFile.close();
+								SD.remove(&fileNameUnverifiedHistory[0]);
+								historyFileLastPos=0;
+							}else
+							{
+								if (!SD.chdir(&dirName[0])) {
+									#if defined(ENABLE_DEBUG_MESSAGE)
+									Serial.println(F("chdir failed"));
+									#endif
+								}
+								/* Rename file */
+								historyFile.rename(SD.vwd(), "history");
+								historyFileLastPos=0;
+								if (!SD.chdir()) {
+									#if defined(ENABLE_DEBUG_MESSAGE)
+									Serial.println(F("chdir failed"));
+									#endif
+								}
+							}
+						}else if(historyFile)
+						{
+							uint8_t container[36];
+							historyFile.seek(historyFileLastPos);
+							if(historyFile.available())
+							{
+								for(int i=0;i<36;i++)
+								{
+									container[i]=historyFile.read();
+								}
+							}
+							userAddressPointerArray[i]->lastTxHash.copyData(container);
+							char txHash_str[65];
+							txHash_str[64]='\0';
+							userAddressPointerArray[i]->lastTxHash.getStringTxHash(txHash_str);
+							#if defined(ENABLE_DEBUG_MESSAGE)
+							Serial.println(F("Getting Merkle Proofs"));
+							#endif
+							request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
+							if(isFirstMerkle){isFirstMerkle=false;}
+							historyFileLastPos = historyFile.curPosition();
+							lastMerkleVerified = false;
+						}
+					}
+					/* Verifying Merkle tree */
+					if(SD.exists(&fileNameMerkle[0]))
+					{
+						#if defined(ENABLE_DEBUG_MESSAGE)
+						Serial.println(F("Merkle"));
+						#endif
+						File merkleFile = SD.open(&fileNameMerkle[0],FILE_READ);
+						/* We should make sure first that we got the right blockheader */
+						uint8_t hash[32]={};
+						uint8_t arrayToHash[64];
+						uint8_t merkleLeaf[32];
+						uint32_t leafPos = userAddressPointerArray[i]->lastTxHash.getLeafPos();
+						uint32_t numberOfLeafs = merkleFile.size()/32;
+						userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
+						reverseBin(hash,32);
+						for(int j = 0 ;j<numberOfLeafs;j++)
+						{
+							for(int i=0;i<32;i++){merkleLeaf[i]=merkleFile.read();}
+							reverseBin(merkleLeaf,32);
+							if((leafPos>>j)&0x01)
+							{
+								memcpy(arrayToHash,merkleLeaf,32);
+								memcpy(arrayToHash+32,hash,32);
+							}else
+							{
+								memcpy(arrayToHash+32,merkleLeaf,32);
+								memcpy(arrayToHash,hash,32);
+							}
+							doubleSha256(hash,arrayToHash,64);
+						}
+						if(!memcmp(merkleRoot,hash,32))
+						{
+							#if defined(ENABLE_DEBUG_MESSAGE)
+							Serial.println(F("Merkle Verified ..! "));
+							#endif
+							lastMerkleVerified = true;
+							for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
+							{
+								if(incomingTx[i].isUsed()&&!incomingTx[i].inBlock())
+								{
+									uint8_t txHash[32];
+									uint8_t hash[32];
+									incomingTx[i].getHash(txHash);
+									userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
+									reverseBin(hash,32);
+									if(!memcmp(txHash,hash,32))
 									{
-										(*transactionCallback)(incomingTx[i]);
+										incomingTx[i].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
+										/* Consider calling user callback here */
+										if(isTransactionCallbackAssigned)
+										{
+											(*transactionCallback)(incomingTx[i]);
+										}
 									}
 								}
 							}
+						}else
+						{
+							/* Remove history File and request it from another server */
+							#if defined(ENABLE_DEBUG_MESSAGE)
+							Serial.println(F("Bad History Removing .."));
+							#endif
+							lastMerkleVerified = false;
 						}
-					}else
+						SD.remove(&fileNameMerkle[0]);
+					}
+				}
+			}
+		}
+		for(int i=0 ;i<MAX_CONNECTED_SERVERS;i++)
+		{
+			bool opened = false;
+			File responseFile;
+			if(!clientsArray[i].connected())
+			{
+				/*
+					TODO:
+					- In case client is disconnected, we should recover by reconnecting to another client.
+					- Also we should pick randomly from recServ file.
+				*/
+				connectToServers();
+			}
+			while(clientsArray[i].available())
+			{
+			 /*save all incoming data in a file called data on SD card and then after there are no data available from the clients
+			   just close the file then open it again and process the data inside it.
+
+			   this will solve the problem of chunks that we will have to save the large files inside the data file and then parse them
+			   byte by byte
+
+			   I am having a concern that when we are processing the large data from the data file it won't be able to get the data
+			   from the clients and the buffer will be overflowed and the data will be lost.*/
+
+				char data =clientsArray[i].read();
+				if(data != '\n')
+				{
+					if(!opened)
 					{
-						/* Remove history File and request it from another server */
+						String fileName = "koyn/responses/client"+String(i)+"/"+"uncomplete";
+						responseFile = SD.open(&fileName[0],FILE_WRITE);
+						opened = true;
+						if(responseFile){
 						#if defined(ENABLE_DEBUG_MESSAGE)
-						Serial.println(F("Bad History Removing .."));
+						/*Serial.println("File Opened");*/
+						#endif	
+						}else{
+						#if defined(ENABLE_DEBUG_MESSAGE)
+						Serial.println(F("File not opened"));
 						#endif
-						lastMerkleVerified = false;
+						}
 					}
-					SD.remove(&fileNameMerkle[0]);
+					#if defined(ENABLE_DEBUG_MESSAGE)
+					Serial.write(data);
+					#endif
+					if(responseFile)
+					{
+						responseFile.write(data);
+					}
+				}else
+				{
+					String dirName = "koyn/responses/client"+String(i);
+					FatFile directory = SD.open(&dirName[0]);
+					if (!responseFile.rename(&directory, &String(millis())[0])) /* In this line we should rename the file using the timeStamp*/
+					{
+						#if defined(ENABLE_DEBUG_MESSAGE)
+						Serial.println(F("Cannot rename file"));
+						#endif
+					}
+					responseFile.close();
+					opened = false;
 				}
 			}
+			responseFile.close();
 		}
-	}
-	for(int i=0 ;i<MAX_CONNECTED_SERVERS;i++)
-	{
-		bool opened = false;
-		File responseFile;
-		if(!clientsArray[i].connected())
+		/* Parsing completed files*/
+		for(int i =0 ;i<MAX_CONNECTED_SERVERS;i++)
 		{
-			/*
-				TODO:
-				- In case client is disconnected, we should recover by reconnecting to another client.
-				- Also we should pick randomly from recServ file.
-			*/
-			connectToServers();
-		}
-		while(clientsArray[i].available())
-		{
-		 /*save all incoming data in a file called data on SD card and then after there are no data available from the clients
-		   just close the file then open it again and process the data inside it.
+			char buff[13];
+			currentClientNo = i;
+			String dirName = "koyn/responses/client"+String(i);
+			FatFile directory = SD.open(dirName);
 
-		   this will solve the problem of chunks that we will have to save the large files inside the data file and then parse them
-		   byte by byte
-
-		   I am having a concern that when we are processing the large data from the data file it won't be able to get the data
-		   from the clients and the buffer will be overflowed and the data will be lost.*/
-
-			char data =clientsArray[i].read();
-			if(data != '\n')
-			{
-				if(!opened)
+			while (file.openNext(&directory,O_READ)) {
+				file.getName(buff,13);
+				if(!(String(buff)==String("uncomplete")))
 				{
-					String fileName = "koyn/responses/client"+String(i)+"/"+"uncomplete";
-					responseFile = SD.open(&fileName[0],FILE_WRITE);
-					opened = true;
-					if(responseFile){
 					#if defined(ENABLE_DEBUG_MESSAGE)
-					/*Serial.println("File Opened");*/
-					#endif	
-					}else{
-					#if defined(ENABLE_DEBUG_MESSAGE)
-					Serial.println(F("File not opened"));
+					Serial.print(F("parsing file "));
+					Serial.println(buff);
 					#endif
-					}
-				}
-				#if defined(ENABLE_DEBUG_MESSAGE)
-				Serial.write(data);
-				#endif
-				if(responseFile)
-				{
-					responseFile.write(data);
-				}
-			}else
-			{
-				String dirName = "koyn/responses/client"+String(i);
-				FatFile directory = SD.open(&dirName[0]);
-				if (!responseFile.rename(&directory, &String(millis())[0])) /* In this line we should rename the file using the timeStamp*/
-				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
-					Serial.println(F("Cannot rename file"));
-					#endif
-				}
-				responseFile.close();
-				opened = false;
-			}
-		}
-		responseFile.close();
-	}
-	/* Parsing completed files*/
-	for(int i =0 ;i<MAX_CONNECTED_SERVERS;i++)
-	{
-		char buff[13];
-		currentClientNo = i;
-		String dirName = "koyn/responses/client"+String(i);
-		FatFile directory = SD.open(dirName);
-
-		while (file.openNext(&directory,O_READ)) {
-			file.getName(buff,13);
-			if(!(String(buff)==String("uncomplete")))
-			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
-				Serial.print(F("parsing file "));
-				Serial.println(buff);
-				#endif
-				JsonStreamingParser parser;
-				parser.setListener(&listener);
-				while(file.available())
-				{
-					parser.parse(file.read());
-					if(bigFile){bigFile=false;break;}
-				}
-				if(reparseFile)
-				{
-					file.seek(0);
 					JsonStreamingParser parser;
 					parser.setListener(&listener);
 					while(file.available())
@@ -915,34 +914,45 @@ void KoynClass::run()
 						parser.parse(file.read());
 						if(bigFile){bigFile=false;break;}
 					}
-				}
-				/* Reseting saveNextHistory so that the next time a history received won't save it again */
-				if(saveNextHistory){saveNextHistory=false;}
-				if(reqData)
-				{
-					reqData->reqType=0;
-					reqData->resetUsed();
-					reqData = NULL;
-					reparseFile = false;
-				}
-				file.close();
-				/* remove file*/
-				if(directory.remove(&directory,&buff[0]))
-				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
-					Serial.print(F("Removed file "));
-					Serial.println(buff);
-					#endif
+					if(reparseFile)
+					{
+						file.seek(0);
+						JsonStreamingParser parser;
+						parser.setListener(&listener);
+						while(file.available())
+						{
+							parser.parse(file.read());
+							if(bigFile){bigFile=false;break;}
+						}
+					}
+					/* Reseting saveNextHistory so that the next time a history received won't save it again */
+					if(saveNextHistory){saveNextHistory=false;}
+					if(reqData)
+					{
+						reqData->reqType=0;
+						reqData->resetUsed();
+						reqData = NULL;
+						reparseFile = false;
+					}
+					file.close();
+					/* remove file*/
+					if(directory.remove(&directory,&buff[0]))
+					{
+						#if defined(ENABLE_DEBUG_MESSAGE)
+						Serial.print(F("Removed file "));
+						Serial.println(buff);
+						#endif
+					}else
+					{
+						#if defined(ENABLE_DEBUG_MESSAGE)
+						Serial.print(F("Failed to remove file "));
+						Serial.println(buff);
+						#endif
+					}
 				}else
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
-					Serial.print(F("Failed to remove file "));
-					Serial.println(buff);
-					#endif
+					file.close();
 				}
-			}else
-			{
-				file.close();
 			}
 		}
 	}
@@ -1603,11 +1613,10 @@ void KoynClass::processInput(String key,String value)
 
 uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 {
-	if(userAddress->address[0]=='1'||userAddress->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
-	if(!userAddress->isTracked())
+	if(isInit)
 	{
-		int i;
-		for(i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
+		if(userAddress->address[0]=='1'||userAddress->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
+		if(!userAddress->isTracked())
 		{
 			int i;
 			for(i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
@@ -1624,35 +1633,51 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			#if defined(ENABLE_DEBUG_MESSAGE)
 			Serial.println(F("Tracking"));
 			#endif
-			File statusFile = SD.open(&fileNameStatus[0],FILE_READ);
-			statusFile.read(userAddress->status,64);
+			request.subscribeToAddress(addr);
+			request.listUtxo(addr);
+			// request.getAddressBalance(addr);
+			userAddress->setTracked();
+			String dirName = "koyn/addresses/" + String(&addr[26]);
+			if(!SD.exists(&dirName[0]))
+			{
+				SD.mkdir(&dirName[0]);
+			}
+			String fileNameStatus=dirName+"/"+"status";
+			if(SD.exists(&fileNameStatus[0]))
+			{
+				#if defined(ENABLE_DEBUG_MESSAGE)
+				Serial.println(F("Old Status copied"));
+				#endif
+				File statusFile = SD.open(&fileNameStatus[0],FILE_READ);
+				statusFile.read(userAddress->status,64);
+			}
+			String fileNameHistory=dirName+"/"+"history";
+			if(SD.exists(&fileNameHistory[0]))
+			{
+				#if defined(ENABLE_DEBUG_MESSAGE)
+				Serial.println(F("Last TxHash copied"));
+				#endif
+				File historyFile = SD.open(&fileNameHistory[0],FILE_READ);
+				uint32_t noOfTxHashes = historyFile.size()/36;
+				historyFile.seek((noOfTxHashes-1)*36);
+				uint8_t lastInFile[36];
+				historyFile.read(lastInFile,36);
+				userAddress->lastTxHash.copyData(lastInFile);
+			}
+			String fileNameUtxo = dirName+"/"+"utxo";
+			if(SD.exists(&fileNameUtxo[0]))
+			{
+				SD.remove(&fileNameUtxo[0]);
+				userAddress->clearBalance();
+			}
+			/* Check also if history file exists get the last history and save it to the lastTxHash object */
 		}
-		String fileNameHistory=dirName+"/"+"history";
-		if(SD.exists(&fileNameHistory[0]))
-		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
-			Serial.println(F("Last TxHash copied"));
-			#endif
-			File historyFile = SD.open(&fileNameHistory[0],FILE_READ);
-			uint32_t noOfTxHashes = historyFile.size()/36;
-			historyFile.seek((noOfTxHashes-1)*36);
-			uint8_t lastInFile[36];
-			historyFile.read(lastInFile,36);
-			userAddress->lastTxHash.copyData(lastInFile);
-		}
-		String fileNameUtxo = dirName+"/"+"utxo";
-		if(SD.exists(&fileNameUtxo[0]))
-		{
-			SD.remove(&fileNameUtxo[0]);
-			userAddress->clearBalance();
-		}
-		/* Check also if history file exists get the last history and save it to the lastTxHash object */
 	}
 }
 
 void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 {
-	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
+	if(isInit)
 	{
 		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 		{
@@ -1667,7 +1692,7 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 
 void KoynClass::unTrackAllAddresses()
 {
-	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
+	if(isInit)
 	{
 		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 		{
@@ -1678,7 +1703,10 @@ void KoynClass::unTrackAllAddresses()
 
 bool KoynClass::isAddressTracked(BitcoinAddress * userAddress)
 {
-	return userAddress->tracked;
+	if(isInit)
+	{
+		return userAddress->tracked;
+	}
 }
 
 WiFiClient * KoynClass::getMainClient()
@@ -1720,19 +1748,28 @@ void KoynClass::updateTotalBlockNumb()
 
 bool KoynClass::isSynced()
 {
-	return synchronized;
+	if(isInit)
+	{
+		return synchronized;
+	}
 }
 
 void KoynClass::onNewTransaction(void (* usersFunction)(BitcoinTransaction newTx))
 {
-	transactionCallback=usersFunction;
-	isTransactionCallbackAssigned=true;
+	if(isInit)
+	{
+		transactionCallback=usersFunction;
+		isTransactionCallbackAssigned=true;
+	}
 }
 
 void KoynClass::onNewBlockHeader(void (*usersFunction)(uint32_t height))
 {
-	newBlockCallback=usersFunction;
-	isNewBlockCallbackAssigned=true;
+	if(isInit)
+	{
+		newBlockCallback=usersFunction;
+		isNewBlockCallbackAssigned=true;	
+	}
 }
 
 void KoynClass::onError(void (*usersFunction)(uint8_t errCode))
@@ -1841,241 +1878,247 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 
 uint32_t KoynClass::getBlockNumber()
 {
-	return totalBlockNumb;
+	if(isInit)
+	{
+		return totalBlockNumb;
+	}
 }
 
 uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t amount, uint64_t fees, BitcoinAddress * change)
 {
-	if(from->address[0]=='1'||from->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
-	long long totalTransactionAmount = amount+fees;
-	uint8_t privKey[32];
-	char toAddr[36];
-	char changeAddr[36];
-	from->getPrivateKey(privKey);
-	to->getEncoded(toAddr);
-	change->getEncoded(changeAddr);
+	if(isInit)
+	{
+		if(from->address[0]=='1'||from->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
+		long long totalTransactionAmount = amount+fees;
+		uint8_t privKey[32];
+		char toAddr[36];
+		char changeAddr[36];
+		from->getPrivateKey(privKey);
+		to->getEncoded(toAddr);
+		change->getEncoded(changeAddr);
 
-	if(!amount)
-	{
-		return INVALID_AMOUNT;
-	}
-
-	if(!from->isTracked())
-	{
-		return ADDRESS_NOT_TRACKED;
-	}
-
-	/* By this check we should calculate confirmed balance from the UTXO's and not by sending a getBalance request to servers,
-	 * so in this case we will check if we already got the list of unspent transaction of the address or not.
-	 */
-	if(from->getConfirmedBalance()<=0)
-	{
-		return ADDRESS_NO_FUNDS;
-	}
-
-	if(totalTransactionAmount > from->getConfirmedBalance())
-	{
-		return ADDRESS_INSUFFECIENT_BALANCE;
-	}
-
-	if(!memcmp(privKey,emptyArray,32))
-	{
-		return ADDRESS_NO_PRIVATE_KEY;
-	}
-
-	if(!memcmp(toAddr,emptyArray,34)||!memcmp(changeAddr,emptyArray,34))
-	{
-		return ADDRESS_INVALID;
-	}
-	char addr[36];
-	from->getEncoded(addr);
-	String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
-	String fileNameTx = "koyn/addresses/" + String(&addr[26])+"/"+"tx";
-	String fileNameFinalTx = "koyn/addresses/" + String(&addr[26])+"/"+"finaltx";
-	if(SD.exists(&fileNameUtxo[0]))
-	{
-		File utxoFile = SD.open(&fileNameUtxo[0],FILE_READ);
-		if(utxoFile.isOpen())
+		if(!amount)
 		{
-			uint32_t unspentTransactionCount = utxoFile.size()/48;
-			uint64_t amountArray[unspentTransactionCount];
-			uint8_t amountArrayIndex[unspentTransactionCount];
-			for(int i=0;i<unspentTransactionCount;i++){amountArrayIndex[i]=i;}
-			Serial.println("Allocated memory");
-			uint32_t i=0;
-			while(utxoFile.available())
+			return INVALID_AMOUNT;
+		}
+
+		if(!from->isTracked())
+		{
+			return ADDRESS_NOT_TRACKED;
+		}
+
+		/* By this check we should calculate confirmed balance from the UTXO's and not by sending a getBalance request to servers,
+		 * so in this case we will check if we already got the list of unspent transaction of the address or not.
+		 */
+		if(from->getConfirmedBalance()<=0)
+		{
+			return ADDRESS_NO_FUNDS;
+		}
+
+		if(totalTransactionAmount > from->getConfirmedBalance())
+		{
+			return ADDRESS_INSUFFECIENT_BALANCE;
+		}
+
+		if(!memcmp(privKey,emptyArray,32))
+		{
+			return ADDRESS_NO_PRIVATE_KEY;
+		}
+
+		if(!memcmp(toAddr,emptyArray,34)||!memcmp(changeAddr,emptyArray,34))
+		{
+			return ADDRESS_INVALID;
+		}
+		char addr[36];
+		from->getEncoded(addr);
+		String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
+		String fileNameTx = "koyn/addresses/" + String(&addr[26])+"/"+"tx";
+		String fileNameFinalTx = "koyn/addresses/" + String(&addr[26])+"/"+"finaltx";
+		if(SD.exists(&fileNameUtxo[0]))
+		{
+			File utxoFile = SD.open(&fileNameUtxo[0],FILE_READ);
+			if(utxoFile.isOpen())
 			{
-				utxoFile.seekCur(40);
-				utxoFile.read((uint8_t*)&amountArray[i],8);
-				i++;
-			}
-			#if defined(ENABLE_DEBUG_MESSAGE)
-			Serial.println("Got All UTXO's Amount");
-			#endif
-			for(int l=0;l<unspentTransactionCount;l++)
-			{
-				for(int j=l+1;j<unspentTransactionCount;j++)
+				uint32_t unspentTransactionCount = utxoFile.size()/48;
+				uint64_t amountArray[unspentTransactionCount];
+				uint8_t amountArrayIndex[unspentTransactionCount];
+				for(int i=0;i<unspentTransactionCount;i++){amountArrayIndex[i]=i;}
+				Serial.println("Allocated memory");
+				uint32_t i=0;
+				while(utxoFile.available())
 				{
-					if(amountArray[l]>amountArray[j])
+					utxoFile.seekCur(40);
+					utxoFile.read((uint8_t*)&amountArray[i],8);
+					i++;
+				}
+				#if defined(ENABLE_DEBUG_MESSAGE)
+				Serial.println("Got All UTXO's Amount");
+				#endif
+				for(int l=0;l<unspentTransactionCount;l++)
+				{
+					for(int j=l+1;j<unspentTransactionCount;j++)
 					{
-						uint64_t temp;
-						temp=amountArray[j];
-						amountArray[j]=amountArray[l];
-						amountArray[l]=temp;
-						uint8_t temp1;
-						temp1=amountArrayIndex[j];
-						amountArrayIndex[j]=amountArrayIndex[l];
-						amountArrayIndex[l]=temp1;
+						if(amountArray[l]>amountArray[j])
+						{
+							uint64_t temp;
+							temp=amountArray[j];
+							amountArray[j]=amountArray[l];
+							amountArray[l]=temp;
+							uint8_t temp1;
+							temp1=amountArrayIndex[j];
+							amountArrayIndex[j]=amountArrayIndex[l];
+							amountArrayIndex[l]=temp1;
+						}
 					}
 				}
-			}
-			#if defined(ENABLE_DEBUG_MESSAGE)
-			Serial.println("Re-ordered UTXO's Amounts");
-			#endif
-			uint64_t changeAmount=0;
-			uint32_t version=0x01;
-			uint32_t hashCode = 0x01;
-			uint32_t sequence = 0xffffffff;
-			uint32_t lockTime= 0x00;
-			bool gotIndividualTx=false;
-			int8_t indexArray[unspentTransactionCount];
-			uint64_t accumilativeAmount=0;
-			i=0;
-			for(int j=0;j<unspentTransactionCount;j++)
-			{
-				if(amountArray[j]>=totalTransactionAmount)
+				#if defined(ENABLE_DEBUG_MESSAGE)
+				Serial.println("Re-ordered UTXO's Amounts");
+				#endif
+				uint64_t changeAmount=0;
+				uint32_t version=0x01;
+				uint32_t hashCode = 0x01;
+				uint32_t sequence = 0xffffffff;
+				uint32_t lockTime= 0x00;
+				bool gotIndividualTx=false;
+				int8_t indexArray[unspentTransactionCount];
+				uint64_t accumilativeAmount=0;
+				i=0;
+				for(int j=0;j<unspentTransactionCount;j++)
 				{
-					indexArray[0]=amountArrayIndex[j];
-					accumilativeAmount=amountArray[j];
-					gotIndividualTx=true;
-					i++;
-					break;
+					if(amountArray[j]>=totalTransactionAmount)
+					{
+						indexArray[0]=amountArrayIndex[j];
+						accumilativeAmount=amountArray[j];
+						gotIndividualTx=true;
+						i++;
+						break;
+					}
 				}
-			}
-			if(!gotIndividualTx)
-			{
-				for(int j=unspentTransactionCount-1;j>=0;j--)
+				if(!gotIndividualTx)
 				{
-					accumilativeAmount+=amountArray[j];
-					indexArray[i]=amountArrayIndex[j];
-					i++;
-					if(accumilativeAmount>totalTransactionAmount){break;}
+					for(int j=unspentTransactionCount-1;j>=0;j--)
+					{
+						accumilativeAmount+=amountArray[j];
+						indexArray[i]=amountArrayIndex[j];
+						i++;
+						if(accumilativeAmount>totalTransactionAmount){break;}
+					}
 				}
-			}
-			if(accumilativeAmount!=0){changeAmount = accumilativeAmount-totalTransactionAmount;}else{/*Return Error*/}
-			uint8_t hash[32];
-			uint8_t signature[64];
-			uint8_t scriptPubKey[25];
-			uint8_t scriptPubKeyLen = 0x19;
-			uint8_t outputNo=1;
-			uint8_t inputNo=i;
-			uint8_t * ptr;
-			uint32_t preImageSize = 4+1+(66*i)+1+8+1+25+4+4;
-			if(changeAmount){preImageSize+=8+1+25;outputNo+=1;}
-			uint8_t preImage[preImageSize];
-			ptr=(uint8_t *)memcpy(preImage,(uint8_t*)&version,4);ptr+=4;
-			memcpy(ptr,&inputNo,1);ptr+=1;
-			utxoFile.seekSet(0);
-			for(int j=0;j<inputNo;j++)
-			{
-				uint8_t data[36];
-				utxoFile.seek(48*indexArray[j]);
-				utxoFile.read(data,36);
-				memcpy(ptr,data,32);ptr+=32;
-				memcpy(ptr,data+32,4);ptr+=4;
-				memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
-				from->getScriptPubKey(scriptPubKey,25);
-				memcpy(ptr,scriptPubKey,25);ptr+=25;
-				memcpy(ptr,(uint8_t*)&sequence,4);ptr+=4;
-			}
-			memcpy(ptr,&outputNo,1);ptr+=1;
-			to->getScriptPubKey(scriptPubKey,25);
-			memcpy(ptr,(uint8_t *)&amount,8);ptr+=8;
-			memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
-			memcpy(ptr,scriptPubKey,25);ptr+=25;
-			if(changeAmount)
-			{
-				change->getScriptPubKey(scriptPubKey,25);
-				memcpy(ptr,(uint8_t *)&changeAmount,8);ptr+=8;
+				if(accumilativeAmount!=0){changeAmount = accumilativeAmount-totalTransactionAmount;}else{/*Return Error*/}
+				uint8_t hash[32];
+				uint8_t signature[64];
+				uint8_t scriptPubKey[25];
 				uint8_t scriptPubKeyLen = 0x19;
-				memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
-				memcpy(ptr,scriptPubKey,25);ptr+=25;
-			}
-			memcpy(ptr,(uint8_t *)&lockTime,4);ptr+=4;
-			memcpy(ptr,(uint8_t *)&hashCode,4);
-			/* Now we got the message to be hashed */
-		    File transactionFile = SD.open(&fileNameTx[0],FILE_WRITE);
-		    if(transactionFile.isOpen())
-		    {
-		    	transactionFile.write((uint8_t *)&version,4);
-		    	transactionFile.write(i);
-				for(int j=0;j<i;j++)
+				uint8_t outputNo=1;
+				uint8_t inputNo=i;
+				uint8_t * ptr;
+				uint32_t preImageSize = 4+1+(66*i)+1+8+1+25+4+4;
+				if(changeAmount){preImageSize+=8+1+25;outputNo+=1;}
+				uint8_t preImage[preImageSize];
+				ptr=(uint8_t *)memcpy(preImage,(uint8_t*)&version,4);ptr+=4;
+				memcpy(ptr,&inputNo,1);ptr+=1;
+				utxoFile.seekSet(0);
+				for(int j=0;j<inputNo;j++)
 				{
-					transactionHash(hash,preImage,preImageSize,j);
-					do {
-				        uECC_sign(privKey, hash, 32, signature, from->curve);
-				        yield();
-				    } while ((signature[0] & 0x80) || (signature[32] & 0x80));
-				    uint8_t derSignatureLen = 0x47;  /* We already took care of signed MSB signature so it will be always 71 byte */
-				    uint8_t derSignature[derSignatureLen];
-				    derSignature[0]= ASN1_BMPSTRING; /* ASN1 start byte */
-				    derSignature[1]= 0x44;  /* Signature with ASN1 identifiers */
-				    derSignature[2]= ASN1_INTEGER;
-				    derSignature[3]= 0x20;
-				    memcpy(derSignature+4,signature,32);
-				    derSignature[36]= ASN1_INTEGER;
-				    derSignature[37]= 0x20;
-				    memcpy(derSignature+38,signature+32,32);
-				    derSignature[70]=0x01;
-
-			    	uint8_t data[36];
+					uint8_t data[36];
 					utxoFile.seek(48*indexArray[j]);
 					utxoFile.read(data,36);
-			    	transactionFile.write(data,32);
-			    	transactionFile.write(data+32,4);
-			    	uint8_t scriptSigLen = derSignatureLen+33+2; /* derSigLen+derSig+compPubLen+compPub*/
-			    	transactionFile.write(&scriptSigLen,1);
-			    	transactionFile.write(&derSignatureLen,1);
-			    	transactionFile.write(derSignature,derSignatureLen);
-			    	transactionFile.write(0x21);
-			    	uint8_t compPubKey[33];
-			    	from->getCompressedPublicKey(compPubKey);
-			    	transactionFile.write(compPubKey,33);
-			    	transactionFile.write((uint8_t*)&sequence,4);
+					memcpy(ptr,data,32);ptr+=32;
+					memcpy(ptr,data+32,4);ptr+=4;
+					memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
+					from->getScriptPubKey(scriptPubKey,25);
+					memcpy(ptr,scriptPubKey,25);ptr+=25;
+					memcpy(ptr,(uint8_t*)&sequence,4);ptr+=4;
 				}
-
-				transactionFile.write(outputNo);
-		    	transactionFile.write((uint8_t*)&amount,8);
-		    	transactionFile.write(0x19);
-		    	to->getScriptPubKey(scriptPubKey,25);
-		    	transactionFile.write(scriptPubKey,25);
-		    	if(changeAmount)
-		    	{
-		    		transactionFile.write((uint8_t*)&changeAmount,8);
-			    	transactionFile.write(0x19);
-			    	change->getScriptPubKey(scriptPubKey,25);
-			    	transactionFile.write(scriptPubKey,25);
-		    	}
-	    		transactionFile.write((uint8_t *)&lockTime,4);
-		    }
-		    transactionFile.close();
-		    transactionFile = SD.open(&fileNameTx[0],FILE_READ);
-		    File finalFile = SD.open(&fileNameFinalTx[0],FILE_WRITE);
-		    if(convertFileToHexString(&transactionFile,&finalFile))
-		    {
-		    	transactionFile.close();
-		    	SD.remove(&fileNameTx[0]);
-		    	transactionFile = SD.open(&fileNameFinalTx[0],FILE_READ);
-		    	if(transactionFile.isOpen())
+				memcpy(ptr,&outputNo,1);ptr+=1;
+				to->getScriptPubKey(scriptPubKey,25);
+				memcpy(ptr,(uint8_t *)&amount,8);ptr+=8;
+				memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
+				memcpy(ptr,scriptPubKey,25);ptr+=25;
+				if(changeAmount)
+				{
+					change->getScriptPubKey(scriptPubKey,25);
+					memcpy(ptr,(uint8_t *)&changeAmount,8);ptr+=8;
+					uint8_t scriptPubKeyLen = 0x19;
+					memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
+					memcpy(ptr,scriptPubKey,25);ptr+=25;
+				}
+				memcpy(ptr,(uint8_t *)&lockTime,4);ptr+=4;
+				memcpy(ptr,(uint8_t *)&hashCode,4);
+				/* Now we got the message to be hashed */
+			    File transactionFile = SD.open(&fileNameTx[0],FILE_WRITE);
+			    if(transactionFile.isOpen())
 			    {
-			    	/* Broadcast transaction */
-				    // request.broadcastTransaction(&transactionFile);
-				    transactionFile.close();
-				    // SD.remove(&fileNameFinalTx[0]);
+			    	transactionFile.write((uint8_t *)&version,4);
+			    	transactionFile.write(i);
+					for(int j=0;j<i;j++)
+					{
+						transactionHash(hash,preImage,preImageSize,j);
+						do {
+					        uECC_sign(privKey, hash, 32, signature, from->curve);
+					        yield();
+					    } while ((signature[0] & 0x80) || (signature[32] & 0x80));
+					    uint8_t derSignatureLen = 0x47;  /* We already took care of signed MSB signature so it will be always 71 byte */
+					    uint8_t derSignature[derSignatureLen];
+					    derSignature[0]= ASN1_BMPSTRING; /* ASN1 start byte */
+					    derSignature[1]= 0x44;  /* Signature with ASN1 identifiers */
+					    derSignature[2]= ASN1_INTEGER;
+					    derSignature[3]= 0x20;
+					    memcpy(derSignature+4,signature,32);
+					    derSignature[36]= ASN1_INTEGER;
+					    derSignature[37]= 0x20;
+					    memcpy(derSignature+38,signature+32,32);
+					    derSignature[70]=0x01;
+
+				    	uint8_t data[36];
+						utxoFile.seek(48*indexArray[j]);
+						utxoFile.read(data,36);
+				    	transactionFile.write(data,32);
+				    	transactionFile.write(data+32,4);
+				    	uint8_t scriptSigLen = derSignatureLen+33+2; /* derSigLen+derSig+compPubLen+compPub*/
+				    	transactionFile.write(&scriptSigLen,1);
+				    	transactionFile.write(&derSignatureLen,1);
+				    	transactionFile.write(derSignature,derSignatureLen);
+				    	transactionFile.write(0x21);
+				    	uint8_t compPubKey[33];
+				    	from->getCompressedPublicKey(compPubKey);
+				    	transactionFile.write(compPubKey,33);
+				    	transactionFile.write((uint8_t*)&sequence,4);
+					}
+
+					transactionFile.write(outputNo);
+			    	transactionFile.write((uint8_t*)&amount,8);
+			    	transactionFile.write(0x19);
+			    	to->getScriptPubKey(scriptPubKey,25);
+			    	transactionFile.write(scriptPubKey,25);
+			    	if(changeAmount)
+			    	{
+			    		transactionFile.write((uint8_t*)&changeAmount,8);
+				    	transactionFile.write(0x19);
+				    	change->getScriptPubKey(scriptPubKey,25);
+				    	transactionFile.write(scriptPubKey,25);
+			    	}
+		    		transactionFile.write((uint8_t *)&lockTime,4);
 			    }
-		    }
+			    transactionFile.close();
+			    transactionFile = SD.open(&fileNameTx[0],FILE_READ);
+			    File finalFile = SD.open(&fileNameFinalTx[0],FILE_WRITE);
+			    if(convertFileToHexString(&transactionFile,&finalFile))
+			    {
+			    	transactionFile.close();
+			    	SD.remove(&fileNameTx[0]);
+			    	transactionFile = SD.open(&fileNameFinalTx[0],FILE_READ);
+			    	if(transactionFile.isOpen())
+				    {
+				    	/* Broadcast transaction */
+					    // request.broadcastTransaction(&transactionFile);
+					    transactionFile.close();
+					    // SD.remove(&fileNameFinalTx[0]);
+				    }
+			    }
+			}
+		    utxoFile.close();
 		}
-	    utxoFile.close();
 	}
 }
 
@@ -2087,10 +2130,13 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 
 void KoynClass::delay(unsigned long time)
 {
-	unsigned long now=millis();
-	while((millis()<(now+time)))
+	if(isInit)
 	{
-		run();
+		unsigned long now=millis();
+		while((millis()<(now+time)))
+		{
+			run();
+		}
 	}
 }
 
