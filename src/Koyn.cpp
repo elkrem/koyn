@@ -18,7 +18,8 @@ KoynClass::KoynClass()
 	saveNextHistory = false;
 	reparseFile=false;
 	confirmedFlag=false;
-	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++){userAddressPointerArray[i]=NULL;}
+	isInit=false;
+	for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++){userAddressPointerArray[i]=NULL;}
 }
 
 
@@ -1608,32 +1609,20 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 		int i;
 		for(i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 		{
-			if(userAddressPointerArray[i]==NULL)
+			int i;
+			for(i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 			{
-				userAddressPointerArray[i]=userAddress;
-				break;
+				if(userAddressPointerArray[i]==NULL)
+				{
+					userAddressPointerArray[i]=userAddress;
+					break;
+				}
 			}
-		}
-		if(i==5){return MAX_ADDRESSES_TRACKED_REACHED;}
-		char addr[36];
-		userAddress->getEncoded(addr);
-		#if defined(ENABLE_DEBUG_MESSAGE)
-		Serial.println(F("Tracking"));
-		#endif
-		request.subscribeToAddress(addr);
-		request.listUtxo(addr);
-		// request.getAddressBalance(addr);
-		userAddress->setTracked();
-		String dirName = "koyn/addresses/" + String(&addr[26]);
-		if(!SD.exists(&dirName[0]))
-		{
-			SD.mkdir(&dirName[0]);
-		}
-		String fileNameStatus=dirName+"/"+"status";
-		if(SD.exists(&fileNameStatus[0]))
-		{
+			if(i==5){return MAX_ADDRESSES_TRACKED_REACHED;}
+			char addr[36];
+			userAddress->getEncoded(addr);
 			#if defined(ENABLE_DEBUG_MESSAGE)
-			Serial.println(F("Old Status copied"));
+			Serial.println(F("Tracking"));
 			#endif
 			File statusFile = SD.open(&fileNameStatus[0],FILE_READ);
 			statusFile.read(userAddress->status,64);
@@ -1665,10 +1654,13 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 {
 	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 	{
-		if(!strcmp(userAddressPointerArray[i]->address,userAddress->address))
+		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 		{
-			userAddressPointerArray[i]=NULL;
-			return;
+			if(!strcmp(userAddressPointerArray[i]->address,userAddress->address))
+			{
+				userAddressPointerArray[i]=NULL;
+				return;
+			}
 		}
 	}
 }
@@ -1677,7 +1669,10 @@ void KoynClass::unTrackAllAddresses()
 {
 	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
 	{
-		userAddressPointerArray[i]=NULL;
+		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
+		{
+			userAddressPointerArray[i]=NULL;
+		}
 	}
 }
 
@@ -2118,7 +2113,7 @@ void KoynClass::removeUnconfirmedTransactions()
 
 int8_t KoynClass::getAddressPointerIndex(ElectrumRequestData * reqDataPointer)
 {
-	for(int i=0;i<MAX_ADDRESSES_TRACKED_COUNT;i++)
+	for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 	{
 		if(!strcmp(userAddressPointerArray[i]->address,(char *)reqDataPointer->dataString))
 		{

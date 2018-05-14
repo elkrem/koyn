@@ -89,10 +89,11 @@ private:
 	bool saveNextHistory;
 	bool reparseFile;
 	bool confirmedFlag;
+	bool isInit;
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
 	BitcoinHeader prevHeader;
-	BitcoinAddress * userAddressPointerArray[MAX_ADDRESSES_TRACKED_COUNT];
+	BitcoinAddress * userAddressPointerArray[MAX_TRACKED_ADDRESSES_COUNT];
 	AddressHistory addHistory;
 	uint8_t currentClientNo;
 	uint32_t chunkNo;
