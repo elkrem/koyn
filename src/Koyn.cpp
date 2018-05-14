@@ -61,7 +61,9 @@ void KoynClass::checkDirAvailability()
 		#if defined(ENABLE_DEBUG_MESSAGE)
 		Serial.println(F("Removing Response folder"));
 		#endif
-		SD.rmdir("koyn/responses");
+		String dirName = "/koyn/responses";
+  		FatFile directory = SD.open(dirName);
+  		directory.rmRfStar();
 	}
 	::delay(200);
 	SD.mkdir("koyn/responses");
