@@ -12,21 +12,13 @@ BitcoinHeader::BitcoinHeader(uint8_t * hdr,uint32_t _height)
 
 BitcoinHeader::BitcoinHeader(const BitcoinHeader &hdr)
 {
-	/* Set version. */
 	memcpy(this->completeHeader,hdr.completeHeader,4);
-	/* Set prevHash. */
 	memcpy(this->completeHeader+4,hdr.completeHeader+4,32);
-	/* Set merkle. */
 	memcpy(this->completeHeader+36,hdr.completeHeader+36,32);
-	/* Set timeStamp. */
 	memcpy(this->completeHeader+68,hdr.completeHeader+68,4);
-	/* Set bits. */
 	memcpy(this->completeHeader+72,hdr.completeHeader+72,4);
-	/* Set nonce. */
 	memcpy(this->completeHeader+76,hdr.completeHeader+76,4);
-	/* Copy hash. */
 	memcpy(this->hash,hdr.hash,32);
-	/* Set height. */
 	this->height = hdr.height;
 	this->pos = hdr.pos;
 	this->isValid = hdr.isValid;
@@ -35,20 +27,13 @@ BitcoinHeader::BitcoinHeader(const BitcoinHeader &hdr)
 void BitcoinHeader::setHeader(uint8_t * hdr,uint32_t _height)
 {
 	isValid = true;
-		/* Set version. */
 	memcpy(completeHeader,hdr,4);
-		/* Set prevHash. */
 	memcpy(completeHeader+4,hdr+4,32);
-		/* Set merkle. */
 	memcpy(completeHeader+36,hdr+36,32);
-		/* Set timeStamp. */
 	memcpy(completeHeader+68,hdr+68,4);
-		/* Set bits. */
 	memcpy(completeHeader+72,hdr+72,4);
-		/* Set nonce. */
 	memcpy(completeHeader+76,hdr+76,4);
-		/* Set height. */
-	this->height = _height;
+	height = _height;
 	calcPos();
 }
 bool BitcoinHeader::isHeaderValid()
@@ -132,17 +117,17 @@ uint32_t BitcoinHeader::getNonceAsInt()
 
 int32_t BitcoinHeader::getHeight()
 {
-	return this->height;
+	return height;
 }
 
 int16_t BitcoinHeader::getPos()
 {
-	return this->pos;
+	return pos;
 }
 
 void BitcoinHeader::calcPos()
 {
-	int32_t temp = this->height;
+	int32_t temp = height;
 	if(!temp)
 	{
 		pos = 0;
@@ -152,7 +137,7 @@ void BitcoinHeader::calcPos()
 	{
 		temp++;
 	}
-	pos = 2016-(temp-this->height);
+	pos = 2016-(temp-height);
 }
 
 void BitcoinHeader::calcHash()

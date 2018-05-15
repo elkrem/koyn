@@ -37,7 +37,7 @@ public:
 	void onNewBlockHeader(void (*)(uint32_t));
 	void onError(void (*)(uint8_t));
 	void delay(unsigned long);
-	uint8_t spend(BitcoinAddress *, BitcoinAddress *, uint64_t , uint64_t , BitcoinAddress *); // return 0 on successfult broadcast
+	uint8_t spend(BitcoinAddress *, BitcoinAddress *, uint64_t , uint64_t , BitcoinAddress *); 
 	uint8_t spend(BitcoinAddress *, BitcoinAddress *, uint64_t, uint64_t);
 	uint32_t getBlockNumber();
 	WiFiClient * getMainClient();

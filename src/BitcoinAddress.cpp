@@ -9,8 +9,6 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	uint8_t keyLen = strlen(key);
 	if(keyType == KEY_ENCODED && (keyLen >=25 && keyLen <=35))
 	{
-		/* This is a normal address set by user. make sure to add error if address doesn't comply to the chosen network by the user
-		*/
 		if(address[0]!='m'||address[0]!='n'||address[0]!='2'||address[0]!='1'||address[0]!='3')
 		{
 			// #error Wrong address;
@@ -25,19 +23,10 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 		memcpy(address,key,keyLen);
 	}else if(keyType == KEY_PRIVATE && keyLen  == 64)
 	{
-		/* Original private key */
 		hex2bin(privateKey,key,keyLen);
 		calculateAddress(KEY_PRIVATE);
 	}else if(keyType == KEY_WIF && keyLen == 52)
 	{
-		/* This is a WIF type private key and we must make sure from the first character.*/
-		// #if defined(USE_MAIN_NET)
-		// if(key[0]!='5'||key[0]!='K'||key[0]!='L')
-		// #error Network doesn't support Key
-		// #elif defined(USE_TEST_NET)
-		// if(key[0]!='9'||key[0]!='c')
-		// #error "Network doesn't support Key"
-		// #endif
 		uint8_t privKey[38];
 		base58Decode(key,keyLen,privKey,38);
 		memcpy(privateKey,privKey+1,32);
@@ -50,7 +39,6 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 		calculateAddress(KEY_COMPRESSED_PUBLIC);
 	}else if(keyType == KEY_PUBLIC && keyLen == 129)
 	{
-
 		uint8_t pubKey[65];
 		hex2bin(pubKey,key,keyLen);
 		memcpy(publicKey,pubKey,65);
@@ -58,7 +46,6 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
-		/* Something wrong with key*/
 		Serial.println("Something wrong with key");
 		#endif
 	}
@@ -71,7 +58,6 @@ BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
 	init();
     if(keyType == KEY_PRIVATE)
 	{
-		/* Original private key */
 		memcpy(privateKey,key,32);
 		calculateAddress(KEY_PRIVATE);
 	}if(keyType == KEY_COMPRESSED_PUBLIC)
@@ -85,7 +71,6 @@ BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
-		/* Something wrong with key*/
 		Serial.println("Something wrong with key");
 		#endif
 	}
@@ -191,15 +176,14 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 		mbedtls_ripemd160(hash,32,final+1);
 	}else if(keyType == KEY_SCRIPT_HASH)
 	{
-		/* Copying out the script hash we already pasted in the compressed public key array to the final to calculate the address */
 		memcpy(final+1,compPubKey,20);
 		memset(compPubKey,0,33);
 	}
-	// #if defined(USE_TEST_NET)
+	#if defined(USE_TEST_NET)
 	final[0]=TEST_NET_VERSION;
-	// #elif defined(USE_MAIN_NET)
-	// versionByteHash[0]=MAIN_NET_VERSION;
-	// #endif
+	#elif defined(USE_MAIN_NET)
+	final[0]=MAIN_NET_VERSION;
+	#endif
 	doubleSha256(hash,final,21);
 	memcpy(final+21,hash,4);
 	base58Encode(final,sizeof(final),address,36);
@@ -216,32 +200,32 @@ bool BitcoinAddress::isTracked()
 
 void BitcoinAddress::setTracked()
 {
-	this->tracked = true;
+	tracked = true;
 }
 
 void BitcoinAddress::setConfirmedBalance(uint32_t _confirmedBalance)
 {
-	this->confirmedBalance = _confirmedBalance;
+	confirmedBalance = _confirmedBalance;
 }
 
 void BitcoinAddress::setUnconfirmedBalance(uint32_t _unconfirmedBalance)
 {
-	this->unconfirmedBalance = _unconfirmedBalance;
+	unconfirmedBalance = _unconfirmedBalance;
 }
 
 uint64_t BitcoinAddress::getBalance()
 {
-	return this->confirmedBalance;
+	return confirmedBalance;
 }
 
 uint64_t BitcoinAddress::getConfirmedBalance()
 {
-	return this->confirmedBalance;
+	return confirmedBalance;
 }
 
 uint64_t BitcoinAddress::getUnconfirmedBalance()
 {
-	return this->unconfirmedBalance;
+	return unconfirmedBalance;
 }
 bool BitcoinAddress::gotAddress()
 {
@@ -291,11 +275,11 @@ uint8_t BitcoinAddress::getAddressType()
 		// case '1':	return P2PKH_ADDRESS;
 		// case '3':	return P2SH_ADDRESS;
 		// #endif
-		// #if defined(USE_TEST_NET)
+		#if defined(USE_TEST_NET)
 		case 'm':	return P2PKH_ADDRESS;
 		case 'n':	return P2PKH_ADDRESS;
 		case '2':	return P2SH_ADDRESS;
-		// #endif
+		#endif
 	}
 }
 
@@ -312,6 +296,6 @@ bool BitcoinAddress::operator==(BitcoinAddress& other)
 
 void BitcoinAddress::clearBalance()
 {
-	this->confirmedBalance=0;
-	this->unconfirmedBalance=0;
+	confirmedBalance=0;
+	unconfirmedBalance=0;
 }

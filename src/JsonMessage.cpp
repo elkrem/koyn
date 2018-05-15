@@ -5,7 +5,6 @@ JsonMessage::JsonMessage()
 
 }
 
-/* This function is made for a single string */
 char * JsonMessage::createJsonMessageString(int id,const  char * methodMessage, const char *  data)
 {
   versionMessage = aJson.createObject();
@@ -21,8 +20,7 @@ char * JsonMessage::createJsonMessageString(int id,const  char * methodMessage, 
   return json;
 }
 
-/* This function is made for a single integer */
-/* i.e we need to know how aJson library will handle large numbers for block heights.*/
+
 char * JsonMessage::createJsonMessage(int id, const char * methodMessage, int * data)
 {
   versionMessage = aJson.createObject();

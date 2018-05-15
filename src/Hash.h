@@ -9,11 +9,9 @@
 static void sha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 {
 	Sha256.init();
-      /* Adding bytes to be hashed. */
 	for (int i = 0 ; i < len; i++) {
 		Sha256.write(dataToHash[i]);
 	}
-    /* Copy content of hashed data to new destincation. */
 	memcpy(hashArray, Sha256.result(), 32);
 }
 
@@ -22,7 +20,6 @@ static void transactionHash(uint8_t * hashArray,uint8_t * dataToHash, uint32_t l
 	Sha256.init();
 	for(int i=0;i<5;i++)
 	{
-		/* Adding bytes to be hashed. */
 		Sha256.write(dataToHash[i]);
 	}
 	uint8_t * startPtr = dataToHash+5;
@@ -49,7 +46,6 @@ static void transactionHash(uint8_t * hashArray,uint8_t * dataToHash, uint32_t l
 	}
 	int remainder = len-(5+66*dataToHash[4]);
 	for(int i=0;i<remainder;i++){Sha256.write(startPtr[i]);}
-    /* Copy content of hashed data to new destincation. */
 	memcpy(hashArray, Sha256.result(), 32);
 	Sha256.init();
 	for (int i = 0 ; i < 32; i++) {
@@ -66,7 +62,6 @@ static void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 		Sha256.init();
 		if (j == 0)
 		{
-      /* Adding bytes to be hashed. */
 			for (int i = 0 ; i < len; i++) {
 				Sha256.write(dataToHash[i]);
 			}
@@ -76,7 +71,6 @@ static void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 				Sha256.write(hashArray[i]);
 			}
 		}
-    /* Copy content of hashed data to new destincation. */
 		memcpy(hashArray, Sha256.result(), 32);
 	}
 }

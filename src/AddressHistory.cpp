@@ -11,9 +11,7 @@ AddressHistory::AddressHistory()
 
 AddressHistory::AddressHistory(const AddressHistory &history)
 {
-	/* Copy hash. */
 	memcpy(this->txHash,history.txHash,32);
-	/* Copy height. */
 	this->height = history.height;
 	this->leafPos = history.leafPos;
 }
@@ -30,12 +28,12 @@ void AddressHistory::getStringTxHash(char * txHash_str)
 
 int32_t AddressHistory::getHeight()
 {
-	return this->height;
+	return height;
 }
 
 uint32_t AddressHistory::getLeafPos()
 {
-	return this->leafPos;
+	return leafPos;
 }
 
 void AddressHistory::setTxHash(char * _txHash)
@@ -45,7 +43,7 @@ void AddressHistory::setTxHash(char * _txHash)
 
 void AddressHistory::setHeight(int32_t _height)
 {
-	this->height = _height;
+	height = _height;
 }
 
 bool AddressHistory::isNull()
@@ -77,7 +75,7 @@ void AddressHistory::copyData(uint8_t * data)
 
 void AddressHistory::setLeafPos(uint32_t pos)
 {
-	this->leafPos= pos;
+	leafPos= pos;
 }
 
 bool AddressHistory::operator==(AddressHistory& other)

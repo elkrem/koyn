@@ -37,9 +37,7 @@ void KoynClass::begin(bool _verify)
 		verify = _verify;
 		checkSDCardMounted();
 		checkDirAvailability();
-		/* connection to servers using clients*/
 		connectToServers();
-		/* setting a main client to communicate with for extra electrum requests.*/
 		setMainClient();
 		syncWithServers();
 		isInit=true;
@@ -48,7 +46,6 @@ void KoynClass::begin(bool _verify)
 
 void KoynClass::checkSDCardMounted()
 {
-	/* Stick here until SD card mounted. */
 	do{
 		#if defined(ENABLE_DEBUG_MESSAGE)
 		Serial.println(F("Mount SD card"));
@@ -63,7 +60,6 @@ void KoynClass::checkDirAvailability()
 		Serial.println(F("chdir to root failed.\n"));
 		#endif
 	}
-	/* Make sure to remove the files in the directory first to remove the directory*/
 	if(SD.exists("koyn/responses"))
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
@@ -97,7 +93,7 @@ void KoynClass::checkDirAvailability()
 				while (blkHeaderFile.available())
 				{
 					uint8_t currentHeader[80];
-					totalBlockNumb = (blkHeaderFile.size() / 80)-1;  /*blockNum will be checked in the bootstrap file and if the same so we are updated with the bootsrap file but still not the network*/
+					totalBlockNumb = (blkHeaderFile.size() / 80)-1;
 					for (uint32_t i = 0; i < totalBlockNumb; i++)
 					{
 						for (uint16_t j = 0; j < 80; j++)
@@ -131,11 +127,9 @@ void KoynClass::checkDirAvailability()
 				lastHeader.setHeader(lastHeaderFromFile,totalBlockNumb);
 				#if defined(ENABLE_DEBUG_MESSAGE)
 				lastHeader.printHeader();
-				/* We must make a check here to verify that we got a correct block header */
 				Serial.println(totalBlockNumb);
 				Serial.println(chunkNo);
 				#endif
-			// return true;
 			}
 		}
 	}else
@@ -148,43 +142,13 @@ void KoynClass::checkDirAvailability()
 
 void KoynClass::syncWithServers()
 {
-/* We Should open the file on the SD card and get the latest block number and request block number from the servers to
-compare them and check if we are not up to date.
-- Open File, get last block number, save it in Electrum client.
-- Request block numbers from server.
-- Compare Block number and if the local block number is less than the returned by the server request the block headers
-first and update them in the SD card file.
-- Update bootstrap file with the last block number and block header.*/
 	request.sendVersion();
 	request.subscribeToBlockHeaders();
-	// request.subscribeToPeers();	 /* get peers and save them in a file on SD card and make sure that there are no servers name duplicate, also we should disconnect from the bootsraped servers and connect to new servers returned.*/
-// request.getBlockChunks(0);	/* Syncing block chunks will be performed with only 1 client connected at first before connecting to another clients and mixing up data in file.*/
+	// request.subscribeToPeers();
 }
 
 int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 {
-/* This function verifies the block headers in the file and make sure that they are all valid.
-   we will give a user a tool to generate .bin file having the headers till now and upload it to
-   spiffs or SD.
-   The verifier will check the file called (blockHeaders.bin) to know the last block number in the system
-   and the last header.
-   Whenever we finished verifying and we are sure that the headers are ok we will update the bootstrap file
-   with the last block number and header so when the system goes offline always return back to know the last
-   updated variables.
-
-   In the stated file there should be a simple variable to prevent/allow the hardware not to go through the
-   verifying process from all over again.
-
-   Make sure also to know how electrum verifies another entities like the target, this will help us if the device is
-   offline the user will be able to accept transactions.
-
-   update 27/12/2017
-   verifyBlockHeaders should return states and not a true or false, which means if the header is new it should return 1 or if the
-   header is new but fork it should return 2 and if same it should return 3 and if not valid at all it should return 0.
-
-   update 4/02/2018
-   Always make sure that we are 1 block behind before validating, otherwise update the system first
-*/
 	reorganizeMainChain();
 	if(currhdr && currhdr->isHeaderValid())
 	{
@@ -224,14 +188,11 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 			{
 				c++;
 			}
-			/* We Should also check the timestamp as a validation */
 			if(target[c]>currentHeaderHash[c])
 			{
 
 				if(headerHeight>lastHeader.height)
 				{
-					//  Check time difference here if more than 2 hours return Invalid, but make sure to disable this check
-					//    verifying a chunk coincidentally we stopped at wrong chain.
 				    uint8_t hash1[32];
 				    uint8_t hash2[32];
 				    lastHeader.getHash(hash1);
@@ -242,8 +203,6 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 						Serial.print(headerHeight);
 						Serial.println(F("Valid "));
 						#endif
-						/* Save new header to file */
-						/* Save current header into blkhdrs file.*/
 						File blkHdrFile = SD.open("koyn/blkhdrs",FILE_WRITE);
 						if(blkHdrFile)
 						{
@@ -258,8 +217,6 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 						return HEADER_VALID;
 					}else
 					{
-						/* A fork happened at this server and was solved or we got a fork already*/
-						/* Create a backward fork, create a file called fork and save the previous header */
 						return catchingUpFork(currhdr);
 					}
 				}else if(headerHeight == lastHeader.height)
@@ -274,17 +231,10 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 						return SAME_HEADER;
 					}else if(lastHeader !=*currhdr)
 					{
-						/* get previous header and make check if the current header is built upon */
-						/* if built over the last header from main chain so this is a current fork */
-						/* else if not so this is a backward fork, jump back a step and get the header*/
-						/* offcourse we gonna create a fork file */
 						return catchingUpFork(currhdr);
 					}
 				}else if(headerHeight < lastHeader.height)
 				{
-					/* We are working here on a backward fork */
-					/* check all forking files and make a chain */
-					/* Make sure not to request old headers multiple times */
 					bool fork;
 					for(int i=0;i<MAX_CONNECTED_SERVERS;i++){if(forks[i].exists()){fork=true;break;}}
 					if(fork && (prevHeader.getHeight()<0 || prevHeader!=*currhdr))
@@ -360,7 +310,6 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 						if(forkFile)
 						{
 							forkFile.write(currhdr->completeHeader,80);
-							/* Write the heigth to file */
 							uint32_t currHdrHeight = currhdr->getHeight();
 							forkFile.write((uint8_t *)&currHdrHeight,4);
 							forkFile.close();
@@ -423,7 +372,6 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 									File tempFile = SD.open("koyn/temp",FILE_WRITE);
 									if(tempFile)
 									{
-										/* Save previous header in a temp file */
 										#if defined(ENABLE_DEBUG_MESSAGE)
 										Serial.print(headerHeight);
 										Serial.println(F("Previous header at fork"));
@@ -474,8 +422,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 			}
 		}
 	}
-	/* No Fork was found so this is a new fork solved remotely by the servers */
-	/* Request the previous header */
+
 	String fileName = String("koyn/forks/")+"fork"+currentClientNo;
 	File forkFile = SD.open(fileName,FILE_WRITE);
 	if(forkFile)
@@ -484,7 +431,6 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 		Serial.println("Fork created");
 		#endif
 		forkFile.write(currhdr->completeHeader,80);
-		/* Write the heigth to file */
 		uint32_t currHdrHeight = currhdr->getHeight();
 		forkFile.write((uint8_t *)&currHdrHeight,4);
 		forkFile.close();
@@ -530,7 +476,6 @@ void KoynClass::reorganizeMainChain()
 				String fileName = String("koyn/forks/")+"fork"+i;
 				if(tempHeader==*forks[i].getLastHeader())
 				{
-					/* reorg chain to have this fork and remove all other forks and set forks with Null then update totalBlockNumb and break */
 					File forkFile = SD.open(fileName,FILE_READ);
 					File blkHeaderFile = SD.open("koyn/blkhdrs",FILE_WRITE);
 					if(forkFile&&blkHeaderFile)
@@ -558,7 +503,6 @@ void KoynClass::reorganizeMainChain()
 		}
 	}else
 	{
-		/* wait for tallest chain height and then swap the chain with main chain and set all forks with Null */
 		tempHeader.setNull();
 		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
@@ -579,7 +523,6 @@ void KoynClass::reorganizeMainChain()
 					#if defined(ENABLE_DEBUG_MESSAGE)
 					Serial.println(F("Chain is long"));
 					#endif
-					/* reorg chain to have this fork and remove all other forks and set forks with Null then update totalBlockNumb and break */
 					File forkFile = SD.open(fileName,FILE_READ);
 					File blkHeaderFile = SD.open("koyn/blkhdrs",FILE_WRITE);
 					if(forkFile&&blkHeaderFile)
@@ -612,7 +555,6 @@ void KoynClass::reorganizeMainChain()
 				}
 			}
 		}
-		/* Solving case if all forks stopped growing and the main chain is growing only */
 		if(tempHeader.getHeight()>0&&lastHeader.getHeight()-tempHeader.getHeight()>LONGEST_CHAIN_AT_FORK)
 		{
 			for(int j=0;j<MAX_CONNECTED_SERVERS;j++){String fileName = String("koyn/forks/")+"fork"+j;SD.remove(&fileName[0]);forks[j].setNull();}
@@ -623,11 +565,6 @@ void KoynClass::reorganizeMainChain()
 
 void KoynClass::connectToServers()
 {
-	/*In this method we will grab the bootstrap servers from the file (bootstrap.bin) and try to connect to them.
- 	  max clients will be updated by the user from the Koyn.h file according to the users settings, so we will make
-  	  an iteration to loop on the clients and then make sure that they are all connected. If anyone of them didn't
-  	  connect successfully we will go fetch another server to connect to.
-	*/
 	uint8_t mainNetArrSize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
 	uint16_t serverNamesCount =0;
 	for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
@@ -664,20 +601,6 @@ void KoynClass::connectToServers()
 
 void KoynClass::run()
 {
-	/* process data file here */
-	/* after process is finished please empty the file with nulls so that we can rewrite over the data again.
-	   Problems:
-	   1- We need to empty the file after we process the data inside just to make sure not to parse the same data again in the next loops.
-	   2- We should also make sure that all the data is parsed and that there are no incomplete data before clearing the file, preventing data loss
-	   from the next loop.
-	   3- In case of huge data (Chunks-Peers-History) we must make sure that there are no different data in between like (Version etc.) preventing
-	   incorrect data parsing.
-	   4- Parsing large data like chunks will be done individually before entering any other functionality in the system.
-	   5- Peers should be parsed and saved directly to a file called (recServ.txt) making sure there are no objects inside them.
-	   6- Transaction history hashes&height should be copied to a new file called history accompained with the address appended at the top
-	   of the file to make sure that the next hashes are for that certain address. and make more files for more addresses history.
-	   7- Merkle checking also has the same issue like tx history as we will save the data in a file first then we will do the
-	 */
 	if(isInit)
 	{
 		if(millis()-lastTimeTaken>55*1000)
@@ -695,7 +618,7 @@ void KoynClass::run()
 			{
 				if(userAddressPointerArray[i]!=NULL)
 				{
-					char addr[36]; /* We must always check type of address before declaring the array to know the length */
+					char addr[36]; 
 					userAddressPointerArray[i]->getEncoded(addr);
 					String dirName = "koyn/addresses/" + String(&addr[26]);
 					String fileNameUnverifiedHistory = dirName+"/"+"his_unveri";
@@ -724,7 +647,6 @@ void KoynClass::run()
 									Serial.println(F("chdir failed"));
 									#endif
 								}
-								/* Rename file */
 								historyFile.rename(SD.vwd(), "history");
 								historyFileLastPos=0;
 								if (!SD.chdir()) {
@@ -757,14 +679,13 @@ void KoynClass::run()
 							lastMerkleVerified = false;
 						}
 					}
-					/* Verifying Merkle tree */
+
 					if(SD.exists(&fileNameMerkle[0]))
 					{
 						#if defined(ENABLE_DEBUG_MESSAGE)
 						Serial.println(F("Merkle"));
 						#endif
 						File merkleFile = SD.open(&fileNameMerkle[0],FILE_READ);
-						/* We should make sure first that we got the right blockheader */
 						uint8_t hash[32]={};
 						uint8_t arrayToHash[64];
 						uint8_t merkleLeaf[32];
@@ -805,7 +726,6 @@ void KoynClass::run()
 									if(!memcmp(txHash,hash,32))
 									{
 										incomingTx[i].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
-										/* Consider calling user callback here */
 										if(isTransactionCallbackAssigned)
 										{
 											(*transactionCallback)(incomingTx[i]);
@@ -815,7 +735,6 @@ void KoynClass::run()
 							}
 						}else
 						{
-							/* Remove history File and request it from another server */
 							#if defined(ENABLE_DEBUG_MESSAGE)
 							Serial.println(F("Bad History Removing .."));
 							#endif
@@ -832,24 +751,10 @@ void KoynClass::run()
 			File responseFile;
 			if(!clientsArray[i].connected())
 			{
-				/*
-					TODO:
-					- In case client is disconnected, we should recover by reconnecting to another client.
-					- Also we should pick randomly from recServ file.
-				*/
 				connectToServers();
 			}
 			while(clientsArray[i].available())
 			{
-			 /*save all incoming data in a file called data on SD card and then after there are no data available from the clients
-			   just close the file then open it again and process the data inside it.
-
-			   this will solve the problem of chunks that we will have to save the large files inside the data file and then parse them
-			   byte by byte
-
-			   I am having a concern that when we are processing the large data from the data file it won't be able to get the data
-			   from the clients and the buffer will be overflowed and the data will be lost.*/
-
 				char data =clientsArray[i].read();
 				if(data != '\n')
 				{
@@ -879,7 +784,7 @@ void KoynClass::run()
 				{
 					String dirName = "koyn/responses/client"+String(i);
 					FatFile directory = SD.open(&dirName[0]);
-					if (!responseFile.rename(&directory, &String(millis())[0])) /* In this line we should rename the file using the timeStamp*/
+					if (!responseFile.rename(&directory, &String(millis())[0]))
 					{
 						#if defined(ENABLE_DEBUG_MESSAGE)
 						Serial.println(F("Cannot rename file"));
@@ -891,7 +796,7 @@ void KoynClass::run()
 			}
 			responseFile.close();
 		}
-		/* Parsing completed files*/
+
 		for(int i =0 ;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			char buff[13];
@@ -925,7 +830,7 @@ void KoynClass::run()
 							if(bigFile){bigFile=false;break;}
 						}
 					}
-					/* Reseting saveNextHistory so that the next time a history received won't save it again */
+
 					if(saveNextHistory){saveNextHistory=false;}
 					if(reqData)
 					{
@@ -935,7 +840,6 @@ void KoynClass::run()
 						reparseFile = false;
 					}
 					file.close();
-					/* remove file*/
 					if(directory.remove(&directory,&buff[0]))
 					{
 						#if defined(ENABLE_DEBUG_MESSAGE)
@@ -978,10 +882,8 @@ bool KoynClass::parseReceivedChunk()
 		while(file.read()!='"');
 		bigFile = true;
 		uint32_t currentHeight = chunkNo*2016;
-		/* We must check that totalBlockNum is < than currentHeight otherwise our system is in the middle of the current block somwhere*/
 		if(totalBlockNumb>currentHeight)
 		{
-			/* Set the position to make sure first that the header we are last waiting is the same in this chunk */
 			uint16_t hdrPos = lastHeader.getPos();
 			file.seekCur((hdrPos*160));
 			currentHeight = totalBlockNumb;
@@ -1025,10 +927,7 @@ bool KoynClass::parseReceivedChunk()
 				header.setNull();
 				currentHeight++;
 			}
-			/* While validating the whole 2016 blocks it takes more than 13 minutes so the servers disconnects,
-			   with this solution we will be able to send local request (without saving it) to just maintain
-			   the connection with servers
-		    */
+
 			if(millis()-lastTimeTaken>90*1000)
 			{
 				#if defined(ENABLE_DEBUG_MESSAGE)
@@ -1090,7 +989,6 @@ void KoynClass::parseReceivedTx()
 					{
 						(*transactionCallback)(incomingTx[i]);
 					}
-					/* reset tx object if user added 0 confirmations*/
 					if(REMOVE_CONFIRMED_TRANSACTION_AFTER==0)
 					{
 						incomingTx[i].resetTx();
@@ -1106,9 +1004,7 @@ void KoynClass::parseReceivedTx()
 void KoynClass::processInput(String key,String value)
 {
 	if(key == "jsonrpc")
-	{
-	/* Just get the value and do nothing */
-	}else if(key == "id")
+	{}else if(key == "id")
 	{
 		if(reqData==NULL)
 		{
@@ -1135,7 +1031,6 @@ void KoynClass::processInput(String key,String value)
 				}else
 				{
 					if(++currentClientNo==MAX_CONNECTED_SERVERS){currentClientNo=MAIN_CLIENT;}
-				/* Re-request chunks but from another server */
 					request.getBlockChunks(currentClientNo+1);
 					synchronized = false;
 				}
@@ -1157,14 +1052,10 @@ void KoynClass::processInput(String key,String value)
 			uint32_t methodType = reqData->reqType;
 			if(methodType&(uint32_t)(0x01<<VERSION_BIT))
 			{
-/* Version type data, we should check on the version of the server we are connected to, and if it's less than certain number we should drop this client and connect to another server */
 				#if defined(ENABLE_DEBUG_MESSAGE)
 				Serial.println(value);
 				#endif
-			}else if(methodType&(uint32_t)(0x01<<TRANSACTION_BIT)){
-	/* Hash includes the transaction in block*/
 			}else if(methodType&(uint32_t)(0x01<<ADDRESS_SUBS_BIT)){
-				/* Here we must check if status file already exists and then grab the status to the Address Object*/
 				#if defined(ENABLE_DEBUG_MESSAGE)
 				Serial.println(F("Address status "));
 				#endif
@@ -1172,7 +1063,7 @@ void KoynClass::processInput(String key,String value)
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
 				userAddressPointerArray[index]->getStatus(status);
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
+				char addr[36];
 				userAddressPointerArray[index]->getEncoded(addr);
 				String dirName = "koyn/addresses/" + String(&addr[26]);
 				String fileNameUtxo = dirName+"/"+"utxo";
@@ -1201,7 +1092,6 @@ void KoynClass::processInput(String key,String value)
 					#endif
 				}else if(value!="null")
 				{
-					/* Status changed request history mempool and check the transaction validity and update to last status*/
 					request.getAddressHistory(addr);
 					request.listUtxo(addr);
 					if(SD.exists(&fileNameUtxo[0]))
@@ -1251,7 +1141,6 @@ void KoynClass::processInput(String key,String value)
 			}
 	}else if(key == "block_height" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
 	{
-	/* Still dunno what to do with blockHeight from block header*/
 		header.setNull();
 		int32_t _height = my_atoll(&value[0]);
 		header.height =  _height;
@@ -1284,7 +1173,6 @@ void KoynClass::processInput(String key,String value)
 	{
 		uint32_t nonce = my_atoll(&value[0]);
 		memcpy(header.completeHeader+76,&nonce,4);
-	/* Verify block header and update totalBlockNum*/
 		#if defined(ENABLE_DEBUG_MESSAGE)
 		Serial.println(F("New Header"));
 		Serial.println(header.height);
@@ -1320,7 +1208,7 @@ void KoynClass::processInput(String key,String value)
 				case SAME_HEADER:break;
 				case FORKED:break;
 				case FORK_VALID:
-				/* Check if there are any transactions to be sent as confirmations to user */
+
 				for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 				{
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
@@ -1345,21 +1233,10 @@ void KoynClass::processInput(String key,String value)
 		isMessage &= ~(1UL << BLOCK_HEAD_SUB);
 	}else if(key == "params" && (isMessage&(0x01<<ADDRESS_SUB)))
 	{
-		/* TODO:
-				- Message type returns address and status in parameters
-				- Support if address is new by checking the first parameter with our address and saving the second parameter
-		*/
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
 		if(!userAddressPointerArray[index]->gotAddress())
 		{
-			/*
-			TODO:
-			- Check on address with our address.
-			- Future there will be multiple addresses each has its status.
-			- Save incoming status in temp_status file first then we wait until the transaction is confirmed in at least 6 blocks
-			  then copy it to the original status file.
-			*/
 			#if defined(ENABLE_DEBUG_MESSAGE)
 			Serial.print(F("Address "));
 			Serial.println(value);
@@ -1372,7 +1249,7 @@ void KoynClass::processInput(String key,String value)
 			#endif
 			char status[65];
 			userAddressPointerArray[index]->getStatus(status);
-			char addr[36]; /* We must always check type of address before declaring the array to know the length */
+			char addr[36];
 			userAddressPointerArray[index]->getEncoded(addr);
 			String dirName = "koyn/addresses/" + String(&addr[26]);
 			String fileNameUtxo = dirName+"/"+"utxo";
@@ -1403,7 +1280,6 @@ void KoynClass::processInput(String key,String value)
 				userAddressPointerArray[index]->resetGotAddress();
 			}else if(value!="null")
 			{
-			/* Status has changed request history again */
 				request.getAddressHistory(addr);
 				request.listUtxo(addr);
 				if(SD.exists(&fileNameUtxo[0]))
@@ -1441,18 +1317,11 @@ void KoynClass::processInput(String key,String value)
 		addHistory.setTxHash(&value[0]);
 	}else if(key == "height" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADRRESS_HISTORY_BIT))))
 	{
-		/*
-		 TODO:
-	     - First check if lastTxHash hash is not equal zero to make sure that this is the first time we are getting the history.
-	     - If it's not the first time so we got the last state of the history in lastTxHash from the history file.
-	     - Then before saving the new incoming history hashes compare the height of the incoming data with lastTxHash height
-	       to make sure to save the new ones
-	    */
 		addHistory.setHeight(my_atoll(&value[0]));
 		int32_t heightData = addHistory.getHeight();
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
-		char addr[36]; /* We must always check type of address before declaring the array to know the length */
+		char addr[36];
 		userAddressPointerArray[index]->getEncoded(addr);	
 		String dirName = "koyn/addresses/" + String(&addr[26]);
 		String fileNameUnverifiedHistory = dirName+"/"+"his_unveri";
@@ -1461,12 +1330,6 @@ void KoynClass::processInput(String key,String value)
 			File historyFile = SD.open(&fileNameUnverifiedHistory[0],FILE_WRITE);
 			if(historyFile)
 			{
-				/*
-				 TODO:
-			   	 - If his_unveri has data make sure that the new incoming unverified history is not inside this temp file
-			   	   otherwise it will be written to the file again and will be verified multiple time. This case will happen
-			   	   if rapidly the server sent multiple unverified txHashes and we haven't updated lastTxHash yet.
-				*/
 				uint8_t hash[32];
 				addHistory.getTxHash(hash);
 				historyFile.write(hash,32);
@@ -1484,14 +1347,12 @@ void KoynClass::processInput(String key,String value)
 		}
 	}else if(key == "fee" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADRRESS_HISTORY_BIT))))
 	{
-		/* save txHash in transaction object */
 		char txHash_str[65];
 		txHash_str[64]='\0';
 		addHistory.getStringTxHash(txHash_str);
 		#if defined(ENABLE_DEBUG_MESSAGE)
 		Serial.println(txHash_str);
 		#endif
-		/* Preventing re-requesting raw transactions */
 		for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 		{
 			if(incomingTx[i].isUsed())
@@ -1530,7 +1391,7 @@ void KoynClass::processInput(String key,String value)
 		hex2bin(txHash,&value[0],64);
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
-		char addr[36]; /* We must always check type of address before declaring the array to know the length */
+		char addr[36];
 		userAddressPointerArray[index]->getEncoded(addr);	
 		String fileNameMerkle = "koyn/addresses/" + String(&addr[26])+"/"+"merkle";
 		File merkleFile = SD.open(&fileNameMerkle[0],FILE_WRITE);
@@ -1550,7 +1411,7 @@ void KoynClass::processInput(String key,String value)
 	}else if(key == "tx_hash" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
+				char addr[36];
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
 				File addressUtxo = SD.open(&fileNameUtxo[0],FILE_WRITE);
@@ -1565,7 +1426,7 @@ void KoynClass::processInput(String key,String value)
 	}else if(key == "tx_pos" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}				
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
+				char addr[36];
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
 				File addressUtxo = SD.open(&fileNameUtxo[0],FILE_WRITE);
@@ -1578,7 +1439,7 @@ void KoynClass::processInput(String key,String value)
 	}else if(key == "height" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
+				char addr[36];
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
 				uint32_t height=0;
@@ -1593,7 +1454,7 @@ void KoynClass::processInput(String key,String value)
 	}else if(key == "value" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
-				char addr[36]; /* We must always check type of address before declaring the array to know the length */
+				char addr[36];
 				userAddressPointerArray[index]->getEncoded(addr);	
 				String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
 				uint64_t val=0;
@@ -1635,7 +1496,6 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			#endif
 			request.subscribeToAddress(addr);
 			request.listUtxo(addr);
-			// request.getAddressBalance(addr);
 			userAddress->setTracked();
 			String dirName = "koyn/addresses/" + String(&addr[26]);
 			if(!SD.exists(&dirName[0]))
@@ -1670,7 +1530,6 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 				SD.remove(&fileNameUtxo[0]);
 				userAddress->clearBalance();
 			}
-			/* Check also if history file exists get the last history and save it to the lastTxHash object */
 		}
 	}
 }
@@ -1791,7 +1650,6 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 {
 	if(!noOfChunksNeeded)
 	{
-		/* We also make sure that if there's any forks to check up with the current heights */
 		int32_t tempForkHeight=0;
 		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
@@ -1800,14 +1658,11 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 		}
 		if(tempForkHeight)
 		{
-			/* This means that there's a fork in our system */
 			int32_t diff = currentHeaderHeight - tempForkHeight;
 			if(currentHeaderHeight>tempForkHeight && diff>1 && diff<=5)
 			{
 				if(!requestsSent)
 				{
-					/* If last time was sync and this is a hop, request the prev header and set sync by false
-						preventing next same headers to request prev again */
 					for(int i=0;i<(currentHeaderHeight-tempForkHeight);i++){request.getBlockHeader(totalBlockNumb+i);}
 					fallingBackBlockHeight = currentHeaderHeight;
 					requestsSent =true;
@@ -1826,13 +1681,11 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 		}
 		if(totalBlockNumb<=currentHeaderHeight)
 		{
-			int32_t diff = currentHeaderHeight - totalBlockNumb; /* Sometimes a problem occurs here as currentBlockOnServers is less than blockNumber*/
+			int32_t diff = currentHeaderHeight - totalBlockNumb;
 			if(diff && diff<=5 && diff>1)
 			{
 				if(!requestsSent)
 				{
-					/* If last time was sync and this is a hop, request the prev header and set sync by false
-						preventing next same headers to request prev again */
 					for(int i=0;i<=diff;i++){request.getBlockHeader(totalBlockNumb+i);}
 					fallingBackBlockHeight = currentHeaderHeight;
 					requestsSent =true;
@@ -1866,7 +1719,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 				synchronized =true;
 				return true;
 			}
-		}else if(totalBlockNumb>currentHeaderHeight) /* we should here check all servers tips to be nearly close to each other otherwise a server is lagging and is not update so drop it*/
+		}else if(totalBlockNumb>currentHeaderHeight)
 		{
 			return false;
 		}
@@ -1907,9 +1760,6 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 			return ADDRESS_NOT_TRACKED;
 		}
 
-		/* By this check we should calculate confirmed balance from the UTXO's and not by sending a getBalance request to servers,
-		 * so in this case we will check if we already got the list of unspent transaction of the address or not.
-		 */
 		if(from->getConfirmedBalance()<=0)
 		{
 			return ADDRESS_NO_FUNDS;
@@ -2045,7 +1895,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				}
 				memcpy(ptr,(uint8_t *)&lockTime,4);ptr+=4;
 				memcpy(ptr,(uint8_t *)&hashCode,4);
-				/* Now we got the message to be hashed */
+
 			    File transactionFile = SD.open(&fileNameTx[0],FILE_WRITE);
 			    if(transactionFile.isOpen())
 			    {
@@ -2058,10 +1908,10 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					        uECC_sign(privKey, hash, 32, signature, from->curve);
 					        yield();
 					    } while ((signature[0] & 0x80) || (signature[32] & 0x80));
-					    uint8_t derSignatureLen = 0x47;  /* We already took care of signed MSB signature so it will be always 71 byte */
+					    uint8_t derSignatureLen = 0x47;
 					    uint8_t derSignature[derSignatureLen];
-					    derSignature[0]= ASN1_BMPSTRING; /* ASN1 start byte */
-					    derSignature[1]= 0x44;  /* Signature with ASN1 identifiers */
+					    derSignature[0]= ASN1_BMPSTRING;
+					    derSignature[1]= 0x44;
 					    derSignature[2]= ASN1_INTEGER;
 					    derSignature[3]= 0x20;
 					    memcpy(derSignature+4,signature,32);
@@ -2075,7 +1925,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 						utxoFile.read(data,36);
 				    	transactionFile.write(data,32);
 				    	transactionFile.write(data+32,4);
-				    	uint8_t scriptSigLen = derSignatureLen+33+2; /* derSigLen+derSig+compPubLen+compPub*/
+				    	uint8_t scriptSigLen = derSignatureLen+33+2;
 				    	transactionFile.write(&scriptSigLen,1);
 				    	transactionFile.write(&derSignatureLen,1);
 				    	transactionFile.write(derSignature,derSignatureLen);
@@ -2110,10 +1960,9 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 			    	transactionFile = SD.open(&fileNameFinalTx[0],FILE_READ);
 			    	if(transactionFile.isOpen())
 				    {
-				    	/* Broadcast transaction */
-					    // request.broadcastTransaction(&transactionFile);
+					    request.broadcastTransaction(&transactionFile);
 					    transactionFile.close();
-					    // SD.remove(&fileNameFinalTx[0]);
+					    SD.remove(&fileNameFinalTx[0]);
 				    }
 			    }
 			}

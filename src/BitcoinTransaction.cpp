@@ -216,7 +216,6 @@ uint64_t BitcoinTransaction::getOutputAmount(uint8_t index)
 
 void BitcoinTransaction::getHash(uint8_t * container)
 {
-	/* Do the hash here and copy the data to container */
 	doubleSha256(container,rawTx,transcationLength);
 }
 
@@ -269,9 +268,9 @@ uint8_t BitcoinTransaction::getOutputsCount()
 
 uint32_t BitcoinTransaction::getConfirmations()
 {
-	if(this->inBlock())
+	if(inBlock())
 	{
-		return Koyn.getBlockNumber()-this->getBlockNumber(); 
+		return Koyn.getBlockNumber()-getBlockNumber(); 
 	}else
 	{
 		unconfirmedIterations++;
