@@ -46,7 +46,7 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
-		Serial.println("Something wrong with key");
+		Serial.println(F("Something wrong with key"));
 		#endif
 	}
 }
@@ -71,7 +71,7 @@ BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
-		Serial.println("Something wrong with key");
+		Serial.println(F("Something wrong with key"));
 		#endif
 	}
 }

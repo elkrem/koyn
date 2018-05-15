@@ -3,11 +3,11 @@
 #include "Koyn.h"
 
 void JsonListener::whitespace(char c) {
-  // Serial.println("whitespace");
+  // Serial.println(F("whitespace"));
 }
 
 void JsonListener::startDocument() {
-////  Serial.println("start document");
+////  Serial.println(F("start document"));
 //  started = true;
 	endOfDocument = false;
 }
@@ -22,7 +22,7 @@ void JsonListener::value(String value) {
 }
 
 void JsonListener::endArray() {
-  // Serial.println("end array. ");
+  // Serial.println(F("end array. "));
 	levelArray--;
 	if(levelArray == 1)
 	{
@@ -31,18 +31,18 @@ void JsonListener::endArray() {
 }
 
 void JsonListener::endObject() {
-  // Serial.println("end object. ");
+  // Serial.println(F("end object. "));
 	endOfObject = true;
 	levelObject--;
 }
 
 void JsonListener::endDocument() {
-  // Serial.println("end document. ");
+  // Serial.println(F("end document. "));
 	endOfDocument = true;
 }
 
 void JsonListener::startArray() {
-   // Serial.println("start array. ");
+   // Serial.println(F("start array. "));
 	levelArray++;
 }
 

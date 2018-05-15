@@ -428,7 +428,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 	if(forkFile)
 	{
 		#if defined(ENABLE_DEBUG_MESSAGE)
-		Serial.println("Fork created");
+		Serial.println(F("Fork created"));
 		#endif
 		forkFile.write(currhdr->completeHeader,80);
 		uint32_t currHdrHeight = currhdr->getHeight();
@@ -483,7 +483,7 @@ void KoynClass::reorganizeMainChain()
 						uint32_t seekValue=forks[i].getParentHeader()->getHeight();
 						blkHeaderFile.seek(seekValue*80);
 						#if defined(ENABLE_DEBUG_MESSAGE)
-						Serial.print("Seek ");
+						Serial.print(F("Seek "));
 						#endif
 						while(forkFile.available())
 						{
@@ -530,7 +530,7 @@ void KoynClass::reorganizeMainChain()
 						uint32_t seekValue=forks[i].getParentHeader()->getHeight();
 						blkHeaderFile.seek(seekValue*80);
 						#if defined(ENABLE_DEBUG_MESSAGE)
-						Serial.print("Seek ");
+						Serial.print(F("Seek "));
 						Serial.println(seekValue);
 						#endif
 						while(forkFile.available())
@@ -765,7 +765,7 @@ void KoynClass::run()
 						opened = true;
 						if(responseFile){
 						#if defined(ENABLE_DEBUG_MESSAGE)
-						/*Serial.println("File Opened");*/
+						/*Serial.println(F("File Opened"));*/
 						#endif	
 						}else{
 						#if defined(ENABLE_DEBUG_MESSAGE)
@@ -1793,7 +1793,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				uint64_t amountArray[unspentTransactionCount];
 				uint8_t amountArrayIndex[unspentTransactionCount];
 				for(int i=0;i<unspentTransactionCount;i++){amountArrayIndex[i]=i;}
-				Serial.println("Allocated memory");
+				Serial.println(F("Allocated memory"));
 				uint32_t i=0;
 				while(utxoFile.available())
 				{
@@ -1802,7 +1802,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					i++;
 				}
 				#if defined(ENABLE_DEBUG_MESSAGE)
-				Serial.println("Got All UTXO's Amount");
+				Serial.println(F("Got All UTXO's Amount"));
 				#endif
 				for(int l=0;l<unspentTransactionCount;l++)
 				{
@@ -1822,7 +1822,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					}
 				}
 				#if defined(ENABLE_DEBUG_MESSAGE)
-				Serial.println("Re-ordered UTXO's Amounts");
+				Serial.println(F("Re-ordered UTXO's Amounts"));
 				#endif
 				uint64_t changeAmount=0;
 				uint32_t version=0x01;

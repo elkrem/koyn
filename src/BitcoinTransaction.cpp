@@ -18,12 +18,12 @@ bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 {
 	if(len%2!=0){return false;}
 	#if defined(ENABLE_DEBUG_MESSAGE)
-	Serial.println("Finding memory for raw transaction");
+	Serial.println(F("Finding memory for raw transaction"));
 	#endif
 	rawTx = (uint8_t*)malloc(sizeof(uint8_t)*(len/2));
 	if(rawTx == NULL){
 	#if defined(ENABLE_DEBUG_MESSAGE)
-	Serial.println("Cannot locate memory");
+	Serial.println(F("Cannot locate memory"));
 	#endif 
 	return false;
 	}
@@ -32,7 +32,7 @@ bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 	if(rawTx[4]==0x00){
 	free(rawTx);rawTx= NULL;
 	#if defined(ENABLE_DEBUG_MESSAGE)
-	Serial.println("SegWit not supported");
+	Serial.println(F("SegWit not supported"));
 	#endif
 	return false;
 	} /* Currently segwit transaction are not supported */
