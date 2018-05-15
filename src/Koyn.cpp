@@ -1477,7 +1477,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 	if(isInit)
 	{
 		if(userAddress->address[0]=='1'||userAddress->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
-		if(!userAddress->isTracked())
+		if(!userAddress->isTracked()&&synchronized)
 		{
 			int i;
 			for(i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
