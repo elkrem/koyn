@@ -1,4 +1,4 @@
-# Koyn: Bitcoin Library For Arduino [![Build Status](https://travis-ci.org/Elkrem/Koyn.svg?branch=master)](https://travis-ci.org/Elkrem/Koyn)
+# Koyn: Bitcoin Library For Arduino [![Build Status](https://travis-ci.org/elkrem/koyn.svg?branch=master)](https://travis-ci.org/elkrem/koyn)
 
 ## Overview
 
