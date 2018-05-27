@@ -1233,24 +1233,24 @@ void KoynClass::processInput(String key,String value)
 		isMessage &= ~(1UL << BLOCK_HEAD_SUB);
 	}else if(key == "params" && (isMessage&(0x01<<ADDRESS_SUB)))
 	{
-		int8_t index = getAddressPointerIndex(reqData);
-		if(index<0){return;}
-		if(!userAddressPointerArray[index]->gotAddress())
+		if(addressPointer == NULL)
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
-			Serial.print(F("Address "));
-			Serial.println(value);
-			#endif
-			userAddressPointerArray[index]->setGotAddress();
+			for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
+			{
+				if(userAddressPointerArray[i]!=NULL && !strcmp(userAddressPointerArray[i]->address,&value[0]))
+				{
+					addressPointer = userAddressPointerArray[i];
+				}
+			}
 		}else
 		{
 			#if defined(ENABLE_DEBUG_MESSAGE)
 			Serial.println(F("Address status "));
 			#endif
 			char status[65];
-			userAddressPointerArray[index]->getStatus(status);
+			addressPointer->getStatus(status);
 			char addr[36];
-			userAddressPointerArray[index]->getEncoded(addr);
+			addressPointer->getEncoded(addr);
 			String dirName = "koyn/addresses/" + String(&addr[26]);
 			String fileNameUtxo = dirName+"/"+"utxo";
 			String fileNameStatus = dirName+"/"+"status";
@@ -1261,7 +1261,7 @@ void KoynClass::processInput(String key,String value)
 				if(SD.exists(&fileNameUtxo[0]))
 				{
 					SD.remove(&fileNameUtxo[0]);
-					userAddressPointerArray[index]->clearBalance();
+					addressPointer->clearBalance();
 				}
 				File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 				if(statusFile)
@@ -1270,14 +1270,14 @@ void KoynClass::processInput(String key,String value)
 					statusFile.write(&value[0],64);
 				}
 				statusFile.close();
-				userAddressPointerArray[index]->setAddressStatus(&value[0]);
-				userAddressPointerArray[index]->resetGotAddress();
+				addressPointer->setAddressStatus(&value[0]);
+				addressPointer->resetGotAddress();
 			}else if(value!="null"&&String(status).length()&&!memcmp(&value[0],status,64))
 			{
 				#if defined(ENABLE_DEBUG_MESSAGE)
 				Serial.println(F("Same status"));
 				#endif
-				userAddressPointerArray[index]->resetGotAddress();
+				addressPointer->resetGotAddress();
 			}else if(value!="null")
 			{
 				request.getAddressHistory(addr);
@@ -1285,7 +1285,7 @@ void KoynClass::processInput(String key,String value)
 				if(SD.exists(&fileNameUtxo[0]))
 				{
 					SD.remove(&fileNameUtxo[0]);
-					userAddressPointerArray[index]->clearBalance();
+					addressPointer->clearBalance();
 				}
 				File statusFile = SD.open(&fileNameStatus[0],FILE_WRITE);
 				if(statusFile)
@@ -1294,10 +1294,11 @@ void KoynClass::processInput(String key,String value)
 					statusFile.write(&value[0],64);
 				}
 				statusFile.close();
-				userAddressPointerArray[index]->setAddressStatus(&value[0]);
-				userAddressPointerArray[index]->resetGotAddress();
+				addressPointer->setAddressStatus(&value[0]);
+				addressPointer->resetGotAddress();
 			}
 			isMessage &= ~(1UL << ADDRESS_SUB);
+			addressPointer=NULL;
 		}
 	}else if(key == "confirmed" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_BALANCE_BIT))))
 	{
