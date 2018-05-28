@@ -1541,9 +1541,21 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 	{
 		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 		{
-			if(!strcmp(userAddressPointerArray[i]->address,userAddress->address))
+			if(userAddressPointerArray[i]!=NULL && !strcmp(userAddressPointerArray[i]->address,userAddress->address))
 			{
 				userAddressPointerArray[i]=NULL;
+				char addr[36];
+				userAddress->getEncoded(addr);	
+				String addressFolder = "koyn/addresses/" + String(&addr[26]);
+				if(SD.exists(&addressFolder[0]))
+				{
+					#if defined(ENABLE_DEBUG_MESSAGE)
+					Serial.println(F("Removing address folder"));
+					#endif
+					String dirName = "/koyn/addresses/"+String(&addr[26]);
+			  		FatFile directory = SD.open(dirName);
+			  		directory.rmRfStar();
+				}
 				return;
 			}
 		}
@@ -1557,6 +1569,15 @@ void KoynClass::unTrackAllAddresses()
 		for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 		{
 			userAddressPointerArray[i]=NULL;
+		}
+		if(SD.exists("koyn/addresses"))
+		{
+			#if defined(ENABLE_DEBUG_MESSAGE)
+			Serial.println(F("Removing addresses folder"));
+			#endif
+			String dirName = "/koyn/addresses";
+	  		FatFile directory = SD.open(dirName);
+	  		directory.rmRfStar();
 		}
 	}
 }
