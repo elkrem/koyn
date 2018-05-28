@@ -627,17 +627,17 @@ void KoynClass::run()
 					/* Requesting Merkle proofs */
 					if(SD.exists(&fileNameUnverifiedHistory[0])&&(lastMerkleVerified||isFirstMerkle))
 					{
-						File historyFile = SD.open(&fileNameUnverifiedHistory[0],FILE_READ);
-						if(historyFile&&historyFileLastPos==historyFile.size())
+						File unverifiedHistoryFile = SD.open(&fileNameUnverifiedHistory[0],FILE_READ);
+						if(unverifiedHistoryFile&&historyFileLastPos==unverifiedHistoryFile.size())
 						{
 							if(SD.exists(&fileNameHistory[0]))
 							{
-								File oldFile = SD.open(&fileNameHistory[0],FILE_WRITE);
-								while(historyFile.available())
+								File oldHistoryFile = SD.open(&fileNameHistory[0],FILE_WRITE);
+								while(unverifiedHistoryFile.available())
 								{
-									oldFile.write(historyFile.read());
+									oldHistoryFile.write(unverifiedHistoryFile.read());
 								}
-								oldFile.close();
+								oldHistoryFile.close();
 								SD.remove(&fileNameUnverifiedHistory[0]);
 								historyFileLastPos=0;
 							}else
@@ -647,7 +647,7 @@ void KoynClass::run()
 									Serial.println(F("chdir failed"));
 									#endif
 								}
-								historyFile.rename(SD.vwd(), "history");
+								unverifiedHistoryFile.rename(SD.vwd(), "history");
 								historyFileLastPos=0;
 								if (!SD.chdir()) {
 									#if defined(ENABLE_DEBUG_MESSAGE)
@@ -655,15 +655,15 @@ void KoynClass::run()
 									#endif
 								}
 							}
-						}else if(historyFile)
+						}else if(unverifiedHistoryFile)
 						{
 							uint8_t container[36];
-							historyFile.seek(historyFileLastPos);
-							if(historyFile.available())
+							unverifiedHistoryFile.seek(historyFileLastPos);
+							if(unverifiedHistoryFile.available())
 							{
 								for(int i=0;i<36;i++)
 								{
-									container[i]=historyFile.read();
+									container[i]=unverifiedHistoryFile.read();
 								}
 							}
 							userAddressPointerArray[i]->lastTxHash.copyData(container);
@@ -675,7 +675,7 @@ void KoynClass::run()
 							#endif
 							request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
 							if(isFirstMerkle){isFirstMerkle=false;}
-							historyFileLastPos = historyFile.curPosition();
+							historyFileLastPos = unverifiedHistoryFile.curPosition();
 							lastMerkleVerified = false;
 						}
 					}
@@ -714,21 +714,21 @@ void KoynClass::run()
 							Serial.println(F("Merkle Verified ..! "));
 							#endif
 							lastMerkleVerified = true;
-							for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
+							for(int j=0;j<MAX_TRANSACTION_COUNT;j++)
 							{
-								if(incomingTx[i].isUsed()&&!incomingTx[i].inBlock())
+								if(incomingTx[j].isUsed()&&!incomingTx[j].inBlock())
 								{
 									uint8_t txHash[32];
 									uint8_t hash[32];
-									incomingTx[i].getHash(txHash);
+									incomingTx[j].getHash(txHash);
 									userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
 									reverseBin(hash,32);
 									if(!memcmp(txHash,hash,32))
 									{
-										incomingTx[i].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
+										incomingTx[j].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
 										if(isTransactionCallbackAssigned)
 										{
-											(*transactionCallback)(incomingTx[i]);
+											(*transactionCallback)(incomingTx[j]);
 										}
 									}
 								}
