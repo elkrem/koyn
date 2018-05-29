@@ -10,12 +10,7 @@
 #define MAX_TRACKED_ADDRESSES_COUNT	5
 #define USE_TEST_NET
 // #define USE_MAIN_NET
-#define ENABLE_DEBUG_MESSAGE
-
-
-
-
-
+#define ENABLE_DEBUG_MESSAGES
 
 
 /********* Koyn Library Definitions *********/
@@ -34,7 +29,7 @@
 #define MAIN_NET_VERSION 0x00
 #define TEST_NET_VERSION 0x6F
 
-#define KEY_ENCODED				0x01
+#define ADDRESS_ENCODED				0x01
 #define KEY_WIF  				0x02
 #define KEY_PRIVATE	 			0x03
 #define KEY_COMPRESSED_PUBLIC	0x04
@@ -94,14 +89,3 @@
 #define FORKED			3
 #define FORK_VALID		4
 #define INVALID			5
-
-
-
-
-
-
-
-
-
-
-

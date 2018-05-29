@@ -7,7 +7,7 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 	gotAddressRef = false;
 	init();
 	uint8_t keyLen = strlen(key);
-	if(keyType == KEY_ENCODED && (keyLen >=25 && keyLen <=35))
+	if(keyType == ADDRESS_ENCODED && (keyLen >=25 && keyLen <=35))
 	{
 		if(address[0]!='m'||address[0]!='n'||address[0]!='2'||address[0]!='1'||address[0]!='3')
 		{

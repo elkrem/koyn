@@ -8,9 +8,9 @@
 /* Renting value of light bulb. */
 #define PAYMENT_VALUE 1000000
 /* Create an address giving it the encoded key address ex."mqBPVCaTaJDVGruNTkTD3CKTVMYqmVow6R" */
-BitcoinAddress myAddress("ENCODED_KEY_ADDRESS",KEY_ENCODED);
+BitcoinAddress myAddress("ENCODED_KEY_ADDRESS",ADDRESS_ENCODED);
 /* Create friend address. */
-BitcoinAddress myFriendAddress("ENCODED_KEY_ADDRESS",KEY_ENCODED);
+BitcoinAddress myFriendAddress("ENCODED_KEY_ADDRESS",ADDRESS_ENCODED);
 
 void setup() {
   /* Make light bulb pin output. */
