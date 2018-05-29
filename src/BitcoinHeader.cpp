@@ -166,7 +166,7 @@ bool BitcoinHeader::operator!=(BitcoinHeader& other)
     	return false;
     }
 }
-#if defined(ENABLE_DEBUG_MESSAGE)
+#if defined(ENABLE_DEBUG_MESSAGES)
 void BitcoinHeader::printHeader()
 {
 	char hdr2[160]={};

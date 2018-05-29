@@ -47,7 +47,7 @@ void KoynClass::begin(bool _verify)
 void KoynClass::checkSDCardMounted()
 {
 	do{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Mount SD card"));
 		#endif
 	}while(!SD.begin(SD_CARD_CHIP_SELECT,SD_SCK_MHZ(4)));
@@ -56,13 +56,13 @@ void KoynClass::checkSDCardMounted()
 void KoynClass::checkDirAvailability()
 {
 	if (!SD.chdir()) {
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("chdir to root failed.\n"));
 		#endif
 	}
 	if(SD.exists("koyn/responses"))
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Removing Response folder"));
 		#endif
 		String dirName = "/koyn/responses";
@@ -77,7 +77,7 @@ void KoynClass::checkDirAvailability()
 		File blkHeaderFile =  SD.open("koyn/blkhdrs",FILE_READ);
 
 		if(!blkHeaderFile){
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Cannot open file"));
 		#endif
 		return;
@@ -87,7 +87,7 @@ void KoynClass::checkDirAvailability()
 		{
 			if(verify)
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Start Verifying"));
 				#endif
 				while (blkHeaderFile.available())
@@ -111,7 +111,7 @@ void KoynClass::checkDirAvailability()
 				}
 			}else
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Verification Skiped.."));
 				#endif
 				totalBlockNumb = ((blkHeaderFile.size()) / 80)-1;
@@ -125,7 +125,7 @@ void KoynClass::checkDirAvailability()
 					i++;
 				}
 				lastHeader.setHeader(lastHeaderFromFile,totalBlockNumb);
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				lastHeader.printHeader();
 				Serial.println(totalBlockNumb);
 				Serial.println(chunkNo);
@@ -134,7 +134,7 @@ void KoynClass::checkDirAvailability()
 		}
 	}else
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Cannot find blkHdr file"));
 		#endif
 	}
@@ -162,12 +162,12 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 			currhdr->getHash(hash);
 			if(memcmp(hash,genisisByte,32))
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Genisis Block not verified"));
 				#endif
 				return INVALID;
 			}else {
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Genisis Block verified"));
 				#endif
 				lastHeader=*currhdr;
@@ -199,7 +199,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 					currhdr->getPrevHash(hash2);
 					if(!memcmp(hash1,hash2,32))
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(headerHeight);
 						Serial.println(F("Valid "));
 						#endif
@@ -223,7 +223,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 				{
 					if(lastHeader == *currhdr)
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						lastHeader.printHeader();
 						Serial.println(lastHeader.height);
 						Serial.println(F("Same header"));
@@ -248,14 +248,14 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 							return catchingUpFork(currhdr);
 						}else
 						{
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("PH"));
 							#endif
 							currhdr->parentHeader=true;
 							switch(catchingUpFork(currhdr))
 							{
 								case FORK_VALID:
-								#if defined(ENABLE_DEBUG_MESSAGE)
+								#if defined(ENABLE_DEBUG_MESSAGES)
 								Serial.println(F("Got parent header "));
 								Serial.println(headerHeight);
 								#endif
@@ -268,7 +268,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 				}
 			}else
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.print(F("New Header is not Valid "));
 				Serial.println(currhdr->getHeight());
 				#endif
@@ -280,7 +280,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 
 int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 {
-	#if defined(ENABLE_DEBUG_MESSAGE)
+	#if defined(ENABLE_DEBUG_MESSAGES)
 	Serial.println("Catching Fork ");
 	#endif
 	int32_t headerHeight = currhdr->getHeight();
@@ -302,7 +302,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 					currhdr->getPrevHash(hash2);
 					if(!memcmp(hash1,hash2,32))
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(headerHeight);
 						Serial.println(F("Fork Valid "));
 						#endif
@@ -320,7 +320,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							}
 							return FORK_VALID;
 						}else{
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Failed to open 1"));
 							#endif
 						}
@@ -329,7 +329,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 				{
 					if((*forks[i].getLastHeader()) == *currhdr)
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Same fork header"));
 						#endif
 						return SAME_HEADER;
@@ -342,7 +342,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 					File forkFile = SD.open(fileName,FILE_READ);
 					if(forkFile)
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Opened and header smaller"));
 						#endif
 						if(forkFile.available())
@@ -352,12 +352,12 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							for(int j=0;j<84;j++){tempHeaderFromFile[j]=forkFile.read();}
 							uint32_t tempHeight = *((uint32_t *)(tempHeaderFromFile+80));
 							tempHeader.setHeader(tempHeaderFromFile,tempHeight);
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(tempHeader.getHeight());
 							#endif
 							if(tempHeader==*currhdr)
 							{
-								#if defined(ENABLE_DEBUG_MESSAGE)
+								#if defined(ENABLE_DEBUG_MESSAGES)
 								Serial.println(F("Same old fork header"));
 								#endif
 								return SAME_HEADER;
@@ -372,7 +372,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 									File tempFile = SD.open("koyn/temp",FILE_WRITE);
 									if(tempFile)
 									{
-										#if defined(ENABLE_DEBUG_MESSAGE)
+										#if defined(ENABLE_DEBUG_MESSAGES)
 										Serial.print(headerHeight);
 										Serial.println(F("Previous header at fork"));
 										#endif
@@ -380,13 +380,13 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 										/* Write the heigth to file */
 										uint32_t currHdrHeight = currhdr->getHeight();
 										tempFile.write((uint8_t *)&currHdrHeight,4);
-										#if defined(ENABLE_DEBUG_MESSAGE)
+										#if defined(ENABLE_DEBUG_MESSAGES)
 										Serial.println(F("Copying data"));
 										#endif
 										forkFile.seek(0);
 										while(forkFile.available()){
 											uint8_t data =forkFile.read();
-											#if defined(ENABLE_DEBUG_MESSAGE)
+											#if defined(ENABLE_DEBUG_MESSAGES)
 											Serial.write(data);
 											#endif
 											tempFile.write(data);
@@ -414,7 +414,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							}
 						}
 					}else{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Failed to open 2"));
 						#endif
 					}
@@ -427,7 +427,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 	File forkFile = SD.open(fileName,FILE_WRITE);
 	if(forkFile)
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Fork created"));
 		#endif
 		forkFile.write(currhdr->completeHeader,80);
@@ -435,7 +435,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 		forkFile.write((uint8_t *)&currHdrHeight,4);
 		forkFile.close();
 	}else{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Failed to open 0"));
 		#endif
 	}
@@ -451,7 +451,7 @@ void KoynClass::reorganizeMainChain()
 	{
 		if(forks[i].exists()&&forks[i].gotParentHeader())
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.print(F("Checking difficulty with forks "));
 			Serial.println(i);
 			#endif
@@ -466,7 +466,7 @@ void KoynClass::reorganizeMainChain()
 	}
 	if(tempHeader!=lastHeader)
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Chain with bigger difficulty"));
 		#endif
 		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
@@ -482,7 +482,7 @@ void KoynClass::reorganizeMainChain()
 					{
 						uint32_t seekValue=forks[i].getParentHeader()->getHeight();
 						blkHeaderFile.seek(seekValue*80);
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(F("Seek "));
 						#endif
 						while(forkFile.available())
@@ -515,12 +515,12 @@ void KoynClass::reorganizeMainChain()
 				}
 				uint32_t diff=0;
 				diff = forks[i].getLastHeader()->getHeight()-forks[i].getParentHeader()->getHeight();
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Getting longest chain"));
 				#endif
 				if(diff>=LONGEST_CHAIN_AT_FORK)
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Chain is long"));
 					#endif
 					File forkFile = SD.open(fileName,FILE_READ);
@@ -529,7 +529,7 @@ void KoynClass::reorganizeMainChain()
 					{
 						uint32_t seekValue=forks[i].getParentHeader()->getHeight();
 						blkHeaderFile.seek(seekValue*80);
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(F("Seek "));
 						Serial.println(seekValue);
 						#endif
@@ -548,7 +548,7 @@ void KoynClass::reorganizeMainChain()
 					}
 
 				}else{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(F("Chain diff "));
 						Serial.println(diff);
 						#endif
@@ -577,14 +577,14 @@ void KoynClass::connectToServers()
 				serverNamesCount++;
 			}
 			else{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Cannot connect to listed servers"));
 				#endif
 				return;
 			}
 		}
 		serverNamesCount++;
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.print(String("Client ")+String(i)+String(" connected to "));
 		Serial.println(servName);
 		#endif
@@ -592,7 +592,7 @@ void KoynClass::connectToServers()
 		if(!SD.exists(&dirName[0]))
 		{
 			SD.mkdir(&dirName[0]);
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(String("Created directory ")+dirName);
 			#endif
 		}
@@ -605,7 +605,7 @@ void KoynClass::run()
 	{
 		if(millis()-lastTimeTaken>55*1000)
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Sending Version"));
 			#endif
 			request.sendVersion();
@@ -643,14 +643,14 @@ void KoynClass::run()
 							}else
 							{
 								if (!SD.chdir(&dirName[0])) {
-									#if defined(ENABLE_DEBUG_MESSAGE)
+									#if defined(ENABLE_DEBUG_MESSAGES)
 									Serial.println(F("chdir failed"));
 									#endif
 								}
 								unverifiedHistoryFile.rename(SD.vwd(), "history");
 								historyFileLastPos=0;
 								if (!SD.chdir()) {
-									#if defined(ENABLE_DEBUG_MESSAGE)
+									#if defined(ENABLE_DEBUG_MESSAGES)
 									Serial.println(F("chdir failed"));
 									#endif
 								}
@@ -670,7 +670,7 @@ void KoynClass::run()
 							char txHash_str[65];
 							txHash_str[64]='\0';
 							userAddressPointerArray[i]->lastTxHash.getStringTxHash(txHash_str);
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Getting Merkle Proofs"));
 							#endif
 							request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
@@ -682,7 +682,7 @@ void KoynClass::run()
 
 					if(SD.exists(&fileNameMerkle[0]))
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Merkle"));
 						#endif
 						File merkleFile = SD.open(&fileNameMerkle[0],FILE_READ);
@@ -710,7 +710,7 @@ void KoynClass::run()
 						}
 						if(!memcmp(merkleRoot,hash,32))
 						{
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Merkle Verified ..! "));
 							#endif
 							lastMerkleVerified = true;
@@ -735,7 +735,7 @@ void KoynClass::run()
 							}
 						}else
 						{
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Bad History Removing .."));
 							#endif
 							lastMerkleVerified = false;
@@ -764,16 +764,16 @@ void KoynClass::run()
 						responseFile = SD.open(&fileName[0],FILE_WRITE);
 						opened = true;
 						if(responseFile){
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						/*Serial.println(F("File Opened"));*/
 						#endif	
 						}else{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("File not opened"));
 						#endif
 						}
 					}
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.write(data);
 					#endif
 					if(responseFile)
@@ -786,7 +786,7 @@ void KoynClass::run()
 					FatFile directory = SD.open(&dirName[0]);
 					if (!responseFile.rename(&directory, &String(millis())[0]))
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Cannot rename file"));
 						#endif
 					}
@@ -808,7 +808,7 @@ void KoynClass::run()
 				file.getName(buff,13);
 				if(!(String(buff)==String("uncomplete")))
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.print(F("parsing file "));
 					Serial.println(buff);
 					#endif
@@ -842,13 +842,13 @@ void KoynClass::run()
 					file.close();
 					if(directory.remove(&directory,&buff[0]))
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(F("Removed file "));
 						Serial.println(buff);
 						#endif
 					}else
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.print(F("Failed to remove file "));
 						Serial.println(buff);
 						#endif
@@ -865,7 +865,7 @@ void KoynClass::run()
 bool KoynClass::parseReceivedChunk()
 {
 	if(!file){
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Cannot open file"));
 		#endif
 		return false;
@@ -887,7 +887,7 @@ bool KoynClass::parseReceivedChunk()
 			uint16_t hdrPos = lastHeader.getPos();
 			file.seekCur((hdrPos*160));
 			currentHeight = totalBlockNumb;
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.print(F("Last Header Position "));
 			Serial.println(lastHeader.getPos());
 			#endif
@@ -906,7 +906,7 @@ bool KoynClass::parseReceivedChunk()
 					currentHeaderString[j] = data;
 				}
 			}
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(currentHeaderString);
 			#endif
 			if(!endOfObject)
@@ -917,7 +917,7 @@ bool KoynClass::parseReceivedChunk()
 				{
 					case HEADER_VALID: break;
 					case INVALID:
-		                #if defined(ENABLE_DEBUG_MESSAGE)
+		                #if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Not Verified"));
 	                    Serial.println(currentHeaderString);
 		                Serial.write(header.completeHeader,80);
@@ -930,7 +930,7 @@ bool KoynClass::parseReceivedChunk()
 
 			if(millis()-lastTimeTaken>90*1000)
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Sending Version"));
 				#endif
 				request.sendVersion();
@@ -945,7 +945,7 @@ bool KoynClass::parseReceivedChunk()
 void KoynClass::parseReceivedTx()
 {
 	if(!file){
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Cannot open file"));
 		#endif
 	}
@@ -965,11 +965,11 @@ void KoynClass::parseReceivedTx()
 		uint32_t pos = file.curPosition();
 		uint32_t count=0;
 		while(file.read()!='"'){count++;}
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(count);
 		#endif
 		if(count/2>MAX_TRANSACTION_SIZE){Serial.println(F("Raw transaction is too big"));return;}
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Locating space in Ram"));
 		#endif
 		char stringRawTx[count];
@@ -981,7 +981,7 @@ void KoynClass::parseReceivedTx()
 			{
 				if(incomingTx[i].setRawTx(stringRawTx,count))
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Success"));
 					#endif
 					incomingTx[i].setHeight(0);
@@ -1022,7 +1022,7 @@ void KoynClass::processInput(String key,String value)
 						synchronized =false;
 					}else
 					{
-						#if defined(ENABLE_DEBUG_MESSAGE)
+						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Got All Chunks"));
 						#endif
 						synchronized = true;
@@ -1052,11 +1052,11 @@ void KoynClass::processInput(String key,String value)
 			uint32_t methodType = reqData->reqType;
 			if(methodType&(uint32_t)(0x01<<VERSION_BIT))
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(value);
 				#endif
 			}else if(methodType&(uint32_t)(0x01<<ADDRESS_SUBS_BIT)){
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Address status "));
 				#endif
 				char status[65];
@@ -1087,7 +1087,7 @@ void KoynClass::processInput(String key,String value)
 					userAddressPointerArray[index]->setAddressStatus(&value[0]);
 				}else if(value!="null"&&String(status).length()&&!memcmp(&value[0],status,64))
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Same status"));
 					#endif
 				}else if(value!="null")
@@ -1109,7 +1109,7 @@ void KoynClass::processInput(String key,String value)
 					userAddressPointerArray[index]->setAddressStatus(&value[0]);
 				}else
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Address is new"));
 					#endif
 				}
@@ -1135,7 +1135,7 @@ void KoynClass::processInput(String key,String value)
 				myFile.close();
 			}else if(methodType&(uint32_t)(0x01<<BROADCAST_TRANSACTION_BIT)){
 			}else{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("request doesn't exist"));
 				#endif
 			}
@@ -1173,7 +1173,7 @@ void KoynClass::processInput(String key,String value)
 	{
 		uint32_t nonce = my_atoll(&value[0]);
 		memcpy(header.completeHeader+76,&nonce,4);
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("New Header"));
 		Serial.println(header.height);
 		header.printHeader();
@@ -1193,7 +1193,7 @@ void KoynClass::processInput(String key,String value)
 						{
 							if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 							{
-								#if defined(ENABLE_DEBUG_MESSAGE)
+								#if defined(ENABLE_DEBUG_MESSAGES)
 								Serial.print(F("Block Difference "));
 								Serial.println(incomingTx[i].getConfirmations());
 								#endif
@@ -1216,7 +1216,7 @@ void KoynClass::processInput(String key,String value)
 						int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
 						if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
-							#if defined(ENABLE_DEBUG_MESSAGE)
+							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.print(F("Block Difference "));
 							Serial.println(incomingTx[i].getConfirmations());
 							#endif
@@ -1244,7 +1244,7 @@ void KoynClass::processInput(String key,String value)
 			}
 		}else
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Address status "));
 			#endif
 			char status[65];
@@ -1274,7 +1274,7 @@ void KoynClass::processInput(String key,String value)
 				addressPointer->resetGotAddress();
 			}else if(value!="null"&&String(status).length()&&!memcmp(&value[0],status,64))
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Same status"));
 				#endif
 				addressPointer->resetGotAddress();
@@ -1310,7 +1310,7 @@ void KoynClass::processInput(String key,String value)
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
 		userAddressPointerArray[index]->setUnconfirmedBalance(my_atoll(&value[0]));
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Got Address Balance"));
 		#endif
 	}else if(key == "tx_hash" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADRRESS_HISTORY_BIT))))
@@ -1341,7 +1341,7 @@ void KoynClass::processInput(String key,String value)
 		}
 		if(addHistory==userAddressPointerArray[index]->lastTxHash)
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Reached last history save next "));
 			#endif
 			saveNextHistory= true;
@@ -1351,7 +1351,7 @@ void KoynClass::processInput(String key,String value)
 		char txHash_str[65];
 		txHash_str[64]='\0';
 		addHistory.getStringTxHash(txHash_str);
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(txHash_str);
 		#endif
 		for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
@@ -1372,7 +1372,7 @@ void KoynClass::processInput(String key,String value)
 		request.getTransaction(txHash_str);
 	}else if(key == "block_height" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<MERKLE_PROOF))))
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(value);
 		#endif
 		uint32_t seekValue = (my_atoll(&value[0]));
@@ -1380,12 +1380,12 @@ void KoynClass::processInput(String key,String value)
 		File blkHdrFile = SD.open("koyn/blkhdrs",FILE_READ);
 		blkHdrFile.seek((seekValue*80)+36);
 		for(int i=0;i<32;i++){merkleRoot[i]=blkHdrFile.read();}
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.write(merkleRoot,32);
 			#endif
 	}else if(key == "merkle" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<MERKLE_PROOF))))
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(value);
 		#endif
 		uint8_t txHash[32];
@@ -1403,7 +1403,7 @@ void KoynClass::processInput(String key,String value)
 		merkleFile.close();
 	}else if(key == "pos" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<MERKLE_PROOF))))
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(value);
 		#endif
 		int8_t index = getAddressPointerIndex(reqData);
@@ -1492,7 +1492,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			if(i==5){return MAX_ADDRESSES_TRACKED_REACHED;}
 			char addr[36];
 			userAddress->getEncoded(addr);
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Tracking"));
 			#endif
 			request.subscribeToAddress(addr);
@@ -1506,7 +1506,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			String fileNameStatus=dirName+"/"+"status";
 			if(SD.exists(&fileNameStatus[0]))
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Old Status copied"));
 				#endif
 				File statusFile = SD.open(&fileNameStatus[0],FILE_READ);
@@ -1515,7 +1515,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			String fileNameHistory=dirName+"/"+"history";
 			if(SD.exists(&fileNameHistory[0]))
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Last TxHash copied"));
 				#endif
 				File historyFile = SD.open(&fileNameHistory[0],FILE_READ);
@@ -1549,7 +1549,7 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 				String addressFolder = "koyn/addresses/" + String(&addr[26]);
 				if(SD.exists(&addressFolder[0]))
 				{
-					#if defined(ENABLE_DEBUG_MESSAGE)
+					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Removing address folder"));
 					#endif
 					String dirName = "/koyn/addresses/"+String(&addr[26]);
@@ -1572,7 +1572,7 @@ void KoynClass::unTrackAllAddresses()
 		}
 		if(SD.exists("koyn/addresses"))
 		{
-			#if defined(ENABLE_DEBUG_MESSAGE)
+			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Removing addresses folder"));
 			#endif
 			String dirName = "/koyn/addresses";
@@ -1619,7 +1619,7 @@ void KoynClass::updateTotalBlockNumb()
 {
 	if(SD.exists("koyn/blkhdrs"))
 	{
-		#if defined(ENABLE_DEBUG_MESSAGE)
+		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("totalBlockNumb Updated"));
 		#endif
 		File blkHdrFile = SD.open("koyn/blkhdrs",FILE_WRITE);
@@ -1720,7 +1720,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 				while(temp1%2016!=0){temp1--;}
 				while(temp2%2016!=0){temp2++;}
 				noOfChunksNeeded = (temp2 - temp1)/2016;
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.print(F("No of Chunks needed "));
 				Serial.println(noOfChunksNeeded);
 				#endif
@@ -1729,7 +1729,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 			}else if(!totalBlockNumb)
 			{
 				noOfChunksNeeded = currentHeaderHeight/2016;
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.print(F("No of Chunks needed "));
 				Serial.println(noOfChunksNeeded);
 				#endif
@@ -1823,7 +1823,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					utxoFile.read((uint8_t*)&amountArray[i],8);
 					i++;
 				}
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Got All UTXO's Amount"));
 				#endif
 				for(int l=0;l<unspentTransactionCount;l++)
@@ -1843,7 +1843,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 						}
 					}
 				}
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Re-ordered UTXO's Amounts"));
 				#endif
 				uint64_t changeAmount=0;
@@ -2019,7 +2019,7 @@ void KoynClass::removeUnconfirmedTransactions()
 		{
 			if(incomingTx[i].getUnconfirmedIterations()==REMOVE_UNCONFIRMED_TRANSACTION_AFTER)
 			{
-				#if defined(ENABLE_DEBUG_MESSAGE)
+				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.print(F("Removing unconfirmed transaction"));
 				#endif
 				incomingTx[i].resetTx();
