@@ -237,6 +237,7 @@ The tests below are for ESP8266 based boards
 
 - Only P2PKH transactions and addresses are supported.
 - Only non-SegWit transactions and addresses are supported.
+- Only addresses generated from compressed public keys are supported.
 - The library connects to non-TLS Electrum servers only.
 - The library works with Bitcoin testnet only for now.
 - The library does cache private keys in memory.
