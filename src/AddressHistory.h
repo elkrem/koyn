@@ -8,15 +8,15 @@ class AddressHistory{
 public:
 	AddressHistory();
 	AddressHistory(const AddressHistory &);
-	void getTxHash(uint8_t *);
-	void getStringTxHash(char *);
+	uint8_t getTxHash(uint8_t *);
+	uint8_t getStringTxHash(char *);
 	int32_t getHeight();
 	uint32_t getLeafPos();
 	void setTxHash(char * );
 	void setHeight(int32_t);
 	void setNull();
 	void setLeafPos(uint32_t);
-	void copyData(uint8_t *);
+	uint8_t copyData(uint8_t *);
 	bool isNull();
 	bool operator==(AddressHistory& );
 private:

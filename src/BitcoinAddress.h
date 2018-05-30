@@ -38,14 +38,14 @@ public:
 	BitcoinAddress(bool=false);
 	BitcoinAddress(const char *,uint8_t);
 	BitcoinAddress(uint8_t *,uint8_t);
-	void getPrivateKey(uint8_t *);
-	void getPrivateKey(const char *);
-	void getPublicKey(uint8_t *);
-	void getPublicKey(const char *);
-	void getCompressedPublicKey(uint8_t *);
-	void getCompressedPublicKey(const char *);
-	void getWif(const char *);
-	void getEncoded(char *);
+	uint8_t getPrivateKey(uint8_t *);
+	uint8_t getPrivateKey(char *);
+	uint8_t getPublicKey(uint8_t *);
+	uint8_t getPublicKey(char *);
+	uint8_t getCompressedPublicKey(uint8_t *);
+	uint8_t getCompressedPublicKey(char *);
+	uint8_t getWif(char *);
+	uint8_t getEncoded(char *);
 	bool isTracked();
 	uint64_t getBalance();
 	uint64_t getConfirmedBalance();
@@ -56,7 +56,7 @@ public:
 
 private:
 	void init();
-	void getStatus(char *);
+	uint8_t getStatus(char *);
 	bool gotAddress();
 	void setTracked();
 	void setConfirmedBalance(uint32_t);

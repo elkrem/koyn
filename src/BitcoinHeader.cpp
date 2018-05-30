@@ -51,40 +51,47 @@ void BitcoinHeader::setNull()
 	parentHeader = false;
 }
 
-void BitcoinHeader::getVersion(uint8_t * container)
+uint8_t BitcoinHeader::getVersion(uint8_t * container)
 {
 	memcpy(container,completeHeader,4);
+	return 4;
 }
 
-void BitcoinHeader::getPrevHash(uint8_t * container)
+uint8_t BitcoinHeader::getPrevHash(uint8_t * container)
 {
 	memcpy(container,completeHeader+4,32);
+	return 32;
 }
 
-void BitcoinHeader::getMerkle(uint8_t * container)
+uint8_t BitcoinHeader::getMerkle(uint8_t * container)
 {
 	memcpy(container,completeHeader+36,32);
+	return 32;
 }
 
-void BitcoinHeader::getTimeStamp(uint8_t * container)
+uint8_t BitcoinHeader::getTimeStamp(uint8_t * container)
 {
 	memcpy(container,completeHeader+68,4);
+	return 4;
 }
 
-void BitcoinHeader::getBits(uint8_t * container)
+uint8_t BitcoinHeader::getBits(uint8_t * container)
 {
 	memcpy(container,completeHeader+72,4);
+	return 4;
 }
 
-void BitcoinHeader::getNonce(uint8_t * container)
+uint8_t BitcoinHeader::getNonce(uint8_t * container)
 {
 	memcpy(container,completeHeader+76,4);
+	return 4;
 }
 
-void BitcoinHeader::getHash(uint8_t * container)
+uint8_t BitcoinHeader::getHash(uint8_t * container)
 {
 	calcHash();
 	memcpy(container,hash,32);
+	return 32;
 }
 
 uint32_t BitcoinHeader::getVersionAsInt()
