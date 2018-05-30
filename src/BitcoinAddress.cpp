@@ -201,7 +201,7 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	doubleSha256(hash,final,21);
 	memcpy(final+21,hash,4);
 	base58Encode(final,sizeof(final),address,36);
-	for(int i=0;i<36;i++){address[i]=address[i+2];} /* Shifting array to the left */
+	for(int i=0;i<34;i++){address[i]=address[i+2];} /* Shifting array to the left */
 	/* Quick and Dirty solution for Base58 encoding, as there should be a generic solution for supporting all addresses lenght*/
 	address[34]='\0';
 	address[35]='\0';
