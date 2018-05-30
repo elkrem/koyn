@@ -40,7 +40,7 @@ getHash			KEYWORD2		RESERVED_WORD
 getBlockNumber	KEYWROD2
 getConfirmations			KEYWORD2		RESERVED_WORD
 #######################################
-# Strcutures and Classes (KEYWORD3)
+# Structures and Classes (KEYWORD3)
 #######################################
 BitcoinAddress	KEYWORD3		RESERVED_WORD	RESERVED_WORD
 BitcoinTransaction	KEYWORD3		RESERVED_WORD
