@@ -242,7 +242,7 @@ The tests below are for ESP8266 based boards
 - The library works with Bitcoin testnet only for now.
 - The library does cache private keys in memory.
 - The library doesn't support true random generators yet (generated private keys and addresses rely on analog pin #0 noise).
-- Due to the limitation of hardware, there are some constraints on transaction sizes, tracked addresses number, transactions number kept in memory and others (They defaults can be overwritten in `Config.h` file)
+- Due to the limitation of hardware, there are some constraints on transaction sizes, tracked addresses number, transactions number kept in memory and others (Their defaults can be overwritten in `Config.h` file)
 
 ## Acquiring Testnet Bitcoins
 
