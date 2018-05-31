@@ -102,39 +102,49 @@ void BitcoinAddress::init()
 	status[64]='\0';
 }
 
-void BitcoinAddress::getPrivateKey(uint8_t * container)
+uint8_t BitcoinAddress::getPrivateKey(uint8_t * container)
 {
 	memcpy(container,privateKey,32);
+	return 32;
 }
 
-void BitcoinAddress::getPrivateKey(const char * container)
+uint8_t BitcoinAddress::getPrivateKey(char * container)
 {
-	bin2hex((char*)container,privateKey,32);
+	bin2hex(container,privateKey,32);
+	container[65]='\0';
+	return 64;
 }
 
-void BitcoinAddress::getPublicKey(uint8_t * container)
+uint8_t BitcoinAddress::getPublicKey(uint8_t * container)
 {
-	memcpy(container,publicKey,64);
+	memcpy(container,publicKey,65);
+	return 65;
 }
 
-void BitcoinAddress::getPublicKey(const char * container)
+uint8_t BitcoinAddress::getPublicKey(char * container)
 {
-	bin2hex((char*)container,publicKey,65);
+	Serial.write(publicKey,65);
+	bin2hex(container,publicKey,65);
+	container[131]='\0';
+	return 130;
 }
 
-void BitcoinAddress::getCompressedPublicKey(uint8_t * container)
+uint8_t BitcoinAddress::getCompressedPublicKey(uint8_t * container)
 {
 	memcpy(container,compPubKey,33);
+	return 33;
 }
 
-void BitcoinAddress::getCompressedPublicKey(const char * container)
+uint8_t BitcoinAddress::getCompressedPublicKey(char * container)
 {
-	bin2hex((char*)container,compPubKey,33);
+	bin2hex(container,compPubKey,33);
+	container[67]='\0';
+	return 66;
 }
 
-void BitcoinAddress::getWif(const char * container)
+uint8_t BitcoinAddress::getWif(char * container)
 {
-	if(!memcmp(privateKey,emptyArray,32)){return;}
+	if(!memcmp(privateKey,emptyArray,32)){return 0;}
 	uint8_t final[38];
 	uint8_t hash[32];
 	memcpy(final+1,privateKey,32);
@@ -143,16 +153,20 @@ void BitcoinAddress::getWif(const char * container)
 	doubleSha256(hash,final,34);
 	memcpy(final+34,hash,4);
 	base58Encode(final,sizeof(final),(char*)container,52);
+	container[53]='\0';
+	return 52;
 }
 
-void BitcoinAddress::getEncoded(char * container)
+uint8_t BitcoinAddress::getEncoded(char * container)
 {
 	strcpy(container,address);
+	return strlen(address);
 }
 
-void BitcoinAddress::getStatus(char * container)
+uint8_t BitcoinAddress::getStatus(char * container)
 {
 	memcpy(container,status,65);
+	return 64;
 }
 
 void BitcoinAddress::calculateAddress(uint8_t keyType)
@@ -187,7 +201,7 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	doubleSha256(hash,final,21);
 	memcpy(final+21,hash,4);
 	base58Encode(final,sizeof(final),address,36);
-	for(int i=0;i<36;i++){address[i]=address[i+2];} /* Shifting array to the left */
+	for(int i=0;i<34;i++){address[i]=address[i+2];} /* Shifting array to the left */
 	/* Quick and Dirty solution for Base58 encoding, as there should be a generic solution for supporting all addresses lenght*/
 	address[34]='\0';
 	address[35]='\0';

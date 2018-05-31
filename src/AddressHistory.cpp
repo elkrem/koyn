@@ -16,14 +16,16 @@ AddressHistory::AddressHistory(const AddressHistory &history)
 	this->leafPos = history.leafPos;
 }
 
-void AddressHistory::getTxHash(uint8_t * containter)
+uint8_t AddressHistory::getTxHash(uint8_t * containter)
 {
 	memcpy(containter,txHash,32);
+	return 32;
 }
 
-void AddressHistory::getStringTxHash(char * txHash_str)
+uint8_t AddressHistory::getStringTxHash(char * txHash_str)
 {
 	bin2hex(txHash_str,txHash,32);
+	return 64;
 }
 
 int32_t AddressHistory::getHeight()
@@ -64,13 +66,14 @@ void AddressHistory::setNull()
 	leafPos = 0;
 }
 
-void AddressHistory::copyData(uint8_t * data)
+uint8_t AddressHistory::copyData(uint8_t * data)
 {
 	memcpy(txHash,data,32);
 	height = (height <<8) | data[35];
 	height = (height << 8) | data[34];
 	height = (height << 8) | data[33];
 	height = (height << 8) | data[32];
+	return 36;
 }
 
 void AddressHistory::setLeafPos(uint32_t pos)
