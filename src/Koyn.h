@@ -28,6 +28,7 @@ public:
 	KoynClass();
 	void begin(bool=false);
 	void run();
+	void initialize();
 	uint8_t trackAddress(BitcoinAddress * );
 	void unTrackAddress(BitcoinAddress * );
 	void unTrackAllAddresses();

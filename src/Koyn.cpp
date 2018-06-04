@@ -4,6 +4,11 @@
 
 KoynClass::KoynClass()
 {
+	initialize();
+}
+
+void KoynClass::initialize()
+{
 	totalBlockNumb = 0;
 	chunkNo =0;
 	saveResToFile = 0;
@@ -20,9 +25,8 @@ KoynClass::KoynClass()
 	confirmedFlag=false;
 	isInit=false;
 	for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++){userAddressPointerArray[i]=NULL;}
+	request.resetRequests();
 }
-
-
 
 void KoynClass::begin(bool _verify)
 {
@@ -751,7 +755,10 @@ void KoynClass::run()
 			File responseFile;
 			if(!clientsArray[i].connected())
 			{
-				connectToServers();
+				clientsArray[i].stop();
+				::delay(1000);
+				initialize();
+				begin();
 			}
 			while(clientsArray[i].available())
 			{
