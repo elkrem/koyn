@@ -45,6 +45,7 @@ public:
 	void relayFee();
 	void broadcastTransaction(File *);
 	void getTransaction(const char *);
+	void resetRequests();
 	ElectrumRequestData * getElectrumRequestData();
 	ElectrumRequestData * getElectrumRequestData(int);
 private:

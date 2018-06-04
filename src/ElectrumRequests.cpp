@@ -355,3 +355,11 @@ ElectrumRequestData * ElectrumRequests::getElectrumRequestData(int reqNo)
 	}
 	return NULL;
 }
+
+void ElectrumRequests::resetRequests()
+{
+	for(int i=0;i<MAX_PARALLEL_REQUESTS;i++)
+	{
+		electrumRequestDataArray[i].resetUsed();
+	}
+}
