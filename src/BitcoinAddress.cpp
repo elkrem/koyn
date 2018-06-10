@@ -123,7 +123,6 @@ uint8_t BitcoinAddress::getPublicKey(uint8_t * container)
 
 uint8_t BitcoinAddress::getPublicKey(char * container)
 {
-	Serial.write(publicKey,65);
 	bin2hex(container,publicKey,65);
 	container[131]='\0';
 	return 130;
