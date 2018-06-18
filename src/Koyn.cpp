@@ -1898,7 +1898,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 						if(accumilativeAmount>totalTransactionAmount){break;}
 					}
 				}
-				if(accumilativeAmount!=0){changeAmount = accumilativeAmount-totalTransactionAmount;}else{/*Return Error*/}
+				if(accumilativeAmount >= totalTransactionAmount){changeAmount = accumilativeAmount-totalTransactionAmount;}else{return TRANSACTION_BUILD_ERROR;}
 				uint8_t hash[32];
 				uint8_t signature[64];
 				uint8_t scriptPubKey[25];

@@ -26,6 +26,7 @@
 #define ADDRESS_INVALID					0x04
 #define INVALID_AMOUNT					0x05
 #define TRANSACTION_PASSED 				0x06
+#define TRANSACTION_BUILD_ERROR			0xFE
 
 #define MAIN_NET_VERSION 0x00
 #define TEST_NET_VERSION 0x6F
@@ -86,9 +87,9 @@
 #define LONGEST_CHAIN_AT_FORK 6
 
 /* BitcoinHeader class definitions */
-#define HEADER_ERROR	0
-#define HEADER_VALID	1
-#define SAME_HEADER		2
-#define FORKED			3
-#define FORK_VALID		4
-#define INVALID			5
+#define HEADER_ERROR	0x0
+#define HEADER_VALID	0x1
+#define SAME_HEADER		0x2
+#define FORKED			0x3
+#define FORK_VALID		0x4
+#define INVALID			0xFE
