@@ -414,7 +414,7 @@ int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 								/* Not error but this is a case where the fork is updated while still the previous headers
 								   didn't reach
 							    */
-								return ERROR;
+								return HEADER_ERROR;
 							}
 						}
 					}else{
@@ -1538,6 +1538,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 				SD.remove(&fileNameUtxo[0]);
 				userAddress->clearBalance();
 			}
+			return TRACKING_ADDRESS;
 		}
 	}
 }
@@ -1594,6 +1595,9 @@ bool KoynClass::isAddressTracked(BitcoinAddress * userAddress)
 	if(isInit)
 	{
 		return userAddress->tracked;
+	}else
+	{
+		return TRACKING_ADDRESS_ERROR;
 	}
 }
 
@@ -1602,6 +1606,9 @@ WiFiClient * KoynClass::getMainClient()
 	if(mainClient)
 	{
 		return mainClient;
+	}else
+	{
+		return NULL;
 	}
 }
 
@@ -1639,6 +1646,9 @@ bool KoynClass::isSynced()
 	if(isInit)
 	{
 		return synchronized;
+	}else
+	{
+		return false;
 	}
 }
 
@@ -1763,6 +1773,9 @@ uint32_t KoynClass::getBlockNumber()
 	if(isInit)
 	{
 		return totalBlockNumb;
+	}else
+	{
+		return 0;
 	}
 }
 
@@ -1996,6 +2009,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 			    }
 			}
 		    utxoFile.close();
+		    return TRANSACTION_PASSED;
 		}
 	}
 }
