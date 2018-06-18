@@ -1826,6 +1826,8 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 		String fileNameUtxo = "koyn/addresses/" + String(&addr[26])+"/"+"utxo";
 		String fileNameTx = "koyn/addresses/" + String(&addr[26])+"/"+"tx";
 		String fileNameFinalTx = "koyn/addresses/" + String(&addr[26])+"/"+"finaltx";
+		if(SD.exists(&fileNameTx[0])){SD.remove(&fileNameTx[0]);}
+		if(SD.exists(&fileNameFinalTx[0])){SD.remove(&fileNameFinalTx[0]);}
 		if(SD.exists(&fileNameUtxo[0]))
 		{
 			File utxoFile = SD.open(&fileNameUtxo[0],FILE_READ);
