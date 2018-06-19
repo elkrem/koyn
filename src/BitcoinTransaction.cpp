@@ -227,11 +227,12 @@ uint8_t BitcoinTransaction::getHash(uint8_t * container)
 	return 32;
 }
 
-uint8_t BitcoinTransaction::getHash(const char * container)
+uint8_t BitcoinTransaction::getHash(char * container)
 {
 	uint8_t hash[32];
 	doubleSha256(hash,rawTx,transcationLength);
-	bin2hex((char *)container,hash,32);
+	bin2hex(container,hash,32);
+	container[65]='\0';
 	return 64;
 }
 

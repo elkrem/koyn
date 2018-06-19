@@ -14,7 +14,7 @@ public:
 	uint8_t getInputsCount();
 	uint8_t getOutputsCount();
 	uint8_t getHash(uint8_t *);
-	uint8_t getHash(const char *);
+	uint8_t getHash(char *);
 	uint32_t getBlockNumber();
 	uint32_t getConfirmations();
 private:
