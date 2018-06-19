@@ -160,7 +160,9 @@ uint8_t BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
 		}
 		if(lastInptAdd[0]>33)
 		{
-			memcpy(addr->publicKey,lastInptAdd+1,65);
+			uint8_t publicKey[65];
+			memcpy(publicKey,lastInptAdd+1,65);
+			uECC_compress(publicKey,addr->compPubKey,addr->curve);
 			addr->calculateAddress(KEY_PUBLIC);
 		}else
 		{

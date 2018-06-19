@@ -40,10 +40,10 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 		calculateAddress(KEY_COMPRESSED_PUBLIC);
 	}else if(keyType == KEY_PUBLIC && keyLen == 129)
 	{
-		uint8_t pubKey[65];
-		hex2bin(pubKey,key,keyLen);
-		memcpy(publicKey,pubKey,65);
-		calculateAddress(KEY_PUBLIC);
+		uint8_t publicKey[65];
+		hex2bin(publicKey,key,keyLen);
+		uECC_compress(publicKey,compPubKey,curve);
+		calculateAddress(KEY_COMPRESSED_PUBLIC);
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGES)
@@ -68,8 +68,8 @@ BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
 		calculateAddress(KEY_COMPRESSED_PUBLIC);
 	}else if(keyType == KEY_PUBLIC)
 	{
-		memcpy(publicKey,key,65);
-		calculateAddress(KEY_PUBLIC);
+		uECC_compress(key,compPubKey,curve);
+		calculateAddress(KEY_COMPRESSED_PUBLIC);
 	}else
 	{
 		#if defined(ENABLE_DEBUG_MESSAGES)
@@ -85,7 +85,9 @@ BitcoinAddress::BitcoinAddress(bool generateKeysImplicitly)
 		tracked= false;
 		isShellAddress = false;
 		init();
+		uint8_t publicKey[65];
 		uECC_make_key(publicKey,privateKey,curve);
+		uECC_compress(publicKey,compPubKey,curve);
 		calculateAddress(KEY_PRIVATE);
 	}else
 	{
@@ -100,7 +102,6 @@ void BitcoinAddress::init()
 	uECC_set_rng(&RNG);
 	curve =  uECC_secp256k1();
 	memset(privateKey,0,32);
-	memset(publicKey,0,65);
 	memset(compPubKey,0,33);
 	memset(address,0,36);
 	status[64]='\0';
@@ -121,24 +122,11 @@ uint8_t BitcoinAddress::getPrivateKey(char * container)
 
 uint8_t BitcoinAddress::getPublicKey(uint8_t * container)
 {
-	memcpy(container,publicKey,65);
-	return 65;
-}
-
-uint8_t BitcoinAddress::getPublicKey(char * container)
-{
-	bin2hex(container,publicKey,65);
-	container[131]='\0';
-	return 130;
-}
-
-uint8_t BitcoinAddress::getCompressedPublicKey(uint8_t * container)
-{
 	memcpy(container,compPubKey,33);
 	return 33;
 }
 
-uint8_t BitcoinAddress::getCompressedPublicKey(char * container)
+uint8_t BitcoinAddress::getPublicKey(char * container)
 {
 	bin2hex(container,compPubKey,33);
 	container[67]='\0';
@@ -178,12 +166,8 @@ void BitcoinAddress::calculateAddress(uint8_t keyType)
 	uint8_t final[25];
 	if(keyType == KEY_PRIVATE || keyType == KEY_WIF)
 	{
+		uint8_t publicKey[65];
 		uECC_compute_public_key(privateKey,publicKey,curve);
-		uECC_compress(publicKey,compPubKey,curve);
-		sha256(hash,compPubKey,33);
-		mbedtls_ripemd160(hash,32,final+1);
-	}else if(keyType == KEY_PUBLIC)
-	{
 		uECC_compress(publicKey,compPubKey,curve);
 		sha256(hash,compPubKey,33);
 		mbedtls_ripemd160(hash,32,final+1);

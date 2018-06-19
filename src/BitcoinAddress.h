@@ -42,8 +42,6 @@ public:
 	uint8_t getPrivateKey(char *);
 	uint8_t getPublicKey(uint8_t *);
 	uint8_t getPublicKey(char *);
-	uint8_t getCompressedPublicKey(uint8_t *);
-	uint8_t getCompressedPublicKey(char *);
 	uint8_t getWif(char *);
 	uint8_t getEncoded(char *);
 	bool isTracked();
@@ -67,7 +65,6 @@ private:
 	void calculateAddress(uint8_t );
 	void clearBalance();
 	uint8_t privateKey[32];
-	uint8_t publicKey[65];
 	uint8_t compPubKey[33];
 	char address[36];
 	char status[65];

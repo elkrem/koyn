@@ -1975,7 +1975,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				    	transactionFile.write(derSignature,derSignatureLen);
 				    	transactionFile.write(0x21);
 				    	uint8_t compPubKey[33];
-				    	from->getCompressedPublicKey(compPubKey);
+				    	from->getPublicKey(compPubKey);
 				    	transactionFile.write(compPubKey,33);
 				    	transactionFile.write((uint8_t*)&sequence,4);
 					}
