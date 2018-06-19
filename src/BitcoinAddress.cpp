@@ -5,6 +5,7 @@ BitcoinAddress::BitcoinAddress(const char * key,uint8_t keyType)
 {
 	tracked = false;
 	gotAddressRef = false;
+	isShellAddress = false;
 	init();
 	uint8_t keyLen = strlen(key);
 	if(keyType == ADDRESS_ENCODED && (keyLen >=25 && keyLen <=35))
@@ -55,6 +56,7 @@ BitcoinAddress::BitcoinAddress(uint8_t * key,uint8_t keyType)
 {
 	tracked = false;
 	gotAddressRef = false;
+	isShellAddress = false; 
 	init();
     if(keyType == KEY_PRIVATE)
 	{
@@ -81,12 +83,14 @@ BitcoinAddress::BitcoinAddress(bool generateKeysImplicitly)
 	if(generateKeysImplicitly)
 	{
 		tracked= false;
+		isShellAddress = false;
 		init();
 		uECC_make_key(publicKey,privateKey,curve);
 		calculateAddress(KEY_PRIVATE);
 	}else
 	{
 		tracked= false;
+		isShellAddress = true;
 		init();
 	}
 }

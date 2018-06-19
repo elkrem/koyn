@@ -73,6 +73,7 @@ private:
 	char status[65];
 	bool tracked;
 	bool gotAddressRef;
+	bool isShellAddress;
 	uint64_t confirmedBalance;
 	uint64_t unconfirmedBalance;
 	AddressHistory lastTxHash;

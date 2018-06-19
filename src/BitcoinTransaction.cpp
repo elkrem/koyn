@@ -90,8 +90,9 @@ void BitcoinTransaction::setHeight(int32_t _height)
 	unconfirmedIterations=0;
 }
 
-bool BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
+uint8_t BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
 {
+	if(!addr->isShellAddress){return ADDRESS_TYPE_ERROR;}
 	if(index<inputNo)
 	{
 		uint8_t * lastInptAdd = &rawTx[5];
@@ -166,15 +167,16 @@ bool BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
 			memcpy(addr->compPubKey,lastInptAdd+1,33);
 			addr->calculateAddress(KEY_COMPRESSED_PUBLIC);
 		}
-		return true;
+		return ADDRESS_RETREIVED;
 	}else
 	{
-		return false;
+		return INDEX_ERROR;
 	}
 }
 
-bool BitcoinTransaction::getOutput(uint8_t index,BitcoinAddress * addr)
+uint8_t BitcoinTransaction::getOutput(uint8_t index,BitcoinAddress * addr)
 {
+	if(!addr->isShellAddress){return ADDRESS_TYPE_ERROR;}
 	if(index<outNo)
 	{
 		uint8_t * lastoutAdd = outputScriptsStart;
@@ -192,10 +194,10 @@ bool BitcoinTransaction::getOutput(uint8_t index,BitcoinAddress * addr)
 		}
 		memcpy(addr->compPubKey,lastoutAdd+1,lastoutAdd[0]);
 		addr->calculateAddress(KEY_SCRIPT_HASH);
-		return true;
+		return ADDRESS_RETREIVED;
 	}else
 	{
-		return false;
+		return INDEX_ERROR;
 	}
 }
 
@@ -211,6 +213,9 @@ uint64_t BitcoinTransaction::getOutputAmount(uint8_t index)
 		}
 		memcpy(&temp,lastoutAdd,8);
 		return temp;
+	}else
+	{
+		return INDEX_ERROR;
 	}
 }
 
