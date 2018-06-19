@@ -8,6 +8,7 @@
 #include "Ripemd160/Ripemd160.h"
 #include <ESP8266WiFi.h>
 #include "Config.h"
+#include "Literals.h"
 #include "JsonMessage.h"
 #include "ElectrumRequests.h"
 #include "Hash.h"
