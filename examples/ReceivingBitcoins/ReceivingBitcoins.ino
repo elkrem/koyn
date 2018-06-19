@@ -3,7 +3,7 @@
 Receiving Bitcoins Example
 
 By using this example, you can turn on a light bulb relay connected
-to pin 13 when 0.01 Bitcoins is sent to a specific address.
+to pin 16 when 0.01 Bitcoins is sent to a specific address.
 
 Note: You need to connect to your WiFi network at the beginning of
 the setup() function before calling Koyn.begin()
@@ -13,8 +13,8 @@ the setup() function before calling Koyn.begin()
 /* Include Koyn library. */
 #include "Koyn.h"
 
-/* Assign a light bulb to pin 13. */
-#define LIGHT_BULB_RELAY 13
+/* Assign a light bulb to pin 16. */
+#define LIGHT_BULB_RELAY 16
 /* Required payment value for the light bulb in satoshis. (0.01 BTC) */
 #define PAYMENT_VALUE 1000000
 /* Create a Bitcoin address with the encoded address ex."mqBPVCaTaJDVGruNTkTD3CKTVMYqmVow6R" */
