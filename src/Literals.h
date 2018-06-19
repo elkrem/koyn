@@ -77,9 +77,9 @@
 #define LONGEST_CHAIN_AT_FORK 6
 
 /* BitcoinHeader class definitions */
-#define HEADER_ERROR	0x0
-#define HEADER_VALID	0x1
-#define SAME_HEADER		0x2
-#define FORKED			0x3
-#define FORK_VALID		0x4
+#define HEADER_ERROR	0x00
+#define HEADER_VALID	0x01
+#define SAME_HEADER		0x02
+#define FORKED			0x03
+#define FORK_VALID		0x04
 #define INVALID			0xFE
