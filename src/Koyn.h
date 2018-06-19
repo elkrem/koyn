@@ -56,8 +56,8 @@ private:
 	BitcoinFork forks[MAX_CONNECTED_SERVERS];
 	void updateTotalBlockNumb();
 	void setMainClient();
-	int8_t verifyBlockHeaders(BitcoinHeader*);
-	int8_t catchingUpFork(BitcoinHeader*);
+	uint8_t verifyBlockHeaders(BitcoinHeader*);
+	uint8_t catchingUpFork(BitcoinHeader*);
 	int8_t getAddressPointerIndex(ElectrumRequestData * );
 	void syncWithServers();
 	void connectToServers();

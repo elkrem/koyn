@@ -151,7 +151,7 @@ void KoynClass::syncWithServers()
 	// request.subscribeToPeers();
 }
 
-int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
+uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 {
 	reorganizeMainChain();
 	if(currhdr && currhdr->isHeaderValid())
@@ -282,7 +282,7 @@ int8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 	}
 }
 
-int8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
+uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 {
 	#if defined(ENABLE_DEBUG_MESSAGES)
 	Serial.println("Catching Fork ");
