@@ -27,7 +27,7 @@ static const uint8_t emptyArray[64]={};
 class KoynClass {
 public:
 	KoynClass();
-	void begin(bool=false);
+	void begin();
 	void run();
 	void initialize();
 	uint8_t trackAddress(BitcoinAddress * );
@@ -82,7 +82,6 @@ private:
 	bool synchronized;
 	bool firstLevel;
 	bool requestsSent;
-	bool verify;
 	bool bigFile;
 	bool lastMerkleVerified;
 	bool isFirstMerkle;

@@ -28,7 +28,7 @@ void KoynClass::initialize()
 	request.resetRequests();
 }
 
-void KoynClass::begin(bool _verify)
+void KoynClass::begin()
 {
 	#ifdef	USE_MAIN_NET
 	#error Main net currently not supported
@@ -38,7 +38,6 @@ void KoynClass::begin(bool _verify)
 	#endif
 	if(!isInit)
 	{
-		verify = _verify;
 		checkSDCardMounted();
 		checkDirAvailability();
 		connectToServers();
@@ -89,52 +88,25 @@ void KoynClass::checkDirAvailability()
 
 		if(blkHeaderFile.available())
 		{
-			if(verify)
+			#if defined(ENABLE_DEBUG_MESSAGES)
+			Serial.println(F("Verification Skiped.."));
+			#endif
+			totalBlockNumb = ((blkHeaderFile.size()) / 80)-1;
+			chunkNo= totalBlockNumb/2016;
+			blkHeaderFile.seek(blkHeaderFile.size() - 80);
+			int i=0;
+			uint8_t lastHeaderFromFile[80];
+			while (blkHeaderFile.available())
 			{
-				#if defined(ENABLE_DEBUG_MESSAGES)
-				Serial.println(F("Start Verifying"));
-				#endif
-				while (blkHeaderFile.available())
-				{
-					uint8_t currentHeader[80];
-					totalBlockNumb = (blkHeaderFile.size() / 80)-1;
-					for (uint32_t i = 0; i < totalBlockNumb; i++)
-					{
-						for (uint16_t j = 0; j < 80; j++)
-						{
-							currentHeader[j] = blkHeaderFile.read();
-						}
-						header.setHeader(currentHeader,i);
-						switch(verifyBlockHeaders(&header))
-						{
-							case HEADER_VALID: break;
-							case INVALID: return;
-						}
-						header.setNull();
-					}
-				}
-			}else
-			{
-				#if defined(ENABLE_DEBUG_MESSAGES)
-				Serial.println(F("Verification Skiped.."));
-				#endif
-				totalBlockNumb = ((blkHeaderFile.size()) / 80)-1;
-				chunkNo= totalBlockNumb/2016;
-				blkHeaderFile.seek(blkHeaderFile.size() - 80);
-				int i=0;
-				uint8_t lastHeaderFromFile[80];
-				while (blkHeaderFile.available())
-				{
-					lastHeaderFromFile[i] = blkHeaderFile.read();
-					i++;
-				}
-				lastHeader.setHeader(lastHeaderFromFile,totalBlockNumb);
-				#if defined(ENABLE_DEBUG_MESSAGES)
-				lastHeader.printHeader();
-				Serial.println(totalBlockNumb);
-				Serial.println(chunkNo);
-				#endif
+				lastHeaderFromFile[i] = blkHeaderFile.read();
+				i++;
 			}
+			lastHeader.setHeader(lastHeaderFromFile,totalBlockNumb);
+			#if defined(ENABLE_DEBUG_MESSAGES)
+			lastHeader.printHeader();
+			Serial.println(totalBlockNumb);
+			Serial.println(chunkNo);
+			#endif
 		}
 	}else
 	{
