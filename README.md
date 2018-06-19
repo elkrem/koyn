@@ -14,19 +14,19 @@ Currently, it can only works with Bitcoin testnet **(no mainnet support yet)**. 
 
 Arduino boards support is initially limited as well, please check below for more info.
 
-The public interface is also not finalized, it can be changed before the first release.
+The public interface is also not finalized, it can be changed a bit during the initial releases.
 
 ## Light Clients
 
-Light Bitcoin clients (nodes) doesn't store the full transaction history (blockchain) of the network (unlike full clients). They only download the headers (80 bytes every ~10 minutes) of the created blocks to be able to verify that a particular transaction was indeed included and accepted by the network. The concept is often referred to by the term *SPV*.
+Light Bitcoin clients (nodes) doesn't store the full transaction history (blockchain) of the network (unlike full clients). They only download the headers (80 bytes every ~10 minutes) of the created blocks to be able to verify that a particular transaction was indeed included and accepted by the network. The concept is often referred to by the term *SPV* (Simplified Payment Verification).
 
-There are two popular protocols for SPV clients. Bitcoin Core and Electrum, they pretty much have the same concept. The core protocol works with raw bytes and Electrum is JSON based. Our library supports only Electrum protocol for now, thus it only works with Electrum servers.
+There are two popular protocols for SPV clients. Bitcoin Core and Electrum, they pretty much have the same concept. The core protocol works with raw bytes and Electrum is JSON based. This library supports only Electrum protocol for now, thus it only works with Electrum servers.
 
 ## Hardware Requirements
 
 Currently the library requires an ESP8266 based board connected with an SPI microSD card module to work.
 
-The microSD card needs to be a single partition, FAT formatted and has at least 1GB of space. It doesn't need to be empty as we create a new directory on its root named `koyn`.
+The microSD card needs to be a single partition, FAT formatted, fast (class 10) and has at least 1GB of space. It doesn't need to be empty as we create a new directory on its root named `koyn`.
 
 ## Boards Support
 
@@ -64,25 +64,34 @@ If you are using PlatformIO, the library can be installed from their library man
 
 ## Blockchain Headers Syncing
 
-If you chose to sync and validate on the board directly starting from the genesis block, time can vary from tens of minutes to hours depending on your sketch and network conditions.
+You can chose to sync and validate the headers on the board directly starting from the genesis block, but it can take from tens of minutes to hours depending on your sketch and network conditions.
 
-So it is advised to preload the microSD card with the latest headers before hand to cut some time.
+So it is advised to preload the microSD card with the latest headers on a host machine before hand using one of the methods below, then rename it to `blkhdrs` and place it in `/koyn` directory on the microSD.
 
-If you are trusting Electrum.org, you can download the headers directly from their website.
+**Using Our Tool (Recommended)**
+
+We developed a command line tool based on [BitcoinJ](https://github.com/bitcoinj/bitcoinj) library that validates and downloads the Bitcoin blockchain headers to a file on your local machine.
+
+First make sure you have a [Java Runtime Environment](https://java.com/en/download/) installed on your host machine and accessible from your `PATH`. Then download the latest [release](https://github.com/elkrem/koyn-sync) of our tool for either the mainnet or the testnet. Then run the executable or call `java -jar koyn-sync.jar` from a command line terminal. (Make sure you are connected to the Internet, and the working directory is writable)
+
+The tool will download the headers to your working directory and create either `./mainnet/blkhdrs` or `./testnet/blkhdrs` depending on the executable you ran. (Logging messages will show its progress)
+
+**From Electrum Website**
+
+If you trust Electrum.org, you can download the headers directly from their website and the library will sync the rest of the headers when started.
 
 - Bitcoin [Testnet Headers](https://download.electrum.org/testnet_headers) (till August, 2017)
 - Bitcoin [Mainnet Headers](https://download.electrum.org/blockchain_headers) (till August, 2017)
 
-If you don't trust their headers, install Electrum client on your machine if you don't have it, run it, let it sync and copy the synced headers file to `/koyn` directory on the microSD and rename it to `blkhdrs`.
+**From Electrum App**
 
-**Notes**
+Install Electrum client on your machine if you don't have it, run it, let it sync.
 
-- Electrum versions >=3.1.0 **does not** sync the headers from the genesis block and rely on the concept of checkpoints. So to sync using Electrum please use version below 3.1.0.
-- You may need to supply `--testnet` parameter before running the Electrum executable if you need to sync the **testnet** headers.
-- On Windows, the headers file is located in `%APPDATA%\Electrum\blockchain_headers` or `%APPDATA%\Electrum\testnet\blockchain_headers` if you are using the testnet.
-- On Mac and Linux, the headers file is located in `~/.electrum/blockchain_headers` or `~/.electrum/testnet/blockchain_headers` if you are using the testnet.
-- After preloading the headers to `/koyn/blkhdrs` you can use `Koyn.begin(true);` in your `setup()` to validate them one by one starting from the genesis (this can take some time).
-- In future releases we will supply a command line tool to ease the download and verification of the headers locally without relying on Electrum client at all.
+You may need to supply `--testnet` parameter before running the Electrum executable if you need to sync the **testnet** headers.
+
+On Windows, the headers file is located in `%APPDATA%\Electrum\blockchain_headers` or `%APPDATA%\Electrum\testnet\blockchain_headers` if you are using the testnet. On Mac and Linux, the headers file is located in `~/.electrum/blockchain_headers` or `~/.electrum/testnet/blockchain_headers` if you are using the testnet.
+
+Note: Electrum versions >=3.1.0 **does not** sync the headers from the genesis block and rely on the concept of checkpoints. So to sync using Electrum please use version below 3.1.0.
 
 ## Usage
 
@@ -195,7 +204,7 @@ Examples that cover most of our APIs can be found [here](examples).
 
 ## Documentation
 
-Documentation for all of the usable public methods, classes and configuration can be found [here](DOCUMENTATION.md).
+Documentation for all of the usable public methods, classes and configuration can be found in our [Wiki](https://github.com/elkrem/koyn/wiki).
 
 ## Configuration And Defaults
 
@@ -221,17 +230,6 @@ Debug messages can be enabled on the default Serial interface through the same f
 - [ ] Support logical hierarchy for deterministic wallets (BIP44).
 - [ ] Add APIs to ease the workflow of payment channels.
 - [ ] Add APIs to ease the prototyping of hardware wallets.
-
-<!--## Performance
-
-The tests below are for ESP8266 based boards
-
-- 1000 double Sha256 hashes: ~XXXms (Hashing power:)
-- Syncing and validating Bitcoin testnet blockchain headers (May 2018): ~XXXms
-- Validating testnet blockchain headers from genesis block (May 2018): ~XXXms
-- Transaction signing for 2 inputs and 2 outputs: ~XXXms
-- Validating merkle proofs for a transaction: ~XXXms
-- Bare Minimum sketch uses ~314220 bytes of program storage space and its global variables use ~40288 bytes of dynamic memory.-->
 
 ## Notes and Caveats
 
