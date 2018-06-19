@@ -298,11 +298,9 @@ void ElectrumRequests::broadcastTransaction(File * transactionFile)
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			
-			Koyn.getMainClient()->print("{\"jsonrpc\":\"2.0\",");
-			Koyn.getMainClient()->print(String("\"id\":")+String(currentReq->getReqId()));
-			Koyn.getMainClient()->print(",\"method\":\"blockchain.address.subscribe\",\"params\":[\"");
-			while(transactionFile->available()){Koyn.getMainClient()->print(transactionFile->read());}
+			Koyn.getMainClient()->print(String("{\"id\":")+String(currentReq->getReqId()));
+			Koyn.getMainClient()->print(",\"method\":\"blockchain.transaction.broadcast\",\"params\":[\"");
+			while(transactionFile->available()){Koyn.getMainClient()->write(transactionFile->read());}
 			Koyn.getMainClient()->print("\"]}\n");
 			currentReq->setReqType(BROADCAST_TRANSACTION_BIT);
 			currentReq->setUsed();
