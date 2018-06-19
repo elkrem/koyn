@@ -8,13 +8,13 @@ class BitcoinTransaction{
 public:
 	BitcoinTransaction();
 	BitcoinTransaction(const BitcoinTransaction *);
-	bool getInput(uint8_t ,BitcoinAddress *);
-	bool getOutput(uint8_t,BitcoinAddress *);
+	uint8_t getInput(uint8_t ,BitcoinAddress *);
+	uint8_t getOutput(uint8_t,BitcoinAddress *);
 	uint64_t getOutputAmount(uint8_t);
 	uint8_t getInputsCount();
 	uint8_t getOutputsCount();
 	uint8_t getHash(uint8_t *);
-	uint8_t getHash(const char *);
+	uint8_t getHash(char *);
 	uint32_t getBlockNumber();
 	uint32_t getConfirmations();
 private:

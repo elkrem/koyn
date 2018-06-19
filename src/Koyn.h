@@ -8,6 +8,7 @@
 #include "Ripemd160/Ripemd160.h"
 #include <ESP8266WiFi.h>
 #include "Config.h"
+#include "Literals.h"
 #include "JsonMessage.h"
 #include "ElectrumRequests.h"
 #include "Hash.h"
@@ -26,7 +27,7 @@ static const uint8_t emptyArray[64]={};
 class KoynClass {
 public:
 	KoynClass();
-	void begin(bool=false);
+	void begin();
 	void run();
 	void initialize();
 	uint8_t trackAddress(BitcoinAddress * );
@@ -55,8 +56,8 @@ private:
 	BitcoinFork forks[MAX_CONNECTED_SERVERS];
 	void updateTotalBlockNumb();
 	void setMainClient();
-	int8_t verifyBlockHeaders(BitcoinHeader*);
-	int8_t catchingUpFork(BitcoinHeader*);
+	uint8_t verifyBlockHeaders(BitcoinHeader*);
+	uint8_t catchingUpFork(BitcoinHeader*);
 	int8_t getAddressPointerIndex(ElectrumRequestData * );
 	void syncWithServers();
 	void connectToServers();
@@ -81,7 +82,6 @@ private:
 	bool synchronized;
 	bool firstLevel;
 	bool requestsSent;
-	bool verify;
 	bool bigFile;
 	bool lastMerkleVerified;
 	bool isFirstMerkle;
