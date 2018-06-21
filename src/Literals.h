@@ -21,9 +21,9 @@
 #define KEY_PUBLIC 				0x05
 #define KEY_SCRIPT_HASH			0x06
 
+#define TRACKING_ADDRESS_ERROR		   0x00
 #define MAX_ADDRESSES_TRACKED_REACHED  0x01
 #define TRACKING_ADDRESS			   0x02
-#define TRACKING_ADDRESS_ERROR		   0x03
 #define MAIN_NET_NOT_SUPPORTED		   0xFF
 
 /* Koyn class definitions */
