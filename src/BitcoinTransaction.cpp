@@ -169,7 +169,7 @@ uint8_t BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
 			memcpy(addr->compPubKey,lastInptAdd+1,33);
 			addr->calculateAddress(KEY_COMPRESSED_PUBLIC);
 		}
-		return ADDRESS_RETREIVED;
+		return ADDRESS_RETRIEVED;
 	}else
 	{
 		return INDEX_ERROR;
@@ -196,7 +196,7 @@ uint8_t BitcoinTransaction::getOutput(uint8_t index,BitcoinAddress * addr)
 		}
 		memcpy(addr->compPubKey,lastoutAdd+1,lastoutAdd[0]);
 		addr->calculateAddress(KEY_SCRIPT_HASH);
-		return ADDRESS_RETREIVED;
+		return ADDRESS_RETRIEVED;
 	}else
 	{
 		return INDEX_ERROR;

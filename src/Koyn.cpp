@@ -1781,7 +1781,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 
 		if(totalTransactionAmount > from->getConfirmedBalance())
 		{
-			return ADDRESS_INSUFFECIENT_BALANCE;
+			return ADDRESS_INSUFFICIENT_BALANCE;
 		}
 
 		if(!memcmp(privKey,emptyArray,32))
