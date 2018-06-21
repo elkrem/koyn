@@ -29,7 +29,7 @@ void setup()
 
   /* Initialize the library and the microSD card. */
   Koyn.begin();
-  /* Subscribe to new incomming transactions with a callback. */
+  /* Subscribe to new incoming transactions with a callback. */
   Koyn.onNewTransaction(&paymentCallback);
   /* Set light bulb relay pin mode to output. */
   pinMode(LIGHT_BULB_RELAY, OUTPUT);
@@ -56,7 +56,7 @@ void paymentCallback(BitcoinTransaction tx)
   {
     /* Create an empty address. */
     BitcoinAddress to;
-    /* Retreiving to address from transaction. */
+    /* Retrieving to address from transaction. */
     tx.getOutput(i, &to);
     /* Check if the bitcoins were sent to me. */
     if (to == myAddress)
