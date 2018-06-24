@@ -280,7 +280,7 @@ uint32_t BitcoinTransaction::getConfirmations()
 {
 	if(inBlock())
 	{
-		return Koyn.getBlockNumber()-getBlockNumber(); 
+		return (Koyn.getBlockNumber()-getBlockNumber())+1; 
 	}else
 	{
 		unconfirmedIterations++;
