@@ -72,7 +72,7 @@ So it is advised to preload the microSD card with the latest headers on a host m
 
 We developed a command line tool based on [BitcoinJ](https://github.com/bitcoinj/bitcoinj) library that validates and downloads the Bitcoin blockchain headers to a file on your local machine.
 
-First make sure you have a [Java Runtime Environment](https://java.com/en/download/) installed on your host machine and accessible from your `PATH`. Then download the latest [release](https://github.com/elkrem/koyn-sync) of our tool for either the mainnet or the testnet. Then run the executable or call `java -jar koyn-sync.jar` from a command line terminal. (Make sure you are connected to the Internet, and the working directory is writable)
+First make sure you have a [Java Runtime Environment](https://java.com/en/download/) installed on your host machine and accessible from your `PATH`. Then download the latest [release](https://github.com/elkrem/koyn-sync/releases) of our tool for either the mainnet or the testnet. Then run the executable or call `java -jar koyn-sync.jar` from a command line terminal. (Make sure you are connected to the Internet, and the working directory is writable)
 
 The tool will download the headers to your working directory and create either `./mainnet/blkhdrs` or `./testnet/blkhdrs` depending on the executable you ran. (Logging messages will show its progress)
 
@@ -204,7 +204,7 @@ Examples that cover most of our APIs can be found [here](examples).
 
 ## Documentation
 
-Documentation for all of the usable public methods, classes and configuration can be found in our [Wiki](https://github.com/elkrem/koyn/wiki).
+Documentation for all of the usable public methods, classes and configuration can be found in our [Wiki](https://github.com/elkrem/koyn/wiki/Docs).
 
 ## Configuration And Defaults
 
@@ -220,6 +220,7 @@ Debug messages can be enabled on the default Serial interface through the same f
 - [x] Track transactions to user's addresses.
 - [x] Validates incoming transactions and making sure they were accepted by the network.
 - [x] Sign and send transactions (from user's addresses) to the network.
+- [ ] Support headers checkpoints.
 - [ ] Support Bitcoin mainnet.
 - [ ] Support additional WiFi connected Arduino boards.
 - [ ] Support custom transactions.
