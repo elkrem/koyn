@@ -64,7 +64,7 @@ If you are using PlatformIO, the library can be installed from their library man
 
 ## Blockchain Headers Syncing
 
-You can chose to sync and validate the headers on the board directly starting from the genesis block, but it can take from tens of minutes to hours depending on your sketch and network conditions.
+You can choose to sync and validate the headers on the board directly starting from the genesis block, but it can take from tens of minutes to hours depending on your sketch and network conditions.
 
 So it is advised to preload the microSD card with the latest headers on a host machine before hand using one of the methods below, then rename it to `blkhdrs` and place it in `/koyn` directory on the microSD.
 
