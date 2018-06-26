@@ -72,9 +72,9 @@ So it is advised to preload the microSD card with the latest headers on a host m
 
 We developed a command line tool based on [BitcoinJ](https://github.com/bitcoinj/bitcoinj) library that validates and downloads the Bitcoin blockchain headers to a file on your local machine.
 
-First make sure you have a [Java Runtime Environment](https://java.com/en/download/) installed on your host machine and accessible from your `PATH`. Then download the latest [release](https://github.com/elkrem/koyn-sync/releases) of our tool for either the mainnet or the testnet. Then run the executable or call `java -jar koyn-sync.jar` from a command line terminal. (Make sure you are connected to the Internet, and the working directory is writable)
+First make sure you have a [Java Runtime Environment](https://java.com/en/download/) installed on your host machine and accessible from your `PATH`. Then download the latest [release](https://github.com/elkrem/koyn-sync) of our tool. Then run the executable or call `java -jar koyn-sync-VERSION.jar` from a command line terminal. (Make sure you are connected to the Internet, and the working directory is writable)
 
-The tool will download the headers to your working directory and create either `./mainnet/blkhdrs` or `./testnet/blkhdrs` depending on the executable you ran. (Logging messages will show its progress)
+The tool will download the headers to your working directory and create either `./koyn/mainnet/blkhdrs` or `./koyn/testnet/blkhdrs` depending on the supplied [flags](https://github.com/elkrem/koyn-sync#optional-flags). (Logging messages will show its progress)
 
 **From Electrum Website**
 
