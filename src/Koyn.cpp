@@ -68,9 +68,16 @@ void KoynClass::checkDirAvailability()
 		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Removing Response folder"));
 		#endif
-		String dirName = "/koyn/responses";
-  		FatFile directory = SD.open(dirName);
-  		directory.rmRfStar();
+		String fileName = "/koyn/responses";
+		FatFile file = SD.open(fileName);
+		if(file.isDir())
+		{
+			file.rmRfStar();
+		}else if(file.isFile())
+		{
+			Serial.println(F("Response folder was corrupted!"));
+			SD.remove(&fileName[0]);
+		}
 	}
 	::delay(200);
 	SD.mkdir("koyn/responses");
