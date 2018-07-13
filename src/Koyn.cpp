@@ -154,6 +154,7 @@ uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 				Serial.println(F("Genisis Block verified"));
 				#endif
 				lastHeader=*currhdr;
+				return HEADER_VALID;
 			}
 		}else{
 
@@ -179,29 +180,32 @@ uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 				    uint8_t hash1[32];
 				    uint8_t hash2[32];
 				    lastHeader.getHash(hash1);
-					currhdr->getPrevHash(hash2);
-					if(!memcmp(hash1,hash2,32))
-					{
-						#if defined(ENABLE_DEBUG_MESSAGES)
-						Serial.print(headerHeight);
-						Serial.println(F("Valid "));
-						#endif
-						File blkHdrFile = SD.open("koyn/blkhdrs",FILE_WRITE);
-						if(blkHdrFile)
+						currhdr->getPrevHash(hash2);
+						if(!memcmp(hash1,hash2,32))
 						{
-							blkHdrFile.write(currhdr->completeHeader,80);
-							blkHdrFile.close();
-						}
-						lastHeader = *currhdr;
-						if(isNewBlockCallbackAssigned)
+							#if defined(ENABLE_DEBUG_MESSAGES)
+							Serial.print(headerHeight);
+							Serial.println(F("Valid "));
+							#endif
+							File blkHdrFile = SD.open("koyn/blkhdrs",FILE_WRITE);
+							if(blkHdrFile)
+							{
+								blkHdrFile.write(currhdr->completeHeader,80);
+								blkHdrFile.close();
+							}else
+							{
+								return ERROR_OPEN_FILE;
+							}
+							lastHeader = *currhdr;
+							if(isNewBlockCallbackAssigned)
+							{
+								(*newBlockCallback)(headerHeight);
+							}
+							return HEADER_VALID;
+						}else
 						{
-							(*newBlockCallback)(headerHeight);
+							return catchingUpFork(currhdr);
 						}
-						return HEADER_VALID;
-					}else
-					{
-						return catchingUpFork(currhdr);
-					}
 				}else if(headerHeight == lastHeader.height)
 				{
 					if(lastHeader == *currhdr)
@@ -212,11 +216,11 @@ uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 						Serial.println(F("Same header"));
 						#endif
 						return SAME_HEADER;
-					}else if(lastHeader !=*currhdr)
+					}else
 					{
 						return catchingUpFork(currhdr);
 					}
-				}else if(headerHeight < lastHeader.height)
+				}else
 				{
 					bool fork;
 					for(int i=0;i<MAX_CONNECTED_SERVERS;i++){if(forks[i].exists()){fork=true;break;}}
@@ -242,11 +246,14 @@ uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 								Serial.println(F("Got parent header "));
 								Serial.println(headerHeight);
 								#endif
-								break;
+								prevHeader=*currhdr;
+								return FORK_VALID;
 							}
-							prevHeader=*currhdr;
-							return FORK_VALID;
+							return HEADER_ERROR;
 						}
+					}else
+					{
+						return HEADER_ERROR;
 					}
 				}
 			}else
@@ -258,6 +265,9 @@ uint8_t KoynClass::verifyBlockHeaders(BitcoinHeader * currhdr)
 				return INVALID;
 			}
 		}
+	}else
+	{
+		return INVALID;
 	}
 }
 
@@ -306,6 +316,7 @@ uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Failed to open 1"));
 							#endif
+							return ERROR_OPEN_FILE;
 						}
 					}
 				}else if(headerHeight == forks[i].getLastHeader()->height)
@@ -319,6 +330,7 @@ uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 					}else
 					{
 						/* Here we should create another fork, as the same last height wasn't equal the two branches*/
+						return HEADER_ERROR;
 					}
 				}else if(headerHeight < forks[i].getLastHeader()->height)
 				{
@@ -386,6 +398,9 @@ uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 											request.getBlockHeader(headerHeight-1);
 										}
 										return FORK_VALID;
+									}else
+									{
+										return ERROR_OPEN_FILE;
 									}
 								}
 							}else if(tempHeader.height<headerHeight)
@@ -395,13 +410,20 @@ uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 							    */
 								return HEADER_ERROR;
 							}
+						}else
+						{
+							return ERROR_NO_DATA_IN_FILE;
 						}
 					}else{
 						#if defined(ENABLE_DEBUG_MESSAGES)
 						Serial.println(F("Failed to open 2"));
 						#endif
+						return ERROR_OPEN_FILE;
 					}
 				}
+			}else
+			{
+				return HEADER_ERROR;
 			}
 		}
 	}
@@ -421,6 +443,7 @@ uint8_t KoynClass::catchingUpFork(BitcoinHeader *currhdr)
 		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Failed to open 0"));
 		#endif
+		return ERROR_OPEN_FILE;
 	}
 	forks[currentClientNo].setLastHeader(currhdr);
 	request.getBlockHeader(headerHeight-1);
@@ -858,7 +881,8 @@ bool KoynClass::parseReceivedChunk()
 	}
 	file.seek(0);
 	if(file.available())
-	{	char data[8];
+	{
+		char data[8];
 		file.read(data,8);
 		while(memcmp(data,"\"result\"",8))
 		{
@@ -925,6 +949,9 @@ bool KoynClass::parseReceivedChunk()
 		}
 		reparseFile = false;
 		return true;
+	}else
+	{
+		return false;
 	}
 }
 
@@ -1518,7 +1545,13 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 				userAddress->clearBalance();
 			}
 			return TRACKING_ADDRESS;
+		}else
+		{
+				return TRACKING_ADDRESS_ERROR;
 		}
+	}else
+	{
+			return LIBRARY_NOT_INITIALIZED;
 	}
 }
 
@@ -1695,6 +1728,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 			}else
 			{
 				/* Drop connection, server is too slow */
+				return false;
 			}
 		}
 		if(totalBlockNumb<=currentHeaderHeight)
@@ -1738,6 +1772,9 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 				return true;
 			}
 		}else if(totalBlockNumb>currentHeaderHeight)
+		{
+			return false;
+		}else
 		{
 			return false;
 		}
@@ -1924,13 +1961,13 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 			    {
 			    	transactionFile.write((uint8_t *)&version,4);
 			    	transactionFile.write(i);
-					for(int j=0;j<i;j++)
-					{
-						transactionHash(hash,preImage,preImageSize,j);
-						do {
-					        uECC_sign(privKey, hash, 32, signature, from->curve);
-					        yield();
-					    } while ((signature[0] & 0x80) || (signature[32] & 0x80));
+						for(int j=0;j<i;j++)
+						{
+							transactionHash(hash,preImage,preImageSize,j);
+							do {
+						        uECC_sign(privKey, hash, 32, signature, from->curve);
+						        yield();
+						    } while ((signature[0] & 0x80) || (signature[32] & 0x80));
 					    uint8_t derSignatureLen = 0x47;
 					    uint8_t derSignature[derSignatureLen];
 					    derSignature[0]= ASN1_BMPSTRING;
@@ -1944,8 +1981,8 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					    derSignature[70]=0x01;
 
 				    	uint8_t data[36];
-						utxoFile.seek(48*indexArray[j]);
-						utxoFile.read(data,36);
+							utxoFile.seek(48*indexArray[j]);
+							utxoFile.read(data,36);
 				    	transactionFile.write(data,32);
 				    	transactionFile.write(data+32,4);
 				    	uint8_t scriptSigLen = derSignatureLen+33+2;
@@ -1957,9 +1994,9 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				    	from->getPublicKey(compPubKey);
 				    	transactionFile.write(compPubKey,33);
 				    	transactionFile.write((uint8_t*)&sequence,4);
-					}
+						}
 
-					transactionFile.write(outputNo);
+						transactionFile.write(outputNo);
 			    	transactionFile.write((uint8_t*)&amount,8);
 			    	transactionFile.write(0x19);
 			    	to->getScriptPubKey(scriptPubKey,25);
@@ -1972,7 +2009,10 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				    	transactionFile.write(scriptPubKey,25);
 			    	}
 		    		transactionFile.write((uint8_t *)&lockTime,4);
-			    }
+			    }else
+					{
+						return ERROR_OPEN_FILE;
+					}
 			    transactionFile.close();
 			    transactionFile = SD.open(&fileNameTx[0],FILE_READ);
 			    File finalFile = SD.open(&fileNameFinalTx[0],FILE_WRITE);
@@ -1986,18 +2026,33 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					    request.broadcastTransaction(&transactionFile);
 					    transactionFile.close();
 					    SD.remove(&fileNameFinalTx[0]);
-				    }
-			    }
+				    }else
+						{
+							return ERROR_OPEN_FILE;
+						}
+			    }else
+					{
+						return TRANSACTION_BUILD_ERROR;
+					}
+			}else
+			{
+				return ERROR_OPEN_FILE;
 			}
 		    utxoFile.close();
 		    return TRANSACTION_PASSED;
+		}else
+		{
+			return MISSING_FILE;
 		}
+	}else
+	{
+		return LIBRARY_NOT_INITIALIZED;
 	}
 }
 
 uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t amount, uint64_t fees)
 {
-	spend(from,to,amount,fees,from);
+	return spend(from,to,amount,fees,from);
 }
 
 

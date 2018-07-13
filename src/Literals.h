@@ -24,7 +24,7 @@
 #define TRACKING_ADDRESS_ERROR		   0x00
 #define MAX_ADDRESSES_TRACKED_REACHED  0x01
 #define TRACKING_ADDRESS			   0x02
-#define MAIN_NET_NOT_SUPPORTED		   0xFF
+#define MAIN_NET_NOT_SUPPORTED		   0x03
 
 /* Koyn class definitions */
 #define MAIN_CLIENT	0
@@ -52,6 +52,10 @@
 #define BROADCAST_TRANSACTION_BIT		13
 #define MERKLE_PROOF					14
 
+#define LIBRARY_NOT_INITIALIZED 0xFF
+#define MISSING_FILE  0xFE
+#define ERROR_OPEN_FILE 0xFD
+#define ERROR_NO_DATA_IN_FILE 0xFC
 /* BitcoinTransaction class definitions */
 #define ASN1_BMPSTRING		0x30
 #define ASN1_INTEGER		0x02
@@ -82,4 +86,4 @@
 #define SAME_HEADER		0x02
 #define FORKED			0x03
 #define FORK_VALID		0x04
-#define INVALID			0xFE
+#define INVALID			0x05
