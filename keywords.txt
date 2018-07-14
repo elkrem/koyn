@@ -9,40 +9,40 @@ Koyn	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-spend			KEYWORD2		RESERVED_WORD
-begin			KEYWORD2		RESERVED_WORD
-run			KEYWORD2		RESERVED_WORD
-trackAddress			KEYWORD2		RESERVED_WORD
-unTrackAddress			KEYWORD2		RESERVED_WORD
-unTrackAllAddresses			KEYWORD2		RESERVED_WORD
-isAddressTracked			KEYWORD2		RESERVED_WORD
-isSynced			KEYWORD2		RESERVED_WORD
-onNewTransaction			KEYWORD2		RESERVED_WORD
-onNewBlockHeader			KEYWORD2		RESERVED_WORD
-onError			KEYWORD2		RESERVED_WORD
-delay			KEYWORD2		RESERVED_WORD
-getBlockNumber			KEYWORD2		RESERVED_WORD
-getPrivateKey			KEYWORD2		RESERVED_WORD
-getPublicKey			KEYWORD2		RESERVED_WORD
-getCompressedPublicKey			KEYWORD2		RESERVED_WORD
-getWif			KEYWORD2		RESERVED_WORD
-getEncoded			KEYWORD2		RESERVED_WORD
-isTracked			KEYWORD2		RESERVED_WORD
-getBalance			KEYWORD2		RESERVED_WORD
-getConfirmedBalance			KEYWORD2		RESERVED_WORD
-getUnconfirmedBalance			KEYWORD2		RESERVED_WORD
-getInput			KEYWORD2		RESERVED_WORD
-getOutput			KEYWORD2		RESERVED_WORD
-getOutputAmount			KEYWORD2		RESERVED_WORD
+spend	KEYWORD2		RESERVED_WORD
+begin	KEYWORD2		RESERVED_WORD
+run	KEYWORD2		RESERVED_WORD
+trackAddress	KEYWORD2		RESERVED_WORD
+unTrackAddress	KEYWORD2		RESERVED_WORD
+unTrackAllAddresses	KEYWORD2		RESERVED_WORD
+isAddressTracked	KEYWORD2		RESERVED_WORD
+isSynced	KEYWORD2		RESERVED_WORD
+onNewTransaction	KEYWORD2		RESERVED_WORD
+onNewBlockHeader	KEYWORD2		RESERVED_WORD
+onError	KEYWORD2		RESERVED_WORD
+delay	KEYWORD2		RESERVED_WORD
+getBlockNumber	KEYWORD2		RESERVED_WORD
+getPrivateKey	KEYWORD2		RESERVED_WORD
+getPublicKey	KEYWORD2		RESERVED_WORD
+getCompressedPublicKey	KEYWORD2		RESERVED_WORD
+getWif	KEYWORD2		RESERVED_WORD
+getEncoded	KEYWORD2		RESERVED_WORD
+isTracked	KEYWORD2		RESERVED_WORD
+getBalance	KEYWORD2		RESERVED_WORD
+getConfirmedBalance	KEYWORD2		RESERVED_WORD
+getUnconfirmedBalance	KEYWORD2		RESERVED_WORD
+getInput	KEYWORD2		RESERVED_WORD
+getOutput	KEYWORD2		RESERVED_WORD
+getOutputAmount	KEYWORD2		RESERVED_WORD
 getInputsCount	KEYOWRD2
-getOutputsCount			KEYWORD2		RESERVED_WORD
-getHash			KEYWORD2		RESERVED_WORD
+getOutputsCount	KEYWORD2		RESERVED_WORD
+getHash	KEYWORD2		RESERVED_WORD
 getBlockNumber	KEYWROD2
-getConfirmations			KEYWORD2		RESERVED_WORD
+getConfirmations	KEYWORD2		RESERVED_WORD
 #######################################
 # Structures and Classes (KEYWORD3)
 #######################################
-BitcoinAddress	KEYWORD3		RESERVED_WORD	RESERVED_WORD
+BitcoinAddress	KEYWORD3		RESERVED_WORD		RESERVED_WORD
 BitcoinTransaction	KEYWORD3		RESERVED_WORD
 #######################################
 # Constants And Literals (KEYWORD2)
