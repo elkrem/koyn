@@ -462,8 +462,10 @@ void KoynClass::reorganizeMainChain()
 			Serial.println(i);
 			#endif
 			BitcoinHeader t1 = *forks[i].getLastHeader();
-			uint32_t forkDifficulty = *((uint32_t *)(t1.completeHeader+72));
-			uint32_t tempDifficulty = *((uint32_t*)(tempHeader.completeHeader+72));
+			uint32_t forkDifficulty = 0;
+			memcpy(&forkDifficulty, t1.completeHeader+72, sizeof(forkDifficulty));
+			uint32_t tempDifficulty = 0;
+			memcpy(&tempDifficulty, tempHeader.completeHeader+72, sizeof(tempDifficulty));
 			if(forkDifficulty<tempDifficulty)
 			{
 				tempHeader=*forks[i].getLastHeader();
