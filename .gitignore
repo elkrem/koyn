@@ -3,3 +3,4 @@ thumbs.db
 *.zip
 *.sublime-project
 *.sublime-workspace
+*.vscode
