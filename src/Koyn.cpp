@@ -1228,7 +1228,6 @@ void KoynClass::processInput(String key,String value)
 				{
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 					{
-						int32_t diff = totalBlockNumb-incomingTx[i].getBlockNumber();
 						if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
 							#if defined(ENABLE_DEBUG_MESSAGES)

@@ -47,7 +47,6 @@ static void reverseBin(uint8_t * cont, uint32_t len)
 static long long my_atoll(char *instr)
 {
   long long retval;
-  int i;
 
   retval = 0;
   for (; *instr; instr++) {
