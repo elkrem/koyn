@@ -4,7 +4,7 @@
 
 
 
-static const char *mainnetServerNames[] PROGMEM=
+/*static const char *mainnetServerNames[] PROGMEM=
 {
 	"E-X.not.fyi",
 	"ELECTRUMX.not.fyi",
@@ -45,7 +45,7 @@ static const char *mainnetServerNames[] PROGMEM=
 	"us.electrum.be",
 	"us01.hamster.science",
 	"currentlane.lovebitco.in"
-};
+};*/
 
 
 static const char *testnetServerNames[]=

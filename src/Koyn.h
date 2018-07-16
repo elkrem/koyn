@@ -13,7 +13,6 @@
 #include "ElectrumRequests.h"
 #include "Hash.h"
 #include "Utils.h"
-#include "Servers.h"
 #include "JsonStreamingParser/JsonStreamingParser.h"
 #include "JsonStreamingParser/JsonListener.h"
 #include "AddressHistory.h"
