@@ -282,6 +282,7 @@ uint8_t BitcoinAddress::getAddressType()
 		case '2':	return P2SH_ADDRESS;
 		#endif
 	}
+	return ADDRESS_TYPE_ERROR;
 }
 
 bool BitcoinAddress::operator==(BitcoinAddress& other)

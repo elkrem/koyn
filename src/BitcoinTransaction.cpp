@@ -82,6 +82,7 @@ bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 	}
 	outNo=lastInptAdd[0];
 	outputScriptsStart = lastInptAdd+1;
+	return true;
 }
 
 void BitcoinTransaction::setHeight(int32_t _height)
