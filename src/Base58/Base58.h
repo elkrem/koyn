@@ -6,7 +6,7 @@
 #define BASE58_DECODE_OUT_OF_RANGE 1
 
 #if defined(ENABLE_DEBUG_MESSAGES)
-static void print_array(unsigned char* arr, int len){
+inline void print_array(unsigned char* arr, int len){
 	int i = 0;
 	for (i=0; i<len; ++i){
 		Serial.printf("%02X ",arr[i]);
@@ -17,7 +17,7 @@ static void print_array(unsigned char* arr, int len){
 
 static unsigned char alphabet[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-static int base58Encode(uint8_t * input,const unsigned int inLen,char *output,unsigned int outLen)
+inline int base58Encode(uint8_t * input,const unsigned int inLen,char *output,unsigned int outLen)
 {
 	int i,j,tmp;
 	memset(output,0,outLen);
@@ -41,7 +41,7 @@ static int base58Encode(uint8_t * input,const unsigned int inLen,char *output,un
 
 
 
-static int base58Decode(const char* addr,const unsigned int addrLen,uint8_t *buf,unsigned int bufLen)
+inline int base58Decode(const char* addr,const unsigned int addrLen,uint8_t *buf,unsigned int bufLen)
 {
 	int i,j;
 	unsigned int tmp;

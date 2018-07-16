@@ -5,7 +5,7 @@
 
 
 
-static void hex2bin(uint8_t * cont,const char * data, uint32_t len)
+inline void hex2bin(uint8_t * cont,const char * data, uint32_t len)
 {
   if (len%2==0)
   {
@@ -21,7 +21,7 @@ static void hex2bin(uint8_t * cont,const char * data, uint32_t len)
 }
 
 
-static void bin2hex(char * cont,uint8_t * data, uint32_t len)
+inline void bin2hex(char * cont,uint8_t * data, uint32_t len)
 {
   int pos =0;
   char val[(len*2)+1];
@@ -34,7 +34,7 @@ static void bin2hex(char * cont,uint8_t * data, uint32_t len)
 }
 
 
-static void reverseBin(uint8_t * cont, uint32_t len)
+inline void reverseBin(uint8_t * cont, uint32_t len)
 {
   for (int i = 0, j = len - 1; i < len / 2; i++, j--)
   {
@@ -44,7 +44,7 @@ static void reverseBin(uint8_t * cont, uint32_t len)
   }
 }
 
-static long long my_atoll(char *instr)
+inline long long my_atoll(char *instr)
 {
   long long retval;
 
@@ -54,7 +54,7 @@ static long long my_atoll(char *instr)
   }
   return retval;
 }
-static String uint64ToString(uint64_t input) {
+inline String uint64ToString(uint64_t input) {
   String result = "";
   uint8_t base = 10;
 
@@ -71,7 +71,7 @@ static String uint64ToString(uint64_t input) {
   return result;
 }
 
-static bool convertFileToHexString(File *file1, File *file2)
+inline bool convertFileToHexString(File *file1, File *file2)
 {
   if(file1->isOpen()&&file2->isOpen())
   {

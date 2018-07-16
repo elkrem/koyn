@@ -6,7 +6,7 @@
 #include "Ripemd160/Ripemd160.h"
 
 
-static void sha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
+inline void sha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 {
 	Sha256.init();
 	for (int i = 0 ; i < len; i++) {
@@ -15,7 +15,7 @@ static void sha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 	memcpy(hashArray, Sha256.result(), 32);
 }
 
-static void transactionHash(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len, uint32_t inputNum)
+inline void transactionHash(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len, uint32_t inputNum)
 {
 	Sha256.init();
 	for(int i=0;i<5;i++)
@@ -55,7 +55,7 @@ static void transactionHash(uint8_t * hashArray,uint8_t * dataToHash, uint32_t l
 }
 
 
-static void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
+inline void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 {
 	for (int j = 0; j < 2; j++)
 	{
@@ -75,7 +75,7 @@ static void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 	}
 }
 
-static void ripemd160(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
+inline void ripemd160(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 {
 	mbedtls_ripemd160(dataToHash,len,hashArray);
 }

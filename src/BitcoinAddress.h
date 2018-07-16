@@ -3,7 +3,7 @@
 
 extern "C" {
 
-  static int RNG(uint8_t *dest, unsigned size) {
+  inline int RNG(uint8_t *dest, unsigned size) {
     // Use the least-significant bits from the ADC for an unconnected pin (or connected to a source of
     // random noise). This can take a long time to generate random data if the result of analogRead(0)
     // doesn't change very frequently.
