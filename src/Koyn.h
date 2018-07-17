@@ -68,12 +68,12 @@ private:
 	void getHeaderFromMainChain(BitcoinHeader *,uint32_t);
 	void reorganizeMainChain();
 	void removeUnconfirmedTransactions();
-	bool checkBlckNumAndValidate(int32_t);
+	bool checkBlckNumAndValidate(uint32_t);
 	void (*transactionCallback)(BitcoinTransaction);
 	void (*newBlockCallback)(uint32_t);
 	uint32_t lastTimeTaken;
-	int32_t totalBlockNumb;
-	int32_t fallingBackBlockHeight;
+	uint32_t totalBlockNumb;
+	uint32_t fallingBackBlockHeight;
 	uint32_t historyFileLastPos;
 	uint8_t saveResToFile;
 	uint8_t isMessage;

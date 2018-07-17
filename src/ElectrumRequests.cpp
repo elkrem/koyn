@@ -328,7 +328,7 @@ void ElectrumRequests::getTransaction(const char * txHash)
 
 ElectrumRequestData * ElectrumRequests::getElectrumRequestData()
 {
-	uint16_t i=0;
+	int i=0;
 	while(i<MAX_PARALLEL_REQUESTS)
 	{
 		if(!electrumRequestDataArray[i].isReqUsed())
@@ -340,9 +340,9 @@ ElectrumRequestData * ElectrumRequests::getElectrumRequestData()
 	return NULL;
 }
 
-ElectrumRequestData * ElectrumRequests::getElectrumRequestData(int reqNo)
+ElectrumRequestData * ElectrumRequests::getElectrumRequestData(unsigned int reqNo)
 {
-	uint16_t i=0;
+	int i=0;
 	while(i<MAX_PARALLEL_REQUESTS)
 	{
 		if(electrumRequestDataArray[i].getReqId()== reqNo)

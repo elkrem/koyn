@@ -19,12 +19,12 @@ static unsigned char alphabet[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkm
 
 inline int base58Encode(uint8_t * input,const unsigned int inLen,char *output,unsigned int outLen)
 {
-	int i,j,tmp;
+	unsigned int i,j,tmp;
 	memset(output,0,outLen);
 	for(i=0;i<inLen;i++)
 	{
 		unsigned int c = input[i] & (0xff) ;
-		for(j=outLen-1;j>=0;j--)
+		for(j=outLen-1;j==0;j--)
 		{
 			tmp = output[j] * 256 + c;
 			c = tmp/58;
@@ -43,7 +43,7 @@ inline int base58Encode(uint8_t * input,const unsigned int inLen,char *output,un
 
 inline int base58Decode(const char* addr,const unsigned int addrLen,uint8_t *buf,unsigned int bufLen)
 {
-	int i,j;
+	unsigned int i,j;
 	unsigned int tmp;
 	memset(buf,0,bufLen);
 	for(i=0;i<addrLen;i++)
@@ -64,7 +64,7 @@ inline int base58Decode(const char* addr,const unsigned int addrLen,uint8_t *buf
 			c -= 65;
 		}
 
-		for(j=bufLen-1;j>=0;j--)
+		for(j=bufLen-1;j==0;j--)
 		{
 			tmp = buf[j] * 58 + c;
 			c = (tmp & (~0xff)) >> 8;

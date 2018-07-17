@@ -44,7 +44,7 @@ bool BitcoinTransaction::setRawTx(char * rawData , uint32_t len)
 	for(int i=0;i<inputNo;i++)
 	{
 		lastInptAdd+=36;
-		uint32_t scriptSigLen;
+		uint32_t scriptSigLen = 0;
 		if(lastInptAdd[0]>0xfc)
 		{
 			/* This means that the script signature length is more than 1 byte */
@@ -100,7 +100,7 @@ uint8_t BitcoinTransaction::getInput(uint8_t index,BitcoinAddress * addr)
 		for(int i=0;i<index;i++)
 		{
 			lastInptAdd+=36;
-			uint32_t scriptSigLen;
+			uint32_t scriptSigLen = 0;
 			if(lastInptAdd[0]>0xfc)
 			{
 					/* This means that the script signature length is more than 1 byte */

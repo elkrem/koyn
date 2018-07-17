@@ -47,7 +47,7 @@ public:
 	void getTransaction(const char *);
 	void resetRequests();
 	ElectrumRequestData * getElectrumRequestData();
-	ElectrumRequestData * getElectrumRequestData(int);
+	ElectrumRequestData * getElectrumRequestData(unsigned int);
 private:
 	ElectrumRequestData electrumRequestDataArray[MAX_PARALLEL_REQUESTS];
 	JsonMessage jsonMessage;

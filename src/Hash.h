@@ -9,7 +9,7 @@
 inline void sha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 {
 	Sha256.init();
-	for (int i = 0 ; i < len; i++) {
+	for (unsigned int i = 0 ; i < len; i++) {
 		Sha256.write(dataToHash[i]);
 	}
 	memcpy(hashArray, Sha256.result(), 32);
@@ -62,7 +62,7 @@ inline void doubleSha256(uint8_t * hashArray,uint8_t * dataToHash, uint32_t len)
 		Sha256.init();
 		if (j == 0)
 		{
-			for (int i = 0 ; i < len; i++) {
+			for (unsigned int i = 0 ; i < len; i++) {
 				Sha256.write(dataToHash[i]);
 			}
 		} else if (j == 1)

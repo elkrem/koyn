@@ -25,7 +25,7 @@ inline void bin2hex(char * cont,uint8_t * data, uint32_t len)
 {
   int pos =0;
   char val[(len*2)+1];
-  for (int i=0; i<len; i++) {
+  for (unsigned int i=0; i<len; i++) {
     val[pos]="0123456789abcdef"[data[i]>>4];
     val[pos+1]="0123456789abcdef"[data[i]&0xf];
     pos+=2;
@@ -36,7 +36,7 @@ inline void bin2hex(char * cont,uint8_t * data, uint32_t len)
 
 inline void reverseBin(uint8_t * cont, uint32_t len)
 {
-  for (int i = 0, j = len - 1; i < len / 2; i++, j--)
+  for (unsigned int i = 0, j = len - 1; i < len / 2; i++, j--)
   {
     int temp = cont[i];
     cont[i] = cont[j];
@@ -89,7 +89,7 @@ inline bool convertFileToHexString(File *file1, File *file2)
       {
         uint8_t binData[remainder];
         char hexData[remainder*2];
-        for(int i=0;i<remainder;i++){binData[i]=file1->read();}
+        for(unsigned int i=0;i<remainder;i++){binData[i]=file1->read();}
         bin2hex(hexData,binData,remainder);
         file2->write(hexData,remainder*2);
       }

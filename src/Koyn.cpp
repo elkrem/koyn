@@ -702,7 +702,7 @@ void KoynClass::run()
 						uint32_t numberOfLeafs = merkleFile.size()/32;
 						userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
 						reverseBin(hash,32);
-						for(int j = 0 ;j<numberOfLeafs;j++)
+						for(unsigned int j = 0 ;j<numberOfLeafs;j++)
 						{
 							for(int i=0;i<32;i++){merkleLeaf[i]=merkleFile.read();}
 							reverseBin(merkleLeaf,32);
@@ -990,7 +990,7 @@ void KoynClass::parseReceivedTx()
 		#endif
 		char stringRawTx[count];
 		file.seek(pos);
-		for(int i=0;i<count;i++){stringRawTx[i]=file.read();}
+		for(unsigned int i=0;i<count;i++){stringRawTx[i]=file.read();}
 		for(int i=0;i<MAX_TRANSACTION_COUNT;i++)
 		{
 			if(!incomingTx[i].isUsed())
@@ -1699,11 +1699,11 @@ void KoynClass::getHeaderFromMainChain(BitcoinHeader * hdr,uint32_t height)
 	}
 }
 
-bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
+bool KoynClass::checkBlckNumAndValidate(uint32_t currentHeaderHeight)
 {
 	if(!noOfChunksNeeded)
 	{
-		int32_t tempForkHeight=0;
+		uint32_t tempForkHeight=0;
 		for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			uint32_t currentForkHeight = forks[i].getLastHeader()->getHeight();
@@ -1716,7 +1716,7 @@ bool KoynClass::checkBlckNumAndValidate(int32_t currentHeaderHeight)
 			{
 				if(!requestsSent)
 				{
-					for(int i=0;i<(currentHeaderHeight-tempForkHeight);i++){request.getBlockHeader(totalBlockNumb+i);}
+					for(unsigned int i=0;i<(currentHeaderHeight-tempForkHeight);i++){request.getBlockHeader(totalBlockNumb+i);}
 					fallingBackBlockHeight = currentHeaderHeight;
 					requestsSent =true;
 				}
@@ -1802,7 +1802,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 	if(isInit)
 	{
 		if(from->address[0]=='1'||from->address[0]=='3'){return MAIN_NET_NOT_SUPPORTED;}
-		long long totalTransactionAmount = amount+fees;
+		unsigned long long totalTransactionAmount = amount+fees;
 		uint8_t privKey[32];
 		char toAddr[36];
 		char changeAddr[36];
@@ -1854,7 +1854,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				uint32_t unspentTransactionCount = utxoFile.size()/48;
 				uint64_t amountArray[unspentTransactionCount];
 				uint8_t amountArrayIndex[unspentTransactionCount];
-				for(int i=0;i<unspentTransactionCount;i++){amountArrayIndex[i]=i;}
+				for(unsigned int i=0;i<unspentTransactionCount;i++){amountArrayIndex[i]=i;}
 				Serial.println(F("Allocated memory"));
 				uint32_t i=0;
 				while(utxoFile.available())
@@ -1866,9 +1866,9 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(F("Got All UTXO's Amount"));
 				#endif
-				for(int l=0;l<unspentTransactionCount;l++)
+				for(unsigned int l=0;l<unspentTransactionCount;l++)
 				{
-					for(int j=l+1;j<unspentTransactionCount;j++)
+					for(unsigned int j=l+1;j<unspentTransactionCount;j++)
 					{
 						if(amountArray[l]>amountArray[j])
 						{
@@ -1895,7 +1895,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 				int8_t indexArray[unspentTransactionCount];
 				uint64_t accumilativeAmount=0;
 				i=0;
-				for(int j=0;j<unspentTransactionCount;j++)
+				for(unsigned int j=0;j<unspentTransactionCount;j++)
 				{
 					if(amountArray[j]>=totalTransactionAmount)
 					{
@@ -1963,7 +1963,7 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 			    {
 			    	transactionFile.write((uint8_t *)&version,4);
 			    	transactionFile.write(i);
-						for(int j=0;j<i;j++)
+						for(unsigned int j=0;j<i;j++)
 						{
 							transactionHash(hash,preImage,preImageSize,j);
 							do {
