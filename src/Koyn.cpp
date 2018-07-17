@@ -1155,37 +1155,37 @@ void KoynClass::processInput(String key,String value)
 				Serial.println(F("request doesn't exist"));
 				#endif
 			}
-	}else if(key == "block_height" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "block_height" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		header.setNull();
 		int32_t _height = my_atoll(&value[0]);
 		header.height =  _height;
 		header.calcPos();
-	}else if(key == "version" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "version" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint32_t version = my_atoll(&value[0]);
 		memcpy(header.completeHeader,&version,4);
-	}else if(key == "prev_block_hash" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "prev_block_hash" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint8_t container[32];
 		hex2bin(container,&value[0],64);
 		reverseBin(container,32);
 		memcpy(header.completeHeader+4,container,32);
-	}else if(key == "merkle_root" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "merkle_root" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint8_t container[32];
 		hex2bin(container,&value[0],64);
 		reverseBin(container,32);
 		memcpy(header.completeHeader+36,container,32);
-	}else if(key == "timestamp" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "timestamp" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint32_t timestamp = my_atoll(&value[0]);
 		memcpy(header.completeHeader+68,&timestamp,4);
-	}else if(key == "bits" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "bits" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint32_t bits = my_atoll(&value[0]);
 		memcpy(header.completeHeader+72,&bits,4);
-	}else if(key == "nonce" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT))))
+	}else if(key == "nonce" && ((isMessage&(0x01<<BLOCK_HEAD_SUB))||(reqData&&(reqData->reqType&(uint32_t)(0x01<<BLOCK_HEADER_BIT)||reqData->reqType&(uint32_t)(0x01<<HEADERS_SUBS_BIT)))))
 	{
 		uint32_t nonce = my_atoll(&value[0]);
 		memcpy(header.completeHeader+76,&nonce,4);
