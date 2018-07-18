@@ -574,14 +574,14 @@ void KoynClass::reorganizeMainChain()
 
 void KoynClass::connectToServers()
 {
-	uint8_t mainNetArrSize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
+	uint16_t mainNetArrSize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
 	uint16_t serverNamesCount =0;
 	for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
 	{
 		char  servName[strlen_P(testnetServerNames[serverNamesCount])+1];
 		while(!clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
 		{
-			if(serverNamesCount <= mainNetArrSize)
+			if(serverNamesCount < mainNetArrSize-1)
 			{
 				serverNamesCount++;
 			}
