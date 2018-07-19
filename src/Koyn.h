@@ -60,6 +60,7 @@ private:
 	int8_t getAddressPointerIndex(ElectrumRequestData * );
 	void syncWithServers();
 	void connectToServers();
+	void reconnectToServers();
 	void processInput(String ,String );
 	bool parseReceivedChunk();
 	void checkSDCardMounted();
@@ -72,6 +73,7 @@ private:
 	void (*transactionCallback)(BitcoinTransaction);
 	void (*newBlockCallback)(uint32_t);
 	uint32_t lastTimeTaken;
+	uint32_t clientTimeout;
 	uint32_t totalBlockNumb;
 	uint32_t fallingBackBlockHeight;
 	uint32_t historyFileLastPos;
@@ -90,6 +92,8 @@ private:
 	bool reparseFile;
 	bool confirmedFlag;
 	bool isInit;
+	bool stopReconnecting;
+	bool clientTimeoutTaken;
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
 	BitcoinHeader prevHeader;
