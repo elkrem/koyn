@@ -24,20 +24,23 @@ There are two popular protocols for SPV clients. Bitcoin Core and Electrum, they
 
 ## Hardware Requirements
 
-Currently the library requires an ESP8266 based board connected with an SPI microSD card module to work.
+The library requires an ESP8266 or ESP32 based boards connected with an SPI microSD card module to work.
 
 The microSD card needs to be a single partition, FAT formatted, fast (class 10) and has at least 1GB of space. It doesn't need to be empty as we create a new directory on its root named `koyn`.
 
 ## Boards Support
 
-Initially we only support ESP8266 based boards. We have plans to support more boards in the near future beginning with ESP32.
+We only support ESP8266 and ESP32 based boards.
 
 These boards has been tested and known to work:
 
+#ESP8266
 - Adafruit Huzzah ESP8266
 - Wemos D1
 - SparkFun ESP8266 Thing
 - NodeMCU
+#ESP32
+- DOIT ESP32 DEVKIT V1
 
 These microSD card boards has been tested and known to work:
 
@@ -46,7 +49,8 @@ These microSD card boards has been tested and known to work:
 
 ## Installation
 
-Make sure you have the latest version of Arduino IDE with the latest [ESP8266 toolchain](https://github.com/esp8266/Arduino#installing-with-boards-manager).
+- Make sure you have the latest version of Arduino IDE with the latest [ESP8266 toolchain](https://github.com/esp8266/Arduino#installing-with-boards-manager).
+- For ESP32 follow these [instrcutions](https://github.com/espressif/arduino-esp32#installation-instructions) and make sure to correctly install ESP32 arduino core.
 
 **Using Library Manager (Recommended)**
 
