@@ -2,11 +2,15 @@
 #define Koyn_h
 
 #include <SPI.h>
+#if defined(ESP32)
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
 #include "SdFat/SdFat.h"
 #include "uECC/uECC.h"
 #include "Base58/Base58.h"
 #include "Ripemd160/Ripemd160.h"
-#include <ESP8266WiFi.h>
 #include "Config.h"
 #include "Literals.h"
 #include "JsonMessage.h"
