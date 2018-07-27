@@ -56,7 +56,7 @@ void KoynClass::checkSDCardMounted()
 		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(F("Mount SD card"));
 		#endif
-	}while(!SD.begin(SD_CARD_CHIP_SELECT,SD_SCK_MHZ(4)));
+	}while(!SD.begin(SD_CARD_CHIP_SELECT,SD_SCK_MHZ(10)));
 }
 
 void KoynClass::checkDirAvailability()
