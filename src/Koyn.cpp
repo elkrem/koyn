@@ -832,7 +832,8 @@ void KoynClass::run()
 
 		for(int i =0 ;i<MAX_CONNECTED_SERVERS;i++)
 		{
-			char buff[13];
+			char buff[14];
+			buff[13]='\0';
 			currentClientNo = i;
 			String dirName = "koyn/responses/client"+String(i);
 			FatFile directory = SD.open(dirName);
@@ -932,7 +933,8 @@ bool KoynClass::parseReceivedChunk()
 			char data;
 			bool endOfObject = false;
 			uint8_t currentHeader[80]={};
-			char currentHeaderString[160]={};
+			char currentHeaderString[161]={};
+			currentHeaderString[160]='\0';
 			for (uint16_t j = 0; j < 160; j++)
 			{
 				data = file.read();

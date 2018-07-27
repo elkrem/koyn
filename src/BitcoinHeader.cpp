@@ -176,8 +176,9 @@ bool BitcoinHeader::operator!=(BitcoinHeader& other)
 #if defined(ENABLE_DEBUG_MESSAGES)
 void BitcoinHeader::printHeader()
 {
-	char hdr2[160]={};
+	char hdr2[161]={};
+	hdr2[160]='\0';
 	bin2hex(hdr2,completeHeader,80);
-	Serial.write(hdr2,160);
+	Serial.print(hdr2);
 }
 #endif
