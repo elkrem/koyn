@@ -24,6 +24,20 @@
  */
 #ifndef FatApiConstants_h
 #define FatApiConstants_h
+// ESP32 _default_fcntl.h hack
+#undef O_READ
+#undef O_RDONLY
+#undef O_WRITE
+#undef O_WRONLY
+#undef O_RDWR
+#undef O_ACCMODE
+#undef O_APPEND
+#undef O_SYNC
+#undef O_TRUNC
+#undef O_AT_END
+#undef O_CREAT
+#undef O_EXCL
+//
 //------------------------------------------------------------------------------
 // use the gnu style oflag in open()
 /** open() oflag for reading */
