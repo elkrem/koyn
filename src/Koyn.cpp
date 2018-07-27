@@ -911,7 +911,7 @@ bool KoynClass::parseReceivedChunk()
 		file.read(data,8);
 		while(memcmp(data,"\"result\"",8))
 		{
-			for(int i=0;i<=7;i++){data[i]=data[i+1];}
+			for(int i=0;i<7;i++){data[i]=data[i+1];}
 			data[7]=file.read();
 		}
 		while(file.read()!='"');
@@ -995,7 +995,7 @@ void KoynClass::parseReceivedTx()
 		file.read(data,8);
 		while(memcmp(data,"\"result\"",8))
 		{
-			for(int i=0;i<=7;i++){data[i]=data[i+1];}
+			for(int i=0;i<7;i++){data[i]=data[i+1];}
 			data[7]=file.read();
 		}
 		while(file.read()!='"');
