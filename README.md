@@ -30,8 +30,6 @@ The microSD card needs to be a single partition, FAT formatted, fast (class 10) 
 
 ## Boards Support
 
-Library supports ESP8266 and ESP32 based boards.
-
 These boards has been tested and known to work:
 
 **ESP8266**
@@ -42,6 +40,8 @@ These boards has been tested and known to work:
 
 **ESP32**
 - DOIT ESP32 DEVKIT V1
+- ESPDUINO-32
+- SparkFun ESP32 Thing
 
 These microSD card boards has been tested and known to work:
 
