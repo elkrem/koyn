@@ -10,9 +10,9 @@ extern "C" {
     while (size) {
       uint8_t val = 0;
       for (unsigned i = 0; i < 8; ++i) {
-        int init = analogRead(0);
+        int init = analogRead(A0);
         int count = 0;
-        while (analogRead(0) == init) {
+        while (analogRead(A0) == init) {
           ++count;
         }
 
