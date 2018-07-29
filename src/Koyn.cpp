@@ -598,6 +598,7 @@ void KoynClass::connectToServers()
 					if(millis()- clientTimeout > MAX_TIMEOUT_FOR_CLIENT_CONNECTION && i!=0)
 					{
 						stopReconnecting = true;
+						request.resetRequests();
 						syncWithServers();
 					}   
 					return;
