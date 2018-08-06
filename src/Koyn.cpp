@@ -41,8 +41,6 @@ void KoynClass::begin()
 		checkSDCardMounted();
 		checkDirAvailability();
 		connectToServers();
-		setMainClient();
-		syncWithServers();
 		isInit=true;
 	}
 }
@@ -596,6 +594,7 @@ void KoynClass::connectToServers()
 					{
 						stopReconnecting = true;
 						request.resetRequests();
+						setMainClient();
 						syncWithServers();
 					}   
 					return;
@@ -615,6 +614,8 @@ void KoynClass::connectToServers()
 				#endif
 			}
 		}
+		setMainClient();
+		syncWithServers();
 	}
 }
 
@@ -1651,7 +1652,7 @@ void KoynClass::setMainClient()
 {
 	for(int i=0;i<MAX_CONNECTED_SERVERS;i++)
 	{
-		if(clientsArray[i].connected())
+		if(clientsArray[i].connected()&&!mainClient)
 		{
 			mainClient = &clientsArray[i];
 			return;
