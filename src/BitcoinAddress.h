@@ -48,7 +48,8 @@ public:
 	uint64_t getBalance();
 	uint64_t getConfirmedBalance();
 	uint64_t getUnconfirmedBalance();
-	void getScriptPubKey(uint8_t *,uint8_t);
+	uint8_t getScript(uint8_t *,uint8_t);
+	uint8_t getScriptHash(char *,uint8_t);
 	uint8_t getAddressType();
 	bool operator==(BitcoinAddress& );
 

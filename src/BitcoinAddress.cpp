@@ -246,7 +246,7 @@ void BitcoinAddress::setAddressStatus(char * _status)
 	memcpy(status,_status,64);
 }
 
-void BitcoinAddress::getScriptPubKey(uint8_t * container,uint8_t len)
+uint8_t BitcoinAddress::getScript(uint8_t * container,uint8_t len)
 {
 	uint8_t data[25];
  	base58Decode(address,strlen(address),data,25);
@@ -258,13 +258,35 @@ void BitcoinAddress::getScriptPubKey(uint8_t * container,uint8_t len)
 		container[23]=OP_EQUALVERIFY;
 		container[24]=OP_CHECKSIG;
 		memcpy(container+3,data+1,SIZE_OF_RIPE_HASH);
+		return 25;
 	}else if((address[0]=='2'||address[0]=='3')&&len==23)
 	{
 		container[0]=OP_HASH160;
 		container[1]=SIZE_OF_RIPE_HASH;
 		container[22]=OP_EQUAL;
 		memcpy(container+2,data+1,SIZE_OF_RIPE_HASH);
+		return 23;
+	}else
+	{
+		/* Error in address */
+		return 0;
 	}
+}
+
+uint8_t BitcoinAddress::getScriptHash(char * container,uint8_t len)
+{
+	if(len!=64)
+	{
+		/* Length is not correct */
+		return 0;
+	}
+	uint8_t scriptContainer[25]={};
+	uint8_t hash[32];
+	getScript(scriptContainer,25);
+	sha256(hash,scriptContainer,25);
+	reverseBin(hash,32);
+	bin2hex(container,hash,32);
+	return 64;
 }
 
 uint8_t BitcoinAddress::getAddressType()

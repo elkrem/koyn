@@ -708,7 +708,9 @@ void KoynClass::run()
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Getting Merkle Proofs"));
 							#endif
-							request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
+							char addressScriptHash[65]={};
+							userAddressPointerArray[i]->getScriptHash(addressScriptHash,64);
+							request.getMerkleProof(addressScriptHash,(const char *)txHash_str,userAddressPointerArray[i]->addressHistory.getHeight());
 							if(userAddressPointerArray[i]->addressHistory.isFirstMerkle){userAddressPointerArray[i]->addressHistory.isFirstMerkle=false;}
 							userAddressPointerArray[i]->addressHistory.historyFileLastPos = unverifiedHistoryFile.curPosition();
 							userAddressPointerArray[i]->addressHistory.lastMerkleVerified = false;
@@ -1081,7 +1083,7 @@ void KoynClass::processInput(String key,String value)
 		if(value == "blockchain.headers.subscribe")
 		{
 			isMessage |= (0x01<<BLOCK_HEAD_SUB);
-		}else if(value == "blockchain.address.subscribe")
+		}else if(value == "blockchain.scripthash.subscribe")
 		{
 			isMessage |= (0x01<<ADDRESS_SUB);
 		}
@@ -1101,15 +1103,17 @@ void KoynClass::processInput(String key,String value)
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
 				userAddressPointerArray[index]->getStatus(status);
-				char addr[36];
+				char addr[36]; 
+				char addressScriptHash[65]={};
 				userAddressPointerArray[index]->getEncoded(addr);
+				userAddressPointerArray[index]->getScriptHash(addressScriptHash,64);
 				String dirName = "koyn/addresses/" + String(&addr[26]);
 				String fileNameUtxo = dirName+"/"+"utxo";
 				String fileNameStatus = dirName+"/"+"status";
 				if(value!="null"&&!String(status).length())
 				{
-					request.getAddressHistory(addr);
-					request.listUtxo(addr);
+					request.getAddressHistory(addressScriptHash);
+					request.listUtxo(addressScriptHash);
 					if(SD.exists(&fileNameUtxo[0]))
 					{
 						SD.remove(&fileNameUtxo[0]);
@@ -1130,8 +1134,8 @@ void KoynClass::processInput(String key,String value)
 					#endif
 				}else if(value!="null")
 				{
-					request.getAddressHistory(addr);
-					request.listUtxo(addr);
+					request.getAddressHistory(addressScriptHash);
+					request.listUtxo(addressScriptHash);
 					if(SD.exists(&fileNameUtxo[0]))
 					{
 						SD.remove(&fileNameUtxo[0]);
@@ -1274,7 +1278,10 @@ void KoynClass::processInput(String key,String value)
 		{
 			for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 			{
-				if(userAddressPointerArray[i]!=NULL && !strcmp(userAddressPointerArray[i]->address,&value[0]))
+				if(userAddressPointerArray[i]==NULL){continue;}
+				char addressScriptHash[65]={};
+				userAddressPointerArray[i]->getScriptHash(addressScriptHash,64);
+				if(!memcmp((uint8_t *)addressScriptHash,&value[0],64))
 				{
 					addressPointer = userAddressPointerArray[i];
 				}
@@ -1287,14 +1294,16 @@ void KoynClass::processInput(String key,String value)
 			char status[65];
 			addressPointer->getStatus(status);
 			char addr[36];
+			char addressScriptHash[65]={};
 			addressPointer->getEncoded(addr);
+			addressPointer->getScriptHash(addressScriptHash,64);
 			String dirName = "koyn/addresses/" + String(&addr[26]);
 			String fileNameUtxo = dirName+"/"+"utxo";
 			String fileNameStatus = dirName+"/"+"status";
 			if(value!="null"&&!String(status).length())
 			{
-				request.getAddressHistory(addr);
-				request.listUtxo(addr);
+				request.getAddressHistory(addressScriptHash);
+				request.listUtxo(addressScriptHash);
 				if(SD.exists(&fileNameUtxo[0]))
 				{
 					SD.remove(&fileNameUtxo[0]);
@@ -1317,8 +1326,8 @@ void KoynClass::processInput(String key,String value)
 				addressPointer->resetGotAddress();
 			}else if(value!="null")
 			{
-				request.getAddressHistory(addr);
-				request.listUtxo(addr);
+				request.getAddressHistory(addressScriptHash);
+				request.listUtxo(addressScriptHash);
 				if(SD.exists(&fileNameUtxo[0]))
 				{
 					SD.remove(&fileNameUtxo[0]);
@@ -1529,11 +1538,13 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 			if(i==5){return MAX_ADDRESSES_TRACKED_REACHED;}
 			char addr[36];
 			userAddress->getEncoded(addr);
+			char addressScriptHash[65]={};
+			userAddress->getScriptHash(addressScriptHash,64);
 			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Tracking"));
 			#endif
-			request.subscribeToAddress(addr);
-			request.listUtxo(addr);
+			request.subscribeToAddress(addressScriptHash);
+			request.listUtxo(addressScriptHash);
 			userAddress->setTracked();
 			String dirName = "koyn/addresses/" + String(&addr[26]);
 			if(!SD.exists(&dirName[0]))
@@ -1960,18 +1971,18 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 					memcpy(ptr,data,32);ptr+=32;
 					memcpy(ptr,data+32,4);ptr+=4;
 					memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
-					from->getScriptPubKey(scriptPubKey,25);
+					from->getScript(scriptPubKey,25);
 					memcpy(ptr,scriptPubKey,25);ptr+=25;
 					memcpy(ptr,(uint8_t*)&sequence,4);ptr+=4;
 				}
 				memcpy(ptr,&outputNo,1);ptr+=1;
-				to->getScriptPubKey(scriptPubKey,25);
+				to->getScript(scriptPubKey,25);
 				memcpy(ptr,(uint8_t *)&amount,8);ptr+=8;
 				memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
 				memcpy(ptr,scriptPubKey,25);ptr+=25;
 				if(changeAmount)
 				{
-					change->getScriptPubKey(scriptPubKey,25);
+					change->getScript(scriptPubKey,25);
 					memcpy(ptr,(uint8_t *)&changeAmount,8);ptr+=8;
 					uint8_t scriptPubKeyLen = 0x19;
 					memcpy(ptr,&scriptPubKeyLen,1);ptr+=1;
@@ -2023,13 +2034,13 @@ uint8_t KoynClass::spend(BitcoinAddress * from, BitcoinAddress * to, uint64_t am
 						transactionFile.write(outputNo);
 			    	transactionFile.write((uint8_t*)&amount,8);
 			    	transactionFile.write(0x19);
-			    	to->getScriptPubKey(scriptPubKey,25);
+			    	to->getScript(scriptPubKey,25);
 			    	transactionFile.write(scriptPubKey,25);
 			    	if(changeAmount)
 			    	{
 			    		transactionFile.write((uint8_t*)&changeAmount,8);
 				    	transactionFile.write(0x19);
-				    	change->getScriptPubKey(scriptPubKey,25);
+				    	change->getScript(scriptPubKey,25);
 				    	transactionFile.write(scriptPubKey,25);
 			    	}
 		    		transactionFile.write((uint8_t *)&lockTime,4);
@@ -2113,7 +2124,10 @@ int8_t KoynClass::getAddressPointerIndex(ElectrumRequestData * reqDataPointer)
 {
 	for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++)
 	{
-		if(!strcmp(userAddressPointerArray[i]->address,(char *)reqDataPointer->dataString))
+		if(userAddressPointerArray[i]==NULL){continue;}
+		char addressScriptHash[65]={};
+		userAddressPointerArray[i]->getScriptHash(addressScriptHash,64);
+		if(!strcmp(addressScriptHash,(char *)reqDataPointer->dataString))
 		{
 			return i;
 		}

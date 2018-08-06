@@ -133,75 +133,75 @@ void ElectrumRequests::subscribeToBlockHeaders()
 	}
 }
 
-void ElectrumRequests::subscribeToAddress(const char  * address)
+void ElectrumRequests::subscribeToAddress(const char  * addressScriptHash)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.subscribe",address))+"\n");
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.scripthash.subscribe",addressScriptHash))+"\n");
 			currentReq->setReqType(ADDRESS_SUBS_BIT);
 			currentReq->setUsed();
-			memcpy(currentReq->dataString,address,strlen(address));
+			memcpy(currentReq->dataString,(uint8_t *)addressScriptHash,64);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
 	}
 }
 
-void ElectrumRequests::getAddressHistory(const char  * address)
+void ElectrumRequests::getAddressHistory(const char  * addressScriptHash)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.get_history",address))+"\n");
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.scripthash.get_history",addressScriptHash))+"\n");
 			currentReq->setReqType(ADRRESS_HISTORY_BIT);
 			currentReq->setUsed();
-			memcpy(currentReq->dataString,address,strlen(address));
+			memcpy(currentReq->dataString,(uint8_t *)addressScriptHash,64);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
 	}
 }
 
-void ElectrumRequests::getAddressBalance(const char  * address)
+void ElectrumRequests::getAddressBalance(const char  * addressScriptHash)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.get_balance",address))+"\n");
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.scripthash.get_balance",addressScriptHash))+"\n");
 			currentReq->setReqType(ADDRESS_BALANCE_BIT);
 			currentReq->setUsed();
-			memcpy(currentReq->dataString,address,strlen(address));
+			memcpy(currentReq->dataString,(uint8_t *)addressScriptHash,64);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
 	}
 }
 
-void ElectrumRequests::getMempool(const char  * address)
+void ElectrumRequests::getMempool(const char  * addressScriptHash)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.get_mempool",address))+"\n");
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.scripthash.get_mempool",addressScriptHash))+"\n");
 			currentReq->setReqType(ADDRESS_MEMPOOL_BIT);
 			currentReq->setUsed();
-			// memcpy(currentReq->dataString,address,strlen(address));
+			// memcpy(currentReq->dataString,addressScriptHash,32);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
 	}
 }
 
-void ElectrumRequests::getMerkleProof(const char * address,const char  * txHash,int height)
+void ElectrumRequests::getMerkleProof(const char * addressScriptHash,const char  * txHash,int height)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
@@ -211,7 +211,7 @@ void ElectrumRequests::getMerkleProof(const char * address,const char  * txHash,
 			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessage(currentReq->getReqId(),"blockchain.transaction.get_merkle",txHash,&height))+"\n");
 			currentReq->setReqType(MERKLE_PROOF);
 			currentReq->setUsed();
-			memcpy(currentReq->dataString,address,strlen(address));
+			memcpy(currentReq->dataString,(uint8_t *)addressScriptHash,64);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
@@ -238,17 +238,17 @@ void ElectrumRequests::getBlockHeader(int blockHeight)
 	}
 }
 
-void ElectrumRequests::listUtxo(const char  * address)
+void ElectrumRequests::listUtxo(const char  * addressScriptHash)
 {
 	if(Koyn.getMainClient()&&Koyn.getMainClient()->connected())
 	{
 		ElectrumRequestData * currentReq = ElectrumRequests::getElectrumRequestData();
 		if(currentReq)
 		{
-			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.address.listunspent",address))+"\n");
+			Koyn.getMainClient()->print(String(jsonMessage.createJsonMessageString(currentReq->getReqId(),"blockchain.scripthash.listunspent",addressScriptHash))+"\n");
 			currentReq->setReqType(ADDRESS_UTXO_BIT);
 			currentReq->setUsed();
-			memcpy(currentReq->dataString,address,strlen(address));
+			memcpy(currentReq->dataString,(uint8_t *)addressScriptHash,64);
 			aJson.deleteItem(jsonMessage.versionMessage);
 			free(jsonMessage.json);
 		}
