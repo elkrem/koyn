@@ -23,6 +23,10 @@ private:
 	uint8_t txHash[32];
 	int32_t height;
 	uint32_t leafPos;
+	bool lastMerkleVerified;
+	bool isFirstMerkle;
+	uint32_t historyFileLastPos;
+	friend class KoynClass;
 };
 
 

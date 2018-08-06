@@ -73,7 +73,7 @@ private:
 	bool isShellAddress;
 	uint64_t confirmedBalance;
 	uint64_t unconfirmedBalance;
-	AddressHistory lastTxHash;
+	AddressHistory addressHistory;
 	const struct uECC_Curve_t * curve;
 	friend class KoynClass;
 	friend class BitcoinTransaction;

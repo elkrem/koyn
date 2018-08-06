@@ -14,13 +14,10 @@ void KoynClass::initialize()
 	chunkNo =0;
 	saveResToFile = 0;
 	isMessage = 0;
-	historyFileLastPos = 0;
 	mainClient = NULL;
 	reqData = NULL;
 	bigFile = false;
 	synchronized = false;
-	lastMerkleVerified = false;
-	isFirstMerkle = true;
 	saveNextHistory = false;
 	reparseFile=false;
 	confirmedFlag=false;
@@ -662,10 +659,10 @@ void KoynClass::run()
 					String fileNameHistory = dirName+"/"+"history";
 					String fileNameMerkle = dirName+"/"+"merkle";
 					/* Requesting Merkle proofs */
-					if(SD.exists(&fileNameUnverifiedHistory[0])&&(lastMerkleVerified||isFirstMerkle))
+					if(SD.exists(&fileNameUnverifiedHistory[0])&&(userAddressPointerArray[i]->addressHistory.lastMerkleVerified||userAddressPointerArray[i]->addressHistory.isFirstMerkle))
 					{
 						File unverifiedHistoryFile = SD.open(&fileNameUnverifiedHistory[0],FILE_READ);
-						if(unverifiedHistoryFile&&historyFileLastPos==unverifiedHistoryFile.size())
+						if(unverifiedHistoryFile&&userAddressPointerArray[i]->addressHistory.historyFileLastPos==unverifiedHistoryFile.size())
 						{
 							if(SD.exists(&fileNameHistory[0]))
 							{
@@ -676,7 +673,7 @@ void KoynClass::run()
 								}
 								oldHistoryFile.close();
 								SD.remove(&fileNameUnverifiedHistory[0]);
-								historyFileLastPos=0;
+								userAddressPointerArray[i]->addressHistory.historyFileLastPos=0;
 							}else
 							{
 								if (!SD.chdir(&dirName[0])) {
@@ -685,7 +682,7 @@ void KoynClass::run()
 									#endif
 								}
 								unverifiedHistoryFile.rename(SD.vwd(), "history");
-								historyFileLastPos=0;
+								userAddressPointerArray[i]->addressHistory.historyFileLastPos=0;
 								if (!SD.chdir()) {
 									#if defined(ENABLE_DEBUG_MESSAGES)
 									Serial.println(F("chdir failed"));
@@ -695,7 +692,7 @@ void KoynClass::run()
 						}else if(unverifiedHistoryFile)
 						{
 							uint8_t container[36];
-							unverifiedHistoryFile.seek(historyFileLastPos);
+							unverifiedHistoryFile.seek(userAddressPointerArray[i]->addressHistory.historyFileLastPos);
 							if(unverifiedHistoryFile.available())
 							{
 								for(int i=0;i<36;i++)
@@ -703,17 +700,17 @@ void KoynClass::run()
 									container[i]=unverifiedHistoryFile.read();
 								}
 							}
-							userAddressPointerArray[i]->lastTxHash.copyData(container);
+							userAddressPointerArray[i]->addressHistory.copyData(container);
 							char txHash_str[65];
 							txHash_str[64]='\0';
-							userAddressPointerArray[i]->lastTxHash.getStringTxHash(txHash_str);
+							userAddressPointerArray[i]->addressHistory.getStringTxHash(txHash_str);
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Getting Merkle Proofs"));
 							#endif
 							request.getMerkleProof(addr,(const char *)txHash_str,userAddressPointerArray[i]->lastTxHash.getHeight());
-							if(isFirstMerkle){isFirstMerkle=false;}
-							historyFileLastPos = unverifiedHistoryFile.curPosition();
-							lastMerkleVerified = false;
+							if(userAddressPointerArray[i]->addressHistory.isFirstMerkle){userAddressPointerArray[i]->addressHistory.isFirstMerkle=false;}
+							userAddressPointerArray[i]->addressHistory.historyFileLastPos = unverifiedHistoryFile.curPosition();
+							userAddressPointerArray[i]->addressHistory.lastMerkleVerified = false;
 						}
 					}
 
@@ -726,9 +723,9 @@ void KoynClass::run()
 						uint8_t hash[32]={};
 						uint8_t arrayToHash[64];
 						uint8_t merkleLeaf[32];
-						uint32_t leafPos = userAddressPointerArray[i]->lastTxHash.getLeafPos();
+						uint32_t leafPos = userAddressPointerArray[i]->addressHistory.getLeafPos();
 						uint32_t numberOfLeafs = merkleFile.size()/32;
-						userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
+						userAddressPointerArray[i]->addressHistory.getTxHash(hash);
 						reverseBin(hash,32);
 						for(unsigned int j = 0 ;j<numberOfLeafs;j++)
 						{
@@ -750,7 +747,7 @@ void KoynClass::run()
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Merkle Verified ..! "));
 							#endif
-							lastMerkleVerified = true;
+							userAddressPointerArray[i]->addressHistory.lastMerkleVerified = true;
 							for(int j=0;j<MAX_TRANSACTION_COUNT;j++)
 							{
 								if(incomingTx[j].isUsed()&&!incomingTx[j].inBlock())
@@ -758,11 +755,11 @@ void KoynClass::run()
 									uint8_t txHash[32];
 									uint8_t hash[32];
 									incomingTx[j].getHash(txHash);
-									userAddressPointerArray[i]->lastTxHash.getTxHash(hash);
+									userAddressPointerArray[i]->addressHistory.getTxHash(hash);
 									reverseBin(hash,32);
 									if(!memcmp(txHash,hash,32))
 									{
-										incomingTx[j].setHeight(userAddressPointerArray[i]->lastTxHash.getHeight());
+										incomingTx[j].setHeight(userAddressPointerArray[i]->addressHistory.getHeight());
 										if(isTransactionCallbackAssigned)
 										{
 											(*transactionCallback)(incomingTx[j]);
@@ -775,7 +772,7 @@ void KoynClass::run()
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.println(F("Bad History Removing .."));
 							#endif
-							lastMerkleVerified = false;
+							userAddressPointerArray[i]->addressHistory.lastMerkleVerified = false;
 						}
 						SD.remove(&fileNameMerkle[0]);
 					}
@@ -1354,31 +1351,31 @@ void KoynClass::processInput(String key,String value)
 		#endif
 	}else if(key == "tx_hash" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADRRESS_HISTORY_BIT))))
 	{
-		addHistory.setTxHash(&value[0]);
+		tempAddressHistory.setTxHash(&value[0]);
 	}else if(key == "height" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADRRESS_HISTORY_BIT))))
 	{
-		addHistory.setHeight(my_atoll(&value[0]));
-		int32_t heightData = addHistory.getHeight();
+		tempAddressHistory.setHeight(my_atoll(&value[0]));
+		int32_t heightData = tempAddressHistory.getHeight();
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
 		char addr[36];
 		userAddressPointerArray[index]->getEncoded(addr);	
 		String dirName = "koyn/addresses/" + String(&addr[26]);
 		String fileNameUnverifiedHistory = dirName+"/"+"his_unveri";
-		if(heightData >0 && (saveNextHistory|| userAddressPointerArray[index]->lastTxHash.isNull()))
+		if(heightData >0 && (saveNextHistory|| userAddressPointerArray[index]->addressHistory.isNull()))
 		{
 			File historyFile = SD.open(&fileNameUnverifiedHistory[0],FILE_WRITE);
 			if(historyFile)
 			{
 				uint8_t hash[32];
-				addHistory.getTxHash(hash);
+				tempAddressHistory.getTxHash(hash);
 				historyFile.write(hash,32);
 				historyFile.write((uint8_t*)&heightData,4);
-				// addHistory.setNull();
+				// tempAddressHistory.setNull();
 			}
 			historyFile.close();
 		}
-		if(addHistory==userAddressPointerArray[index]->lastTxHash)
+		if(tempAddressHistory==userAddressPointerArray[index]->addressHistory)
 		{
 			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Reached last history save next "));
@@ -1389,7 +1386,7 @@ void KoynClass::processInput(String key,String value)
 	{
 		char txHash_str[65];
 		txHash_str[64]='\0';
-		addHistory.getStringTxHash(txHash_str);
+		tempAddressHistory.getStringTxHash(txHash_str);
 		#if defined(ENABLE_DEBUG_MESSAGES)
 		Serial.println(txHash_str);
 		#endif
@@ -1399,7 +1396,7 @@ void KoynClass::processInput(String key,String value)
 			{
 				uint8_t transactionHash[32];
 				uint8_t historyHash[32];
-				addHistory.getTxHash(historyHash);
+				tempAddressHistory.getTxHash(historyHash);
 				reverseBin(historyHash,32);
 				incomingTx[i].getHash(transactionHash);
 				if(!memcmp(transactionHash,historyHash,32))
@@ -1447,7 +1444,7 @@ void KoynClass::processInput(String key,String value)
 		#endif
 		int8_t index = getAddressPointerIndex(reqData);
 		if(index<0){return;}
-		userAddressPointerArray[index]->lastTxHash.setLeafPos(my_atoll(&value[0]));
+		userAddressPointerArray[index]->addressHistory.setLeafPos(my_atoll(&value[0]));
 	}else if(key == "tx_hash" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<ADDRESS_UTXO_BIT)))){
 				int8_t index = getAddressPointerIndex(reqData);
 				if(index<0){return;}
@@ -1562,7 +1559,7 @@ uint8_t KoynClass::trackAddress(BitcoinAddress * userAddress)
 				historyFile.seek((noOfTxHashes-1)*36);
 				uint8_t lastInFile[36];
 				historyFile.read(lastInFile,36);
-				userAddress->lastTxHash.copyData(lastInFile);
+				userAddress->addressHistory.copyData(lastInFile);
 			}
 			String fileNameUtxo = dirName+"/"+"utxo";
 			if(SD.exists(&fileNameUtxo[0]))

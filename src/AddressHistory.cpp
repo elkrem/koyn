@@ -7,6 +7,9 @@ AddressHistory::AddressHistory()
 	memset(txHash,0,32);
 	height = -1;
 	leafPos = 0;
+	lastMerkleVerified = false;
+	isFirstMerkle = true;
+	historyFileLastPos = 0;
 }
 
 AddressHistory::AddressHistory(const AddressHistory &history)

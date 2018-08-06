@@ -80,7 +80,6 @@ private:
 	uint32_t clientTimeout;
 	uint32_t totalBlockNumb;
 	uint32_t fallingBackBlockHeight;
-	uint32_t historyFileLastPos;
 	uint8_t saveResToFile;
 	uint8_t isMessage;
 	uint8_t merkleRoot[32];
@@ -88,8 +87,6 @@ private:
 	bool firstLevel;
 	bool requestsSent;
 	bool bigFile;
-	bool lastMerkleVerified;
-	bool isFirstMerkle;
 	bool isTransactionCallbackAssigned;
 	bool isNewBlockCallbackAssigned;
 	bool saveNextHistory;
@@ -103,7 +100,7 @@ private:
 	BitcoinHeader prevHeader;
 	BitcoinAddress * userAddressPointerArray[MAX_TRACKED_ADDRESSES_COUNT];
 	BitcoinAddress * addressPointer;
-	AddressHistory addHistory;
+	AddressHistory tempAddressHistory;
 	uint8_t currentClientNo;
 	uint32_t chunkNo;
 	uint32_t noOfChunksNeeded;
