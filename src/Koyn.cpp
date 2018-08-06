@@ -1426,9 +1426,9 @@ void KoynClass::processInput(String key,String value)
 		File blkHdrFile = SD.open("koyn/blkhdrs",FILE_READ);
 		blkHdrFile.seek((seekValue*80)+36);
 		for(int i=0;i<32;i++){merkleRoot[i]=blkHdrFile.read();}
-			#if defined(ENABLE_DEBUG_MESSAGES)
-			Serial.write(merkleRoot,32);
-			#endif
+		#if defined(ENABLE_DEBUG_MESSAGES)
+		Serial.write(merkleRoot,32);
+		#endif
 	}else if(key == "merkle" && (reqData&&(reqData->reqType&(uint32_t)(0x01<<MERKLE_PROOF))))
 	{
 		#if defined(ENABLE_DEBUG_MESSAGES)
