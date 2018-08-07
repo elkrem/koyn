@@ -32,7 +32,6 @@ public:
 	ElectrumRequests();
 	void sendVersion();
 	void subscribeToPeers();
-	void subscribeToBlocksNumber();
 	void subscribeToBlockHeaders();
 	void subscribeToAddress(const char  *);
 	void getAddressHistory(const char  *);
@@ -50,7 +49,6 @@ public:
 	ElectrumRequestData * getElectrumRequestData(unsigned int);
 private:
 	ElectrumRequestData electrumRequestDataArray[MAX_PARALLEL_REQUESTS];
-	JsonMessage jsonMessage;
 friend class KoynClass;
 friend class JsonListener;
 };

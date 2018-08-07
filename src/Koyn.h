@@ -13,7 +13,6 @@
 #include "Ripemd160/Ripemd160.h"
 #include "Config.h"
 #include "Literals.h"
-#include "JsonMessage.h"
 #include "ElectrumRequests.h"
 #include "Hash.h"
 #include "Utils.h"
