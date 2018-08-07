@@ -72,6 +72,7 @@ private:
 	void getHeaderFromMainChain(BitcoinHeader *,uint32_t);
 	void reorganizeMainChain();
 	void removeUnconfirmedTransactions();
+	void retrackAddresses();
 	bool checkBlckNumAndValidate(uint32_t);
 	void (*transactionCallback)(BitcoinTransaction);
 	void (*newBlockCallback)(uint32_t);

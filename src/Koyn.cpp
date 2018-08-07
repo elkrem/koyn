@@ -631,6 +631,7 @@ void KoynClass::reconnectToServers()
 			connectToServers();
 		}
 	}
+	retrackAddresses();
 	if(disconnectedClientCount == MAX_CONNECTED_SERVERS){clientTimeoutTaken=false;stopReconnecting = false;}
 }
 
@@ -1612,6 +1613,36 @@ void KoynClass::unTrackAddress(BitcoinAddress * userAddress)
 			  		directory.rmRfStar();
 				}
 				return;
+			}
+		}
+	}
+}
+
+void KoynClass::retrackAddresses()
+{
+	if(isInit)
+	{
+		for(int i=0 ; i<MAX_TRACKED_ADDRESSES_COUNT;i++)
+		{
+			if(userAddressPointerArray[i]!=NULL && !userAddressPointerArray[i]->isTracked() && synchronized)
+			{
+				char addr[36];
+				userAddressPointerArray[i]->getEncoded(addr);
+				char addressScriptHash[65]={};
+				userAddressPointerArray[i]->getScriptHash(addressScriptHash,64);
+				#if defined(ENABLE_DEBUG_MESSAGES)
+				Serial.println(F("Re-Tracking"));
+				#endif
+				request.subscribeToAddress(addressScriptHash);
+				request.listUtxo(addressScriptHash);
+				userAddressPointerArray[i]->setTracked();
+				String dirName = "koyn/addresses/" + String(&addr[26]);
+				String fileNameUtxo = dirName+"/"+"utxo";
+				if(SD.exists(&fileNameUtxo[0]))
+				{
+					SD.remove(&fileNameUtxo[0]);
+					userAddressPointerArray[i]->clearBalance();
+				}	
 			}
 		}
 	}
