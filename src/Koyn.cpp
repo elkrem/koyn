@@ -638,12 +638,12 @@ void KoynClass::run()
 {
 	if(isInit)
 	{
-		if(millis()-lastTimeTaken>55*1000)
+		if(millis()-lastTimeTaken>60*1000*5)
 		{
 			#if defined(ENABLE_DEBUG_MESSAGES)
-			Serial.println(F("Sending Version"));
+			Serial.println(F("Pinging"));
 			#endif
-			request.sendVersion();
+			request.ping();
 			lastTimeTaken = millis();
 		}
 		if(synchronized)

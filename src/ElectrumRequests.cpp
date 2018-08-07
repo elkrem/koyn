@@ -52,9 +52,20 @@ uint32_t ElectrumRequestData::getDataInt()
 
 /************************************************** ElectrumRequestsClassClass *******************************************************/
 ElectrumRequests::ElectrumRequests()
-{
-}
+{}
 
+void ElectrumRequests::ping()
+{
+	for(int i = 0;i<MAX_CONNECTED_SERVERS;i++)
+	{
+		if(Koyn.getClient(i)->connected())
+		{
+			Koyn.getClient(i)->print(String("{\"id\":") + String("255"));
+			Koyn.getClient(i)->print(",\"method\":\"server.ping");
+			Koyn.getClient(i)->print("\"}\n");
+		}
+	}
+}
 
 void ElectrumRequests::sendVersion()
 {

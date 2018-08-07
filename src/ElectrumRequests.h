@@ -30,6 +30,7 @@ class ElectrumRequests
 {
 public:
 	ElectrumRequests();
+	void ping();
 	void sendVersion();
 	void subscribeToPeers();
 	void subscribeToBlockHeaders();
