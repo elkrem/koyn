@@ -14,7 +14,7 @@ Currently, it can only works with Bitcoin testnet **(no mainnet support yet)**. 
 
 Arduino boards support is initially limited as well, please check below for more info.
 
-The public interface is also not finalized, it can be changed a bit during the initial releases.
+Also, the public interface hasn't been finalized yet, it can be changed a bit during the initial releases.
 
 ## Light Clients
 
@@ -24,13 +24,13 @@ There are two popular protocols for SPV clients. Bitcoin Core and Electrum, they
 
 ## Hardware Requirements
 
-The library requires an ESP8266 or ESP32 based boards connected with an SPI microSD card module to work.
+The library requires an ESP8266 or ESP32 based board connected with an SPI microSD card module to work.
 
 The microSD card needs to be a single partition, FAT formatted, fast (class 10) and has at least 1GB of space. It doesn't need to be empty as we create a new directory on its root named `koyn`.
 
 ## Boards Support
 
-These boards has been tested and known to work:
+These boards have been tested and are known to work:
 
 **ESP8266**
 - Adafruit Huzzah ESP8266
@@ -50,8 +50,8 @@ These microSD card boards has been tested and known to work:
 
 ## Installation
 
-- Make sure you have the latest version of Arduino IDE with the latest [ESP8266 toolchain](https://github.com/esp8266/Arduino#installing-with-boards-manager).
-- For ESP32 follow these [instrcutions](https://github.com/espressif/arduino-esp32#installation-instructions) and make sure to correctly install ESP32 arduino core.
+Make sure you have the latest version of [Arduino IDE](https://www.arduino.cc/en/Main/Software) with either [ESP8266](https://github.com/esp8266/Arduino#installing-with-boards-manager) or [ESP32](https://github.com/espressif/arduino-esp32#installation-instructions) cores installed.
+
 
 **Using Library Manager (Recommended)**
 
@@ -243,6 +243,7 @@ Debug messages can be enabled on the default Serial interface through the same f
 - Only non-SegWit transactions and addresses are supported.
 - Only addresses generated from compressed public keys are supported.
 - The library connects to non-TLS Electrum servers only.
+- The library connects to a hardcoded list of bootnodes only for now, the `server.peers.subscribe` call hasn't been implemented yet.
 - The library works with Bitcoin testnet only for now.
 - The library does cache private keys in memory.
 - The library doesn't support true random generators yet (generated private keys and addresses rely on analog pin #0 noise).

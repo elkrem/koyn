@@ -1,6 +1,6 @@
 {
   "name": "Koyn",
-  "keywords": "arduino, bitcoin, blockchain, esp8266, electrum",
+  "keywords": "arduino, bitcoin, blockchain, esp8266, esp32, electrum",
   "description": "A trustless and decentralized Bitcoin library for Arduino compatible boards",
   "repository":
   {
@@ -25,5 +25,5 @@
   "homepage":"https://www.elkrem.io",
   "version": "0.1.0",
   "frameworks": "arduino",
-  "platforms": "espressif8266"
+  "platforms": "espressif8266,espressif32"
 }
