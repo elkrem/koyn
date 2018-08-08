@@ -4,7 +4,7 @@ env:
   global:
     - ARDUINO_VERSION="1.8.5"
   matrix:
-    - BOARD="esp8266:esp8266:generic" FLAGS='CpuFrequency=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=512K0'
+    - BOARD="esp8266:esp8266:generic" FLAGS=':CpuFrequency=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,FlashSize=512K0'
     - BOARD="esp32:esp32:esp32"       FLAGS=''
 
 before_install:
@@ -31,7 +31,7 @@ install:
   - ln -s $PWD /usr/local/share/arduino/libraries/Koyn
 
 before_script:
-  - arduino --pref build.path=$PWD/build --board $BOARD:$FLAGS --save-prefs
+  - arduino --pref build.path=$PWD/build --board $BOARD$FLAGS --save-prefs
 
 script:
  - for example in $PWD/examples/*/*.ino; do arduino --verify $example; done;
