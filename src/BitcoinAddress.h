@@ -58,6 +58,7 @@ private:
 	uint8_t getStatus(char *);
 	bool gotAddress();
 	void setTracked();
+	void resetTracked();
 	void setConfirmedBalance(uint32_t);
 	void setUnconfirmedBalance(uint32_t);
 	void setGotAddress();

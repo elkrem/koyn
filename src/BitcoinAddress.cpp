@@ -204,6 +204,11 @@ void BitcoinAddress::setTracked()
 	tracked = true;
 }
 
+void BitcoinAddress::resetTracked()
+{
+	tracked = false;
+}
+
 void BitcoinAddress::setConfirmedBalance(uint32_t _confirmedBalance)
 {
 	confirmedBalance = _confirmedBalance;
