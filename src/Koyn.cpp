@@ -607,6 +607,8 @@ void KoynClass::connectToServers()
 								userAddressPointerArray[i]=NULL;
 							}
 						}
+						synchronized = false;
+						mainClient = NULL;
 					}   
 					return;
 				}
@@ -637,10 +639,10 @@ void KoynClass::reconnectToServers()
 		{
 			disconnectedClientCount++;
 			clientsArray[i].stop();
-			connectToServers();
 		}
 	}
 	if(disconnectedClientCount == MAX_CONNECTED_SERVERS){clientTimeoutTaken=false;stopReconnecting = false;}
+	connectToServers();
 }
 
 void KoynClass::run()
