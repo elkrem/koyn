@@ -647,7 +647,7 @@ void KoynClass::run()
 {
 	if(isInit)
 	{
-		if(millis()-lastTimeTaken>60*1000*5)
+		if(millis()-lastTimeTaken>PINGING_PERIOD)
 		{
 			#if defined(ENABLE_DEBUG_MESSAGES)
 			Serial.println(F("Pinging"));
