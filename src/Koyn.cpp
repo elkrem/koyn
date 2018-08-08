@@ -573,18 +573,19 @@ void KoynClass::connectToServers()
 {
 	if(!stopReconnecting)
 	{
-		uint16_t mainNetArrSize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
+		uint16_t networkArraySize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
 		uint16_t serverNamesCount =0;
 		for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
 		{
 			char  servName[strlen_P(testnetServerNames[serverNamesCount])+1];
-			while(!clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
+			while(!clientsArray[i].connected() && !clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
 			{
-				if(serverNamesCount < mainNetArrSize-1)
+				if(serverNamesCount < networkArraySize-1)
 				{
 					serverNamesCount++;
 				}
-				else{
+				else
+				{
 					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Cannot connect to listed servers"));        
 					#endif
@@ -611,16 +612,14 @@ void KoynClass::connectToServers()
 				}
 			}
 			serverNamesCount++;
-			#if defined(ENABLE_DEBUG_MESSAGES)
-			Serial.print(String("Client ")+String(i)+String(" connected to "));
-			Serial.println(servName);
-			#endif
 			String dirName = String("koyn/responses/")+"client"+i;
 			if(!SD.exists(&dirName[0]))
 			{
 				SD.mkdir(&dirName[0]);
 				#if defined(ENABLE_DEBUG_MESSAGES)
 				Serial.println(String("Created directory ")+dirName);
+				Serial.print(String("Client ")+String(i)+String(" connected to "));
+				Serial.println(servName);
 				#endif
 			}
 		}
