@@ -1068,7 +1068,12 @@ void KoynClass::processInput(String key,String value)
 					if(noOfChunksNeeded)
 					{
 						chunkNo++;
-						if(++currentClientNo==MAX_CONNECTED_SERVERS){currentClientNo=MAIN_CLIENT;}
+						while(++currentClientNo!=MAX_CONNECTED_SERVERS&&!clientsArray[currentClientNo].connected())
+						{}
+						if(currentClientNo==MAX_CONNECTED_SERVERS)
+						{
+							currentClientNo=MAIN_CLIENT;
+						}
 						request.getBlockChunks(currentClientNo);
 						synchronized =false;
 					}else
@@ -1081,7 +1086,13 @@ void KoynClass::processInput(String key,String value)
 					updateTotalBlockNumb();
 				}else
 				{
-					if(++currentClientNo==MAX_CONNECTED_SERVERS){currentClientNo=MAIN_CLIENT;}
+					/* This should be handled as a bad chunk from the server and we should disconnect and reconnect to another server */
+					while(++currentClientNo!=MAX_CONNECTED_SERVERS&&!clientsArray[currentClientNo].connected())
+					{}
+					if(currentClientNo==MAX_CONNECTED_SERVERS)
+					{
+						currentClientNo=MAIN_CLIENT;
+					}
 					request.getBlockChunks(currentClientNo+1);
 					synchronized = false;
 				}
