@@ -976,12 +976,12 @@ bool KoynClass::parseReceivedChunk()
 				currentHeight++;
 			}
 
-			if(millis()-lastTimeTaken>90*1000)
+			if(millis()-lastTimeTaken>PINGING_PERIOD)
 			{
 				#if defined(ENABLE_DEBUG_MESSAGES)
-				Serial.println(F("Sending Version"));
+				Serial.println(F("Pinging"));
 				#endif
-				request.sendVersion();
+				request.ping();
 				lastTimeTaken = millis();
 			}
 		}
