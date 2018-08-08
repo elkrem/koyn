@@ -229,7 +229,7 @@ void ElectrumRequests::getBlockHeader(int blockHeight)
 			if(currentReq)
 			{
 				Koyn.getClient(i)->print(String("{\"id\":") + String(currentReq->getReqId()));
-				Koyn.getClient(i)->print(",\"method\":\"blockchain.block.header\",\"params\":[");
+				Koyn.getClient(i)->print(",\"method\":\"blockchain.block.get_header\",\"params\":[");
 				Koyn.getClient(i)->print(blockHeight);
 				Koyn.getClient(i)->print("]}\n");
 				currentReq->setReqType(BLOCK_HEADER_BIT);
