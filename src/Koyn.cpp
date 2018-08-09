@@ -589,9 +589,7 @@ void KoynClass::connectToServers()
 					#if defined(ENABLE_DEBUG_MESSAGES)
 					Serial.println(F("Cannot connect to listed servers"));        
 					#endif
-					if(!clientTimeoutTaken){clientTimeout = millis();clientTimeoutTaken=true;}
-					/* timeout function to break the looping for connecting disconnected clients */
-					if(millis()- clientTimeout > MAX_TIMEOUT_FOR_CLIENT_CONNECTION && i!=0)
+					if(i!=0)
 					{
 						stopReconnecting = true;
 						request.resetRequests();
@@ -599,16 +597,7 @@ void KoynClass::connectToServers()
 						syncWithServers();
 					}else
 					{
-						for(int i=0 ; i<MAX_TRACKED_ADDRESSES_COUNT;i++)
-						{
-							if(userAddressPointerArray[i]!=NULL)
-							{
-								userAddressPointerArray[i]->resetTracked();	
-								userAddressPointerArray[i]=NULL;
-							}
-						}
-						synchronized = false;
-						mainClient = NULL;
+						connectToServers();
 					}   
 					return;
 				}
@@ -632,17 +621,35 @@ void KoynClass::connectToServers()
 
 void KoynClass::reconnectToServers()
 {
-	uint8_t disconnectedClientCount = 0;
-	for(int i=0 ;i<MAX_CONNECTED_SERVERS;i++)
+	uint8_t disconnectedClientsCount = 0;
+	for(int i=0 ;i < MAX_CONNECTED_SERVERS; i++)
 	{
 		if(!clientsArray[i].connected())
 		{
-			disconnectedClientCount++;
-			clientsArray[i].stop();
+			disconnectedClientsCount++;
 		}
 	}
-	if(disconnectedClientCount == MAX_CONNECTED_SERVERS){clientTimeoutTaken=false;stopReconnecting = false;}
-	connectToServers();
+	if(disconnectedClientsCount==MAX_CONNECTED_SERVERS)
+	{
+		for(int i=0 ; i<MAX_TRACKED_ADDRESSES_COUNT;i++)
+		{
+			if(userAddressPointerArray[i]!=NULL)
+			{
+				userAddressPointerArray[i]->resetTracked();	
+				userAddressPointerArray[i]=NULL;
+			}
+		}
+		synchronized = false;
+		mainClient = NULL;
+		connectToServers();
+	}
+	/* timeout function to break the looping for connecting disconnected clients */
+	if(millis() - clientTimeout > MAX_TIMEOUT_FOR_CLIENT_CONNECTION)
+	{
+		clientTimeout = millis();
+		stopReconnecting = false;
+		connectToServers();
+	}
 }
 
 void KoynClass::run()

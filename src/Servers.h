@@ -51,9 +51,9 @@
 static const char *testnetServerNames[]=
 {
 	"testnet.qtornado.com",
+	"testnet.hsmiths.com",
 	"bitcoin.cluelessperson.com",
 	"testnetnode.arihanc.com",
-	"testnet.hsmiths.com",
 	"electrum.akinbo.org",
 	"testnet1.bauerj.eu"
 };
@@ -61,9 +61,9 @@ static const char *testnetServerNames[]=
 static const int  testnetPortNumber[] =
 {
 	51001,
+	53011,
 	50003,
 	51001,
-	53011,
 	51001,
 	50001
 };
