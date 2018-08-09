@@ -23,7 +23,7 @@
   ],
   "license": "LGPL-3.0-only",
   "homepage":"https://www.elkrem.io",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "frameworks": "arduino",
   "platforms": "espressif8266,espressif32"
 }
