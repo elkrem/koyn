@@ -22,7 +22,6 @@ void KoynClass::initialize()
 	reparseFile=false;
 	confirmedFlag=false;
 	isInit=false;
-	stopReconnecting=false;
 	clientTimeoutTaken=false;
 	for(int i=0;i<MAX_TRACKED_ADDRESSES_COUNT;i++){userAddressPointerArray[i]=NULL;}
 	request.resetRequests();
@@ -571,52 +570,48 @@ void KoynClass::reorganizeMainChain()
 
 void KoynClass::connectToServers()
 {
-	if(!stopReconnecting)
+	uint16_t networkArraySize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
+	uint16_t serverNamesCount =0;
+	for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
 	{
-		uint16_t networkArraySize =  sizeof(testnetServerNames)/sizeof(testnetServerNames[0]);
-		uint16_t serverNamesCount =0;
-		for(uint16_t i =0;i<MAX_CONNECTED_SERVERS;i++)
+		char  servName[strlen_P(testnetServerNames[serverNamesCount])+1];
+		while(!clientsArray[i].connected() && !clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
 		{
-			char  servName[strlen_P(testnetServerNames[serverNamesCount])+1];
-			while(!clientsArray[i].connected() && !clientsArray[i].connect(strcpy_P(servName,testnetServerNames[serverNamesCount]),testnetPortNumber[serverNamesCount]))
+			if(serverNamesCount < networkArraySize-1)
 			{
-				if(serverNamesCount < networkArraySize-1)
-				{
-					serverNamesCount++;
-				}
-				else
-				{
-					#if defined(ENABLE_DEBUG_MESSAGES)
-					Serial.println(F("Cannot connect to listed servers"));        
-					#endif
-					if(i!=0)
-					{
-						stopReconnecting = true;
-						request.resetRequests();
-						setMainClient();
-						syncWithServers();
-					}else
-					{
-						connectToServers();
-					}   
-					return;
-				}
+				serverNamesCount++;
 			}
-			serverNamesCount++;
-			String dirName = String("koyn/responses/")+"client"+i;
-			if(!SD.exists(&dirName[0]))
+			else
 			{
-				SD.mkdir(&dirName[0]);
 				#if defined(ENABLE_DEBUG_MESSAGES)
-				Serial.println(String("Created directory ")+dirName);
-				Serial.print(String("Client ")+String(i)+String(" connected to "));
-				Serial.println(servName);
+				Serial.println(F("Cannot connect to listed servers"));        
 				#endif
+				if(i!=0)
+				{
+					request.resetRequests();
+					setMainClient();
+					syncWithServers();
+				}else
+				{
+					connectToServers();
+				}   
+				return;
 			}
 		}
-		setMainClient();
-		syncWithServers();
+		serverNamesCount++;
+		String dirName = String("koyn/responses/")+"client"+i;
+		if(!SD.exists(&dirName[0]))
+		{
+			SD.mkdir(&dirName[0]);
+			#if defined(ENABLE_DEBUG_MESSAGES)
+			Serial.println(String("Created directory ")+dirName);
+			Serial.print(String("Client ")+String(i)+String(" connected to "));
+			Serial.println(servName);
+			#endif
+		}
 	}
+	setMainClient();
+	syncWithServers();
 }
 
 void KoynClass::reconnectToServers()
@@ -647,7 +642,6 @@ void KoynClass::reconnectToServers()
 	if(millis() - clientTimeout > MAX_TIMEOUT_FOR_CLIENT_CONNECTION)
 	{
 		clientTimeout = millis();
-		stopReconnecting = false;
 		connectToServers();
 	}
 }

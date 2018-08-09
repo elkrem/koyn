@@ -92,7 +92,6 @@ private:
 	bool reparseFile;
 	bool confirmedFlag;
 	bool isInit;
-	bool stopReconnecting;
 	bool clientTimeoutTaken;
 	BitcoinHeader header;
 	BitcoinHeader lastHeader;
