@@ -8,21 +8,31 @@ extern "C" {
     // random noise). This can take a long time to generate random data if the result of analogRead(0)
     // doesn't change very frequently.
     while (size) {
-      uint8_t val = 0;
-      for (unsigned i = 0; i < 8; ++i) {
-        int init = analogRead(A0);
-        int count = 0;
-        while (analogRead(A0) == init) {
-          ++count;
-        }
+      // uint8_t val = 0;
+      // for (unsigned i = 0; i < 8; ++i) {
+			// 	#if defined(ESP32)
+      //   int init = esp_random();
+			// 	#elif defined (ESP8266)
+			// 	int init = RANDOM_REG32;
+			// 	#else
+			// 	int init = analogRead(A0);
+			// 	#endif
+      //   int count = 0;
+      //   while (analogRead(A0) == init) {
+      //     ++count;
+      //   }
 
-        if (count == 0) {
-          val = (val << 1) | (init & 0x01);
-        } else {
-          val = (val << 1) | (count & 0x01);
-        }
-      }
-      *dest = val;
+      //   if (count == 0) {
+      //     val = (val << 1) | (init & 0x01);
+      //   } else {
+      //     val = (val << 1) | (count & 0x01);
+      //   }
+      // }
+			#if defined(ESP32)
+			*dest = esp_random();
+			#elif defined (ESP8266)
+			*dest = RANDOM_REG32;
+			#endif
       ++dest;
       --size;
     }
