@@ -1256,7 +1256,7 @@ void KoynClass::processInput(String key,String value)
 					{
 						if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 						{
-							if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+							if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>1 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 							{
 								#if defined(ENABLE_DEBUG_MESSAGES)
 								Serial.print(F("Block Difference "));
@@ -1278,7 +1278,7 @@ void KoynClass::processInput(String key,String value)
 				{
 					if(incomingTx[i].isUsed()&&incomingTx[i].inBlock())
 					{
-						if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>0 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
+						if(isTransactionCallbackAssigned && incomingTx[i].getConfirmations()>1 && incomingTx[i].getConfirmations()<REMOVE_CONFIRMED_TRANSACTION_AFTER)
 						{
 							#if defined(ENABLE_DEBUG_MESSAGES)
 							Serial.print(F("Block Difference "));
