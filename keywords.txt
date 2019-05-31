@@ -34,10 +34,10 @@ getUnconfirmedBalance	KEYWORD2		RESERVED_WORD
 getInput	KEYWORD2		RESERVED_WORD
 getOutput	KEYWORD2		RESERVED_WORD
 getOutputAmount	KEYWORD2		RESERVED_WORD
-getInputsCount	KEYOWRD2
+getInputsCount	KEYWORD2
 getOutputsCount	KEYWORD2		RESERVED_WORD
 getHash	KEYWORD2		RESERVED_WORD
-getBlockNumber	KEYWROD2
+getBlockNumber	KEYWORD2
 getConfirmations	KEYWORD2		RESERVED_WORD
 #######################################
 # Structures and Classes (KEYWORD3)
